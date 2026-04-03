@@ -1,0 +1,301 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+}
+
+/* ─── Hero ─── */
+.hero {
+  padding: var(--space-3xl) var(--space-lg);
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.heroTitle {
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin-bottom: var(--space-md);
+}
+
+.heroSub {
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+  margin-bottom: var(--space-xl);
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.heroCtas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+}
+
+.heroSecondary {
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--accent);
+  transition: opacity var(--transition-fast);
+}
+
+.heroSecondary:hover {
+  opacity: 0.8;
+}
+
+/* ─── Social proof bar ─── */
+.proofBar {
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.proofInner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-lg);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  text-align: center;
+}
+
+.proofStat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.proofValue {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.proofLabel {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* ─── Section ─── */
+.section {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-3xl) var(--space-lg);
+}
+
+.sectionTitle {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.sectionSub {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xl);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+}
+
+.viewAll {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--accent);
+  transition: opacity var(--transition-fast);
+}
+
+.viewAll:hover {
+  opacity: 0.8;
+}
+
+/* ─── How it works ─── */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xl);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-md);
+}
+
+.stepNum {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: var(--text-md);
+  border-radius: 50%;
+}
+
+.stepTitle {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stepDesc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  max-width: 280px;
+}
+
+/* ─── Trust block ─── */
+.trustGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+}
+
+.trustCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.trustIcon {
+  color: var(--accent);
+}
+
+.trustTitle {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.trustDesc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+/* ─── Category discovery ─── */
+.catGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.catTile {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  transition: border-color var(--transition-fast);
+  text-decoration: none;
+}
+
+.catTile:hover {
+  border-color: var(--text-muted);
+}
+
+.catIcon {
+  color: var(--text-muted);
+}
+
+.catInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.catName {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.catCount {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ─── CTA banner ─── */
+.ctaBanner {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.ctaTitle {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ctaDesc {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  max-width: 420px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1023px) {
+  .catGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .heroTitle {
+    font-size: 28px;
+  }
+
+  .heroCtas {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .proofInner {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .trustGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .catGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,84 @@
+.skeleton {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.textLine {
+  height: 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.textLine:last-child {
+  width: 60%;
+}
+
+.card {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.cardImage {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-md);
+}
+
+.cardTitle {
+  height: 18px;
+  width: 70%;
+  border-radius: var(--radius-sm);
+}
+
+.cardDesc {
+  height: 14px;
+  width: 90%;
+  border-radius: var(--radius-sm);
+}
+
+.cardMeta {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cardMetaItem {
+  height: 14px;
+  width: 60px;
+  border-radius: var(--radius-sm);
+}
+
+.statCard {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  height: 100px;
+}
+
+.tableRow {
+  height: 48px;
+  border-bottom: 1px solid var(--border-subtle);
+}

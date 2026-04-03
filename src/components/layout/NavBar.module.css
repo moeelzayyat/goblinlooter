@@ -1,0 +1,125 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--nav-height);
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.logoIcon {
+  color: var(--accent);
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+}
+
+.link {
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  padding: var(--space-xs) 0;
+}
+
+.link:hover {
+  color: var(--text-primary);
+}
+
+.linkActive {
+  color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.hamburger {
+  display: none;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-xs);
+}
+
+/* Mobile nav */
+.mobileMenu {
+  display: none;
+  position: fixed;
+  top: var(--nav-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-surface);
+  border-top: 1px solid var(--border-default);
+  padding: var(--space-lg);
+  z-index: 99;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.mobileMenu.open {
+  display: flex;
+}
+
+.mobileLink {
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: color var(--transition-fast);
+}
+
+.mobileLink:hover {
+  color: var(--text-primary);
+}
+
+.mobileActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+@media (max-width: 767px) {
+  .links {
+    display: none;
+  }
+
+  .actions {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+}

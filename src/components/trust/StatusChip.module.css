@@ -1,0 +1,41 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.active {
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.pending {
+  color: var(--warning);
+  background: var(--warning-subtle);
+}
+
+.completed {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+}
+
+.cancelled {
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+}
+
+.disputed {
+  color: var(--danger);
+  background: var(--danger-subtle);
+}
+
+.suspended {
+  color: var(--danger);
+  background: var(--danger-subtle);
+}
