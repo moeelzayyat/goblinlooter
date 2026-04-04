@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gem, Menu, X } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Gem, Menu, X, User, LogOut, Settings, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import styles from "./NavBar.module.css";
 
@@ -16,7 +17,9 @@ const NAV_LINKS = [
 
 export function NavBar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   return (
     <nav className={styles.nav}>
@@ -43,16 +46,57 @@ export function NavBar() {
         </div>
 
         <div className={styles.actions}>
-          <Link href="/auth/login">
-            <Button variant="ghost" size="sm">
-              Log In
-            </Button>
-          </Link>
-          <Link href="/auth/register">
-            <Button variant="primary" size="sm">
-              Sign Up
-            </Button>
-          </Link>
+          {session?.user ? (
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className={styles.userBtn}
+              >
+                <div className={styles.userAvatar}>
+                  <User size={16} />
+                </div>
+                <span className={styles.userName}>{session.user.name}</span>
+              </button>
+
+              {userMenuOpen && (
+                <div className={styles.userMenu}>
+                  <Link
+                    href="/dashboard"
+                    className={styles.menuItem}
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    <LayoutDashboard size={16} /> Dashboard
+                  </Link>
+                  <Link
+                    href="/settings"
+                    className={styles.menuItem}
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    <Settings size={16} /> Settings
+                  </Link>
+                  <button
+                    className={styles.menuItem}
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                  >
+                    <LogOut size={16} /> Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link href="/auth/login">
+                <Button variant="ghost" size="sm">
+                  Log In
+                </Button>
+              </Link>
+              <Link href="/auth/register">
+                <Button variant="primary" size="sm">
+                  Sign Up
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -76,16 +120,34 @@ export function NavBar() {
           </Link>
         ))}
         <div className={styles.mobileActions}>
-          <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
-            <Button variant="secondary" size="lg" style={{ width: "100%" }}>
-              Log In
-            </Button>
-          </Link>
-          <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
-            <Button variant="primary" size="lg" style={{ width: "100%" }}>
-              Sign Up
-            </Button>
-          </Link>
+          {session?.user ? (
+            <>
+              <span style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", padding: "var(--space-sm) 0" }}>
+                Signed in as {session.user.name}
+              </span>
+              <Button
+                variant="secondary"
+                size="lg"
+                style={{ width: "100%" }}
+                onClick={() => signOut({ callbackUrl: "/" })}
+              >
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
+                <Button variant="secondary" size="lg" style={{ width: "100%" }}>
+                  Log In
+                </Button>
+              </Link>
+              <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
+                <Button variant="primary" size="lg" style={{ width: "100%" }}>
+                  Sign Up
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>

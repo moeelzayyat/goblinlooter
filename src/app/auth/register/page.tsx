@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Gem } from "lucide-react";
 import { TextInput } from "@/components/ui/TextInput";
@@ -8,9 +10,53 @@ import { Button } from "@/components/ui/Button";
 import styles from "../auth.module.css";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Registration failed.");
+        setLoading(false);
+        return;
+      }
+
+      // Auto-login after registration
+      const signInResult = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        // Registration succeeded but auto-login failed — redirect to login
+        router.push("/auth/login");
+      } else {
+        router.push("/");
+        router.refresh();
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -20,12 +66,9 @@ export default function RegisterPage() {
           GoblinLooter
         </Link>
 
-        <form
-          className={styles.form}
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
-        >
+        {error && <p className={styles.error}>{error}</p>}
+
+        <form className={styles.form} onSubmit={handleSubmit}>
           <TextInput
             label="Username"
             placeholder="goblinmaster42"
@@ -50,7 +93,12 @@ export default function RegisterPage() {
             helperText="Must be at least 8 characters"
             required
           />
-          <Button size="lg" type="submit" style={{ width: "100%" }}>
+          <Button
+            size="lg"
+            type="submit"
+            loading={loading}
+            style={{ width: "100%" }}
+          >
             Create Account
           </Button>
         </form>
