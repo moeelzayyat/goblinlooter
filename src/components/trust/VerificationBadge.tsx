@@ -1,19 +1,16 @@
-import { Shield, ShieldCheck, ShieldPlus } from "lucide-react";
-import type { VerificationTier } from "@/types";
+import { Shield, ShieldCheck } from "lucide-react";
 import styles from "./VerificationBadge.module.css";
 
+type BadgeTier = "customer" | "admin";
+
 interface VerificationBadgeProps {
-  tier: VerificationTier;
+  tier: BadgeTier;
   showLabel?: boolean;
 }
 
-const CONFIG: Record<
-  VerificationTier,
-  { icon: typeof Shield; label: string }
-> = {
-  unverified: { icon: Shield, label: "Unverified" },
-  verified: { icon: ShieldCheck, label: "Verified" },
-  trusted: { icon: ShieldPlus, label: "Trusted Seller" },
+const CONFIG: Record<BadgeTier, { icon: typeof Shield; label: string }> = {
+  customer: { icon: Shield, label: "Customer" },
+  admin: { icon: ShieldCheck, label: "Admin" },
 };
 
 export function VerificationBadge({
@@ -23,7 +20,7 @@ export function VerificationBadge({
   const { icon: Icon, label } = CONFIG[tier];
 
   return (
-    <span className={`${styles.badge} ${styles[tier]}`} title={label}>
+    <span className={`${styles.badge} ${styles[tier] || ""}`} title={label}>
       <Icon size={14} />
       {showLabel && label}
     </span>

@@ -1,5 +1,13 @@
-import type { StatusVariant } from "@/types";
 import styles from "./StatusChip.module.css";
+
+type StatusVariant =
+  | "pending"
+  | "paid"
+  | "delivered"
+  | "review"
+  | "cancelled"
+  | "refunded"
+  | "chargeback";
 
 interface StatusChipProps {
   status: StatusVariant;
@@ -7,17 +15,18 @@ interface StatusChipProps {
 }
 
 const LABELS: Record<StatusVariant, string> = {
-  active: "Active",
   pending: "Pending",
-  completed: "Completed",
+  paid: "Paid",
+  delivered: "Delivered",
+  review: "Under Review",
   cancelled: "Cancelled",
-  disputed: "Disputed",
-  suspended: "Suspended",
+  refunded: "Refunded",
+  chargeback: "Chargeback",
 };
 
 export function StatusChip({ status, label }: StatusChipProps) {
   return (
-    <span className={`${styles.chip} ${styles[status]}`}>
+    <span className={`${styles.chip} ${styles[status] || ""}`}>
       {label || LABELS[status]}
     </span>
   );
