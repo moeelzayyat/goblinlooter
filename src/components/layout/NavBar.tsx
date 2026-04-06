@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Gem, Menu, X, User, LogOut, Settings, LayoutDashboard } from "lucide-react";
+import { Menu, X, User, LogOut, Settings, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import styles from "./NavBar.module.css";
 
@@ -25,7 +26,7 @@ export function NavBar() {
     <nav className={styles.nav}>
       <div className={styles.inner}>
         <Link href="/" className={styles.logo}>
-          <Gem size={24} className={styles.logoIcon} />
+          <Image src="/logo.png" alt="GoblinLooter Logo" width={32} height={32} style={{ borderRadius: '8px' }} />
           GoblinLooter
         </Link>
 
