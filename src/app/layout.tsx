@@ -16,9 +16,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GoblinLooter — Game Tools & Trading Marketplace",
+  title: "GoblinLooter — Premium Digital Game Tools",
   description:
-    "Buy, sell, and trade game tools with verified sellers and secure transactions.",
+    "Curated game keys, tool access, and configs — secure checkout, fast delivery, real support.",
 };
 
 export default function RootLayout({

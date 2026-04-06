@@ -6,13 +6,160 @@ datasource db {
   provider = "postgresql"
 }
 
+// ───── User ─────
+
 model User {
-  id               String   @id @default(cuid())
-  username         String   @unique
-  email            String   @unique
-  passwordHash     String
-  avatarUrl        String?
-  verificationTier String   @default("unverified")
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id           String    @id @default(cuid())
+  username     String    @unique
+  email        String    @unique
+  passwordHash String
+  avatarUrl    String?
+  role         String    @default("customer") // 'customer' | 'admin'
+  flaggedAt    DateTime?
+  flagReason   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  orders         Order[]
+  supportTickets SupportTicket[]
+}
+
+// ───── Product ─────
+
+model Product {
+  id                   String   @id @default(cuid())
+  title                String
+  slug                 String   @unique
+  shortDescription     String
+  fullDescription      String   // markdown
+  category             String   // 'game-keys' | 'tool-access' | 'configs'
+  price                Decimal  @db.Decimal(10, 2)
+  platform             String[]
+  compatibilityNotes   String
+  regionRestrictions   String?
+  deliveryMethod       String   // 'key' | 'download' | 'manual'
+  deliveryTimeEstimate String
+  refundEligibility    String   // 'eligible' | 'conditional' | 'non-refundable'
+  refundTerms          String
+  images               String[]
+  featured             Boolean  @default(false)
+  status               String   @default("draft") // 'draft' | 'published' | 'disabled'
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  inventoryKeys InventoryKey[]
+  orderItems    OrderItem[]
+}
+
+// ───── Inventory Key ─────
+
+model InventoryKey {
+  id         String    @id @default(cuid())
+  productId  String
+  keyValue   String    // encrypted at rest
+  status     String    @default("available") // 'available' | 'assigned' | 'revoked'
+  orderId    String?   @unique
+  assignedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  order   Order?  @relation(fields: [orderId], references: [id])
+}
+
+// ───── Order ─────
+
+model Order {
+  id               String    @id @default(cuid())
+  customerId       String
+  status           String    @default("pending")
+  // 'pending' | 'paid' | 'delivered' | 'review' | 'cancelled' | 'refunded' | 'chargeback'
+  totalAmount      Decimal   @db.Decimal(10, 2)
+  stripePaymentId  String?   @unique
+  chargebackStatus String?   // null | 'dispute_opened' | 'dispute_won' | 'dispute_lost'
+  deliveredAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  customer  User              @relation(fields: [customerId], references: [id])
+  items     OrderItem[]
+  key       InventoryKey?
+  meta      OrderMeta?
+  auditLogs DeliveryAuditLog[]
+  tickets   SupportTicket[]
+}
+
+// ───── Order Item ─────
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int     @default(1)
+  unitPrice Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+// ───── Order Metadata (fraud / risk) ─────
+
+model OrderMeta {
+  id              String   @id @default(cuid())
+  orderId         String   @unique
+  ipAddress       String
+  userAgent       String
+  country         String?
+  fingerprint     String?
+  stripeRiskScore Int?
+  stripeRiskLevel String?  // 'normal' | 'elevated' | 'highest'
+  cardCountry     String?
+  cardLast4       String?
+  cardBrand       String?
+  riskFlags       String[]
+  createdAt       DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+// ───── Delivery Audit Log ─────
+
+model DeliveryAuditLog {
+  id          String   @id @default(cuid())
+  orderId     String
+  keyId       String?
+  action      String   // 'key_assigned' | 'key_revealed' | 'key_revoked' | 'delivery_failed' | 'refund_processed'
+  metadata    Json?
+  performedBy String?  // 'system' | admin userId
+  createdAt   DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+// ───── Support Ticket ─────
+
+model SupportTicket {
+  id         String   @id @default(cuid())
+  orderId    String?
+  customerId String
+  type       String   // 'refund_request' | 'delivery_issue' | 'key_problem' | 'general'
+  subject    String
+  message    String
+  status     String   @default("open") // 'open' | 'in_progress' | 'resolved' | 'closed'
+  resolution String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customer User   @relation(fields: [customerId], references: [id])
+  order    Order? @relation(fields: [orderId], references: [id])
+}
+
+// ───── Analytics Event ─────
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  event     String   // 'page_view' | 'product_view' | 'add_to_cart' | 'checkout_start' | 'purchase' | 'refund' etc.
+  data      Json?
+  userId    String?
+  sessionId String?
+  createdAt DateTime @default(now())
 }

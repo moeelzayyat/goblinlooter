@@ -1,243 +1,160 @@
-import type { Product, User, TradeListing, Review } from "@/types";
+import type { Product } from "@/types";
 
-/* ───── Mock Users ───── */
-
-export const MOCK_USERS: User[] = [
-  {
-    id: "u1",
-    username: "EliteForge",
-    avatarUrl: undefined,
-    memberSince: "2024-03-15",
-    verificationTier: "trusted",
-    rating: 4.9,
-    reviewCount: 312,
-    tradesCompleted: 187,
-    itemsSold: 456,
-    responseTime: "< 1 hour",
-    disputeRate: 0.3,
-  },
-  {
-    id: "u2",
-    username: "ScriptVault",
-    avatarUrl: undefined,
-    memberSince: "2024-08-22",
-    verificationTier: "verified",
-    rating: 4.7,
-    reviewCount: 89,
-    tradesCompleted: 45,
-    itemsSold: 128,
-    responseTime: "< 2 hours",
-    disputeRate: 1.1,
-  },
-  {
-    id: "u3",
-    username: "NovaBlade",
-    avatarUrl: undefined,
-    memberSince: "2025-01-10",
-    verificationTier: "verified",
-    rating: 4.5,
-    reviewCount: 34,
-    tradesCompleted: 22,
-    itemsSold: 67,
-    responseTime: "< 4 hours",
-    disputeRate: 0,
-  },
-  {
-    id: "u4",
-    username: "PixelSmith",
-    avatarUrl: undefined,
-    memberSince: "2025-06-01",
-    verificationTier: "unverified",
-    rating: 4.2,
-    reviewCount: 8,
-    tradesCompleted: 3,
-    itemsSold: 12,
-    responseTime: "< 12 hours",
-    disputeRate: 0,
-  },
-];
-
-/* ───── Mock Products ───── */
+/* ───── Mock Products (Storefront — we are the seller) ───── */
 
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: "p1",
     title: "AutoFarm Pro — Intelligent Resource Collector",
-    description:
-      "Advanced farming bot with AI-powered pathfinding, anti-detection measures, and customizable routes. Supports 15+ games.",
+    slug: "autofarm-pro",
+    shortDescription:
+      "AI-powered farming tool with smart pathfinding and anti-detection.",
+    fullDescription:
+      "Advanced farming tool with AI-powered pathfinding, anti-detection measures, and customizable routes. Supports 15+ games. Includes lifetime updates and priority support.",
     price: 24.99,
-    thumbnailUrl: undefined,
-    rating: 4.8,
-    reviewCount: 214,
-    seller: MOCK_USERS[0],
-    category: "game-tools",
-    compatibility: ["Windows 10/11", "DirectX 11+"],
-    deliveryEstimate: "Instant delivery",
+    images: [],
+    category: "tool-access",
+    platform: ["Windows 10/11"],
+    compatibilityNotes: "Requires DirectX 11+. Windows 10 or 11 only.",
+    regionRestrictions: null,
+    deliveryMethod: "key",
+    deliveryTimeEstimate: "Typically within seconds",
+    refundEligibility: "conditional",
+    refundTerms:
+      "Refund available within 72 hours if the key has not been redeemed. No refunds after activation.",
+    featured: true,
+    status: "published",
+    stockCount: 48,
     createdAt: "2025-11-20",
-    status: "active",
   },
   {
     id: "p2",
     title: "LootRadar — Real-Time Drop Tracker",
-    description:
-      "Track rare item drops in real time with overlay support. Configurable alerts for high-value spawns.",
+    slug: "lootradar",
+    shortDescription:
+      "Track rare item drops in real time with overlay support.",
+    fullDescription:
+      "Track rare item drops in real time with overlay support. Configurable alerts for high-value spawns. Works with most popular MMOs and RPGs.",
     price: 14.99,
-    thumbnailUrl: undefined,
-    rating: 4.6,
-    reviewCount: 98,
-    seller: MOCK_USERS[1],
-    category: "game-tools",
-    deliveryEstimate: "Instant delivery",
+    images: [],
+    category: "tool-access",
+    platform: ["Windows 10/11"],
+    compatibilityNotes: "Overlay requires DirectX 11. Admin rights needed.",
+    regionRestrictions: null,
+    deliveryMethod: "key",
+    deliveryTimeEstimate: "Typically within seconds",
+    refundEligibility: "conditional",
+    refundTerms:
+      "Refund available within 72 hours if the key has not been redeemed.",
+    featured: true,
+    status: "published",
+    stockCount: 63,
     createdAt: "2025-12-05",
-    status: "active",
   },
   {
     id: "p3",
     title: "ConfigPack Elite — Optimized Game Settings",
-    description:
-      "Pre-tuned configurations for competitive FPS games. Includes sensitivity calculators and crosshair presets.",
+    slug: "configpack-elite",
+    shortDescription:
+      "Pre-tuned configurations for competitive FPS games.",
+    fullDescription:
+      "Pre-tuned configurations for competitive FPS games. Includes sensitivity calculators, crosshair presets, and video settings optimized for maximum FPS.",
     price: 9.99,
-    thumbnailUrl: undefined,
-    rating: 4.9,
-    reviewCount: 156,
-    seller: MOCK_USERS[0],
+    images: [],
     category: "configs",
-    deliveryEstimate: "Instant delivery",
+    platform: ["Windows", "macOS"],
+    compatibilityNotes:
+      "Compatible with CS2, Valorant, Apex Legends, and Overwatch 2.",
+    regionRestrictions: null,
+    deliveryMethod: "download",
+    deliveryTimeEstimate: "Typically within seconds",
+    refundEligibility: "non-refundable",
+    refundTerms:
+      "Config packs are non-refundable once downloaded. Preview descriptions carefully before purchasing.",
+    featured: true,
+    status: "published",
+    stockCount: 999,
     createdAt: "2025-10-15",
-    status: "active",
   },
   {
     id: "p4",
-    title: "MarketEdge — Trading Price Analyzer",
-    description:
-      "Real-time price tracking and trend analysis for in-game marketplaces. Alerts, charts, and profit calculators.",
+    title: "MarketEdge — In-Game Price Analyzer",
+    slug: "marketedge",
+    shortDescription:
+      "Real-time price tracking and trend analysis for in-game economies.",
+    fullDescription:
+      "Real-time price tracking and trend analysis for in-game marketplaces. Alerts, charts, and profit calculators. Supports WoW, FFXIV, EVE Online, and more.",
     price: 19.99,
-    thumbnailUrl: undefined,
-    rating: 4.7,
-    reviewCount: 73,
-    seller: MOCK_USERS[2],
-    category: "scripts",
-    deliveryEstimate: "Instant delivery",
+    images: [],
+    category: "tool-access",
+    platform: ["Windows 10/11"],
+    compatibilityNotes: "Requires .NET 8 runtime. Internet connection required.",
+    regionRestrictions: null,
+    deliveryMethod: "key",
+    deliveryTimeEstimate: "Typically within seconds",
+    refundEligibility: "conditional",
+    refundTerms:
+      "Refund available within 72 hours if the key has not been redeemed.",
+    featured: true,
+    status: "published",
+    stockCount: 31,
     createdAt: "2026-01-08",
-    status: "active",
   },
   {
     id: "p5",
     title: "DungeonMapper — Instance Layout Tool",
-    description:
-      "Automatically maps dungeon layouts and marks key locations. Integrates with popular overlay tools.",
+    slug: "dungeonmapper",
+    shortDescription:
+      "Automatically maps dungeon layouts and marks key locations.",
+    fullDescription:
+      "Automatically maps dungeon layouts and marks key locations. Integrates with popular overlay tools. Supports 10+ games with regular updates.",
     price: 12.99,
-    thumbnailUrl: undefined,
-    rating: 4.4,
-    reviewCount: 42,
-    seller: MOCK_USERS[1],
-    category: "game-tools",
-    deliveryEstimate: "Instant delivery",
+    images: [],
+    category: "tool-access",
+    platform: ["Windows 10/11"],
+    compatibilityNotes: "Requires overlay permissions. DirectX 11+.",
+    regionRestrictions: null,
+    deliveryMethod: "key",
+    deliveryTimeEstimate: "Typically within seconds",
+    refundEligibility: "conditional",
+    refundTerms:
+      "Refund available within 72 hours if the key has not been redeemed.",
+    featured: false,
+    status: "published",
+    stockCount: 22,
     createdAt: "2026-02-14",
-    status: "active",
   },
   {
     id: "p6",
-    title: "QuickMacro — Custom Keybind Automation",
-    description:
-      "Create complex macro sequences with a visual builder. Supports delays, conditions, and loop controls.",
+    title: "QuickMacro — Custom Keybind Pack",
+    slug: "quickmacro",
+    shortDescription:
+      "Pre-built macro sequences with visual documentation.",
+    fullDescription:
+      "Pre-built macro sequences for RPG and MMO games. Includes visual documentation, installation guide, and support for major macro engines.",
     price: 7.99,
-    thumbnailUrl: undefined,
-    rating: 4.3,
-    reviewCount: 31,
-    seller: MOCK_USERS[3],
-    category: "scripts",
-    deliveryEstimate: "Instant delivery",
+    images: [],
+    category: "configs",
+    platform: ["Windows", "macOS", "Linux"],
+    compatibilityNotes:
+      "Supports AutoHotkey, Logitech G Hub, and Razer Synapse formats.",
+    regionRestrictions: null,
+    deliveryMethod: "download",
+    deliveryTimeEstimate: "Typically within seconds",
+    refundEligibility: "non-refundable",
+    refundTerms:
+      "Config/macro packs are non-refundable once downloaded.",
+    featured: false,
+    status: "published",
+    stockCount: 999,
     createdAt: "2026-03-01",
-    status: "active",
   },
 ];
 
-/* ───── Mock Trade Listings ───── */
-
-export const MOCK_TRADE_LISTINGS: TradeListing[] = [
-  {
-    id: "t1",
-    offeredItem: {
-      name: "Legendary Dragon Blade",
-      thumbnailUrl: undefined,
-      estimatedValue: 45,
-    },
-    wantedItem: {
-      name: "Enchanted Shield of Fortitude",
-      thumbnailUrl: undefined,
-      estimatedValue: 52,
-    },
-    trader: MOCK_USERS[0],
-    game: "Dragon's Realm",
-    createdAt: "2026-03-28",
-    status: "active",
-  },
-  {
-    id: "t2",
-    offeredItem: {
-      name: "Rare Mount: Shadow Stallion",
-      thumbnailUrl: undefined,
-      estimatedValue: 120,
-    },
-    wantedItem: null,
-    trader: MOCK_USERS[2],
-    game: "Dragon's Realm",
-    createdAt: "2026-03-30",
-    status: "active",
-  },
-  {
-    id: "t3",
-    offeredItem: {
-      name: "Max-Level Account (Season 12)",
-      thumbnailUrl: undefined,
-      estimatedValue: 200,
-    },
-    wantedItem: {
-      name: "Premium Currency Bundle (5000+)",
-      thumbnailUrl: undefined,
-      estimatedValue: 180,
-    },
-    trader: MOCK_USERS[1],
-    game: "Star Conflict",
-    createdAt: "2026-04-01",
-    status: "active",
-  },
-];
-
-/* ───── Mock Reviews ───── */
-
-export const MOCK_REVIEWS: Review[] = [
-  {
-    id: "r1",
-    reviewer: MOCK_USERS[2],
-    rating: 5,
-    text: "Works perfectly. Setup took 2 minutes and it's been running flawlessly for weeks. Seller was responsive to questions.",
-    createdAt: "2026-03-25",
-  },
-  {
-    id: "r2",
-    reviewer: MOCK_USERS[3],
-    rating: 4,
-    text: "Good tool overall. Would love to see more customization options in the next update.",
-    createdAt: "2026-03-20",
-  },
-  {
-    id: "r3",
-    reviewer: MOCK_USERS[0],
-    rating: 5,
-    text: "Exactly what I needed. The overlay integration is seamless and doesn't impact performance at all.",
-    createdAt: "2026-03-15",
-  },
-];
-
-/* ───── Categories ───── */
+/* ───── Categories (Phase 1: 3 only) ───── */
 
 export const CATEGORIES = [
-  { id: "game-tools", name: "Game Tools", count: 142 },
-  { id: "scripts", name: "Scripts", count: 89 },
-  { id: "configs", name: "Configs", count: 67 },
-  { id: "accounts", name: "Accounts", count: 34 },
-  { id: "items", name: "Items", count: 215 },
-  { id: "services", name: "Services", count: 28 },
+  { id: "game-keys" as const, name: "Game Keys", count: 24 },
+  { id: "tool-access" as const, name: "Tool Access", count: 18 },
+  { id: "configs" as const, name: "Configs", count: 12 },
 ];

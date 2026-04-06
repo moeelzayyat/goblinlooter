@@ -19,7 +19,6 @@ const SORT_OPTIONS = [
   { value: "newest", label: "Newest" },
   { value: "price-low", label: "Price: Low → High" },
   { value: "price-high", label: "Price: High → Low" },
-  { value: "top-rated", label: "Top Rated" },
 ];
 
 const CATEGORY_OPTIONS = [
@@ -29,33 +28,26 @@ const CATEGORY_OPTIONS = [
 
 const ITEMS_PER_PAGE = 12;
 
-export default function MarketplacePage() {
+export default function ShopPage() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("popular");
   const [category, setCategory] = useState("");
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const filtered = useMemo(() => {
-    let items = [...MOCK_PRODUCTS];
+    let items = [...MOCK_PRODUCTS].filter((p) => p.status === "published");
 
     if (search) {
       const q = search.toLowerCase();
       items = items.filter(
         (p) =>
           p.title.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q)
+          p.shortDescription.toLowerCase().includes(q)
       );
     }
 
     if (category) {
       items = items.filter((p) => p.category === category);
-    }
-
-    if (verifiedOnly) {
-      items = items.filter(
-        (p) => p.seller.verificationTier !== "unverified"
-      );
     }
 
     switch (sort) {
@@ -71,15 +63,12 @@ export default function MarketplacePage() {
       case "price-high":
         items.sort((a, b) => b.price - a.price);
         break;
-      case "top-rated":
-        items.sort((a, b) => b.rating - a.rating);
-        break;
       default:
-        items.sort((a, b) => b.reviewCount - a.reviewCount);
+        break;
     }
 
     return items;
-  }, [search, sort, category, verifiedOnly]);
+  }, [search, sort, category]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const paginated = filtered.slice(
@@ -92,12 +81,6 @@ export default function MarketplacePage() {
     const name = CATEGORIES.find((c) => c.id === category)?.name || category;
     activeFilters.push({ label: name, clear: () => setCategory("") });
   }
-  if (verifiedOnly) {
-    activeFilters.push({
-      label: "Verified Only",
-      clear: () => setVerifiedOnly(false),
-    });
-  }
   if (search) {
     activeFilters.push({
       label: `"${search}"`,
@@ -108,7 +91,6 @@ export default function MarketplacePage() {
   function clearAll() {
     setSearch("");
     setCategory("");
-    setVerifiedOnly(false);
     setCurrentPage(1);
   }
 
@@ -117,8 +99,8 @@ export default function MarketplacePage() {
       <NavBar />
       <main className={styles.main}>
         <PageHeader
-          title="Marketplace"
-          subtitle="Browse tools, scripts, configs, and more"
+          title="Shop"
+          subtitle="Game keys, tool access, and configs — curated and tested by our team"
         />
 
         {/* Toolbar */}
@@ -130,7 +112,7 @@ export default function MarketplacePage() {
                 setSearch(v);
                 setCurrentPage(1);
               }}
-              placeholder="Search tools..."
+              placeholder="Search products..."
             />
           </div>
           <Select
@@ -146,17 +128,6 @@ export default function MarketplacePage() {
             value={sort}
             onChange={(e) => setSort(e.target.value)}
           />
-          <label className={styles.verifiedToggle}>
-            <input
-              type="checkbox"
-              checked={verifiedOnly}
-              onChange={(e) => {
-                setVerifiedOnly(e.target.checked);
-                setCurrentPage(1);
-              }}
-            />
-            Verified Only
-          </label>
         </div>
 
         {/* Active filter chips */}
@@ -173,7 +144,8 @@ export default function MarketplacePage() {
 
         {/* Results */}
         <div className={styles.resultCount}>
-          {filtered.length} {filtered.length === 1 ? "item" : "items"} found
+          {filtered.length} {filtered.length === 1 ? "product" : "products"}{" "}
+          found
         </div>
 
         {paginated.length > 0 ? (
@@ -191,7 +163,7 @@ export default function MarketplacePage() {
           </>
         ) : (
           <EmptyState
-            message="No items match your filters"
+            message="No products match your filters"
             description="Try adjusting your search or filters to find what you're looking for."
             action={
               <button className={styles.clearAll} onClick={clearAll}>

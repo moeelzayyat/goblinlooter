@@ -1,147 +1,186 @@
 /* ───── User & Auth ───── */
 
-export type VerificationTier = "unverified" | "verified" | "trusted";
+export type UserRole = "customer" | "admin";
 
 export interface User {
   id: string;
   username: string;
+  email: string;
   avatarUrl?: string;
-  memberSince: string;
-  verificationTier: VerificationTier;
-  rating: number;
-  reviewCount: number;
-  tradesCompleted: number;
-  itemsSold: number;
-  responseTime: string;
-  disputeRate: number;
+  role: UserRole;
+  flaggedAt?: string | null;
+  flagReason?: string | null;
+  createdAt: string;
 }
 
-/* ───── Products & Listings ───── */
+/* ───── Products ───── */
+
+export type ProductCategory = "game-keys" | "tool-access" | "configs";
+
+export type DeliveryMethod = "key" | "download" | "manual";
+
+export type RefundEligibility = "eligible" | "conditional" | "non-refundable";
+
+export type ProductStatus = "draft" | "published" | "disabled";
 
 export interface Product {
   id: string;
   title: string;
-  description: string;
+  slug: string;
+  shortDescription: string;
+  fullDescription: string;
+  category: ProductCategory;
   price: number;
-  thumbnailUrl?: string;
-  images?: string[];
-  rating: number;
-  reviewCount: number;
-  seller: User;
-  category: string;
-  compatibility?: string[];
-  deliveryEstimate: string;
-  createdAt: string;
-  status: ListingStatus;
-}
-
-export type ListingStatus = "active" | "paused" | "sold" | "removed";
-
-export type ProductCategory =
-  | "game-tools"
-  | "scripts"
-  | "configs"
-  | "accounts"
-  | "items"
-  | "services";
-
-/* ───── Trading ───── */
-
-export interface TradeListing {
-  id: string;
-  offeredItem: TradeItem;
-  wantedItem: TradeItem | null; // null = "Open to offers"
-  trader: User;
-  game: string;
-  createdAt: string;
-  status: TradeStatus;
-}
-
-export interface TradeItem {
-  name: string;
-  thumbnailUrl?: string;
-  estimatedValue: number;
-}
-
-export type TradeStatus =
-  | "active"
-  | "pending"
-  | "completed"
-  | "cancelled"
-  | "disputed";
-
-export interface TradeRoom {
-  id: string;
-  yourOffer: TradeItem[];
-  theirOffer: TradeItem[];
-  partner: User;
-  status: TradeRoomStatus;
-  yourConfirmed: boolean;
-  theirConfirmed: boolean;
-  countdownEndsAt?: string;
-  chatMessages: ChatMessage[];
-}
-
-export type TradeRoomStatus =
-  | "negotiating"
-  | "awaiting-confirmation"
-  | "countdown"
-  | "completed"
-  | "cancelled"
-  | "expired";
-
-export interface ChatMessage {
-  id: string;
-  senderId: string;
-  text: string;
-  timestamp: string;
-}
-
-/* ───── Reviews ───── */
-
-export interface Review {
-  id: string;
-  reviewer: User;
-  rating: number;
-  text: string;
+  platform: string[];
+  compatibilityNotes: string;
+  regionRestrictions?: string | null;
+  deliveryMethod: DeliveryMethod;
+  deliveryTimeEstimate: string;
+  refundEligibility: RefundEligibility;
+  refundTerms: string;
+  images: string[];
+  featured: boolean;
+  status: ProductStatus;
+  stockCount?: number;
   createdAt: string;
 }
 
-/* ───── Dashboard / Orders ───── */
+/* ───── Cart ───── */
 
-export interface DashboardStats {
-  activeListings: number;
-  pendingOrders: number;
-  revenue30d: number;
-  averageRating: number;
+export interface CartItem {
+  product: Product;
+  quantity: number;
 }
 
-export interface Order {
-  id: string;
-  item: Product;
-  buyer: User;
-  price: number;
-  status: OrderStatus;
-  deadline?: string;
-  createdAt: string;
-}
+/* ───── Orders ───── */
 
 export type OrderStatus =
   | "pending"
-  | "fulfilled"
-  | "completed"
+  | "paid"
+  | "delivered"
+  | "review"
   | "cancelled"
-  | "disputed";
+  | "refunded"
+  | "chargeback";
 
-/* ───── UI helpers ───── */
+export type ChargebackStatus =
+  | "dispute_opened"
+  | "dispute_won"
+  | "dispute_lost";
 
-export type StatusVariant =
-  | "active"
-  | "pending"
-  | "completed"
-  | "cancelled"
-  | "disputed"
-  | "suspended";
+export interface Order {
+  id: string;
+  customerId: string;
+  status: OrderStatus;
+  totalAmount: number;
+  stripePaymentId?: string | null;
+  chargebackStatus?: ChargebackStatus | null;
+  deliveredAt?: string | null;
+  createdAt: string;
+  items: OrderItem[];
+  key?: InventoryKeyPublic | null;
+}
+
+export interface OrderItem {
+  id: string;
+  productId: string;
+  product?: Product;
+  quantity: number;
+  unitPrice: number;
+}
+
+/* ───── Inventory Keys ───── */
+
+export type KeyStatus = "available" | "assigned" | "revoked";
+
+/** Public-facing key (value only shown when order is DELIVERED) */
+export interface InventoryKeyPublic {
+  id: string;
+  status: KeyStatus;
+  keyValue?: string; // only populated when order.status === 'delivered'
+}
+
+/* ───── Order Metadata (admin) ───── */
+
+export interface OrderMeta {
+  id: string;
+  orderId: string;
+  ipAddress: string;
+  userAgent: string;
+  country?: string | null;
+  fingerprint?: string | null;
+  stripeRiskScore?: number | null;
+  stripeRiskLevel?: string | null;
+  cardCountry?: string | null;
+  cardLast4?: string | null;
+  cardBrand?: string | null;
+  riskFlags: string[];
+}
+
+/* ───── Delivery Audit Log (admin) ───── */
+
+export type AuditAction =
+  | "key_assigned"
+  | "key_revealed"
+  | "key_revoked"
+  | "delivery_failed"
+  | "refund_processed";
+
+export interface DeliveryAuditLog {
+  id: string;
+  orderId: string;
+  keyId?: string | null;
+  action: AuditAction;
+  metadata?: Record<string, unknown> | null;
+  performedBy?: string | null;
+  createdAt: string;
+}
+
+/* ───── Support Tickets ───── */
+
+export type TicketType =
+  | "refund_request"
+  | "delivery_issue"
+  | "key_problem"
+  | "general";
+
+export type TicketStatus = "open" | "in_progress" | "resolved" | "closed";
+
+export interface SupportTicket {
+  id: string;
+  orderId?: string | null;
+  customerId: string;
+  type: TicketType;
+  subject: string;
+  message: string;
+  status: TicketStatus;
+  resolution?: string | null;
+  createdAt: string;
+}
+
+/* ───── Analytics ───── */
+
+export type AnalyticsEventType =
+  | "page_view"
+  | "product_view"
+  | "add_to_cart"
+  | "remove_from_cart"
+  | "checkout_start"
+  | "purchase"
+  | "purchase_review"
+  | "refund"
+  | "support_ticket";
+
+export interface AnalyticsEvent {
+  id: string;
+  event: AnalyticsEventType;
+  data?: Record<string, unknown> | null;
+  userId?: string | null;
+  sessionId?: string | null;
+  createdAt: string;
+}
+
+/* ───── UI Helpers ───── */
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";

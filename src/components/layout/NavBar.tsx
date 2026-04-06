@@ -5,14 +5,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, User, LogOut, Settings, LayoutDashboard } from "lucide-react";
+import {
+  Menu,
+  X,
+  User,
+  LogOut,
+  Settings,
+  ShoppingBag,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import styles from "./NavBar.module.css";
 
 const NAV_LINKS = [
-  { href: "/browse", label: "Marketplace" },
-  { href: "/trading", label: "Trading" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/shop", label: "Shop" },
   { href: "/support", label: "Support" },
 ];
 
@@ -26,7 +31,13 @@ export function NavBar() {
     <nav className={styles.nav}>
       <div className={styles.inner}>
         <Link href="/" className={styles.logo}>
-          <Image src="/logo.png" alt="GoblinLooter Logo" width={32} height={32} style={{ borderRadius: '8px' }} />
+          <Image
+            src="/logo.png"
+            alt="GoblinLooter"
+            width={32}
+            height={32}
+            style={{ borderRadius: "6px" }}
+          />
           GoblinLooter
         </Link>
 
@@ -62,18 +73,18 @@ export function NavBar() {
               {userMenuOpen && (
                 <div className={styles.userMenu}>
                   <Link
-                    href="/dashboard"
+                    href="/orders"
                     className={styles.menuItem}
                     onClick={() => setUserMenuOpen(false)}
                   >
-                    <LayoutDashboard size={16} /> Dashboard
+                    <ShoppingBag size={16} /> My Orders
                   </Link>
                   <Link
-                    href="/settings"
+                    href="/account"
                     className={styles.menuItem}
                     onClick={() => setUserMenuOpen(false)}
                   >
-                    <Settings size={16} /> Settings
+                    <Settings size={16} /> Account Settings
                   </Link>
                   <button
                     className={styles.menuItem}
@@ -123,11 +134,26 @@ export function NavBar() {
         <div className={styles.mobileActions}>
           {session?.user ? (
             <>
-              <span style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", padding: "var(--space-sm) 0" }}>
+              <span
+                style={{
+                  fontSize: "var(--text-sm)",
+                  color: "var(--text-secondary)",
+                  padding: "var(--space-sm) 0",
+                }}
+              >
                 Signed in as {session.user.name}
               </span>
+              <Link href="/orders" onClick={() => setMobileOpen(false)}>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  style={{ width: "100%" }}
+                >
+                  My Orders
+                </Button>
+              </Link>
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="lg"
                 style={{ width: "100%" }}
                 onClick={() => signOut({ callbackUrl: "/" })}
@@ -138,12 +164,20 @@ export function NavBar() {
           ) : (
             <>
               <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
-                <Button variant="secondary" size="lg" style={{ width: "100%" }}>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  style={{ width: "100%" }}
+                >
                   Log In
                 </Button>
               </Link>
               <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
-                <Button variant="primary" size="lg" style={{ width: "100%" }}>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  style={{ width: "100%" }}
+                >
                   Sign Up
                 </Button>
               </Link>

@@ -1,23 +1,16 @@
 import Link from "next/link";
-import { Gem, Globe, MessageCircle, ExternalLink } from "lucide-react";
+import Image from "next/image";
+import { Globe, MessageCircle, ExternalLink } from "lucide-react";
 import styles from "./Footer.module.css";
 
 const COLUMNS = [
   {
-    title: "Marketplace",
+    title: "Shop",
     links: [
-      { label: "Browse All", href: "/browse" },
-      { label: "Game Tools", href: "/browse?category=game-tools" },
-      { label: "Scripts", href: "/browse?category=scripts" },
-      { label: "Configs", href: "/browse?category=configs" },
-    ],
-  },
-  {
-    title: "Trading",
-    links: [
-      { label: "Trade Listings", href: "/trading" },
-      { label: "How Trading Works", href: "/support#trading" },
-      { label: "Safety Tips", href: "/support#safety" },
+      { label: "All Products", href: "/shop" },
+      { label: "Game Keys", href: "/shop?category=game-keys" },
+      { label: "Tool Access", href: "/shop?category=tool-access" },
+      { label: "Configs", href: "/shop?category=configs" },
     ],
   },
   {
@@ -25,6 +18,7 @@ const COLUMNS = [
     links: [
       { label: "Help Center", href: "/support" },
       { label: "Contact Us", href: "/support#contact" },
+      { label: "Refund Policy", href: "/refund-policy" },
       { label: "Terms of Service", href: "/terms" },
       { label: "Privacy Policy", href: "/privacy" },
     ],
@@ -38,12 +32,17 @@ export function Footer() {
         <div className={styles.grid}>
           <div className={styles.brand}>
             <div className={styles.logo}>
-              <Gem size={20} className={styles.logoIcon} />
+              <Image
+                src="/logo.png"
+                alt="GoblinLooter"
+                width={20}
+                height={20}
+                style={{ borderRadius: "4px" }}
+              />
               GoblinLooter
             </div>
             <p className={styles.tagline}>
-              Buy, sell, and trade game tools with verified sellers and secure
-              transactions.
+              Premium digital game tools — curated, tested, delivered fast.
             </p>
           </div>
 
@@ -68,7 +67,7 @@ export function Footer() {
             © {new Date().getFullYear()} GoblinLooter. All rights reserved.
           </span>
           <div className={styles.socials}>
-            <a href="#" className={styles.socialLink} aria-label="Twitter">
+            <a href="#" className={styles.socialLink} aria-label="Website">
               <Globe size={18} />
             </a>
             <a href="#" className={styles.socialLink} aria-label="Discord">
