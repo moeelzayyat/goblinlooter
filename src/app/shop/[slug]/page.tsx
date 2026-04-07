@@ -27,8 +27,31 @@ export default function ProductPage() {
   const params = useParams();
   const slug = params.slug as string;
   const [activeTab, setActiveTab] = useState<TabId>("description");
+  const [checkingOut, setCheckingOut] = useState(false);
 
   const product = MOCK_PRODUCTS.find((p) => p.slug === slug);
+
+  const handleBuyNow = async () => {
+    if (!product || checkingOut) return;
+    setCheckingOut(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productSlug: product.slug }),
+      });
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        alert("Failed to create checkout session. Please try again.");
+      }
+    } catch {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setCheckingOut(false);
+    }
+  };
 
   useEffect(() => {
     if (product) {
@@ -141,11 +164,14 @@ export default function ProductPage() {
             </div>
 
             <div className={styles.actions}>
-              <Button size="lg" style={{ flex: 1 }}>
-                <ShoppingCart size={18} /> Add to Cart
-              </Button>
-              <Button variant="secondary" size="lg" style={{ flex: 1 }}>
-                Buy Now
+              <Button
+                size="lg"
+                style={{ flex: 1 }}
+                onClick={handleBuyNow}
+                disabled={checkingOut}
+              >
+                <ShoppingCart size={18} />
+                {checkingOut ? "Processing…" : "Buy Now — Pay with Crypto"}
               </Button>
             </div>
 
