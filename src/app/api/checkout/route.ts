@@ -43,14 +43,26 @@ export async function POST(req: NextRequest) {
     const message =
       error instanceof Error ? error.message : "Unknown error";
     const isTimeout = message.includes("timed out");
+    const isNodeSync =
+      message.includes("not available") ||
+      message.includes("Payment method unavailable") ||
+      message.includes("synchronized");
+
+    let userError: string;
+    let status: number;
+
+    if (isTimeout || isNodeSync) {
+      userError =
+        "Payment system is currently syncing with the blockchain network. This is temporary — please try again in a few hours.";
+      status = 503;
+    } else {
+      userError = "Failed to create checkout session. Please try again later.";
+      status = 500;
+    }
+
     return NextResponse.json(
-      {
-        error: isTimeout
-          ? "Payment server is busy syncing. Please try again in a few minutes."
-          : "Failed to create checkout session",
-        details: message,
-      },
-      { status: isTimeout ? 503 : 500 }
+      { error: userError, details: message },
+      { status }
     );
   }
 }
