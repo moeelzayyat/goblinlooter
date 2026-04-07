@@ -1,30 +1,23 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ShieldCheck,
   Zap,
   Shield,
   ArrowRight,
-  Key,
-  Wrench,
-  Settings2,
-  TrendingUp,
+  Gamepad2,
+  Download,
+  Headphones,
+  ShoppingCart,
 } from "lucide-react";
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/Button";
-import { ProductCard } from "@/components/data/ProductCard";
-import { ContentGrid } from "@/components/layout/ContentGrid";
-import { MOCK_PRODUCTS, CATEGORIES } from "@/lib/mockData";
+import { MOCK_PRODUCTS } from "@/lib/mockData";
 import styles from "./page.module.css";
 
-const CATEGORY_ICONS: Record<string, typeof Key> = {
-  "game-keys": Key,
-  "tool-access": Wrench,
-  configs: Settings2,
-};
-
 export default function HomePage() {
-  const featured = MOCK_PRODUCTS.filter((p) => p.featured).slice(0, 4);
+  const product = MOCK_PRODUCTS[0];
 
   return (
     <div className={styles.page}>
@@ -32,17 +25,44 @@ export default function HomePage() {
       <main className={styles.main}>
         {/* ─── Hero ─── */}
         <section className={styles.hero}>
-          <h1 className={styles.heroTitle}>
-            Premium game tools, delivered fast.
-          </h1>
-          <p className={styles.heroSub}>
-            Hand-picked digital products for serious gamers. Secure checkout,
-            fast delivery, real support.
-          </p>
-          <div className={styles.heroCtas}>
-            <Link href="/shop">
-              <Button size="lg">Browse the Shop</Button>
-            </Link>
+          <div className={styles.heroContent}>
+            <span className={styles.heroBadge}>
+              <Gamepad2 size={14} />
+              Arc Raiders
+            </span>
+            <h1 className={styles.heroTitle}>
+              ArcWay Dupe
+            </h1>
+            <p className={styles.heroSub}>
+              Premium duplication tool for Arc Raiders — fast, undetected, and
+              regularly updated with every game patch.
+            </p>
+            <div className={styles.heroPrice}>
+              <span className={styles.priceTag}>${product.price.toFixed(2)}</span>
+              <span className={styles.priceNote}>One-time purchase · Instant delivery</span>
+            </div>
+            <div className={styles.heroCtas}>
+              <Link href={`/shop/${product.slug}`}>
+                <Button size="lg">
+                  <ShoppingCart size={18} />
+                  Get ArcWay Dupe
+                </Button>
+              </Link>
+              <Link href={`/shop/${product.slug}`} className={styles.heroSecondary}>
+                Learn more <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+          <div className={styles.heroImage}>
+            <Image
+              src="/arcway-dupe.png"
+              alt="ArcWay Dupe"
+              width={560}
+              height={315}
+              className={styles.heroImg}
+              priority
+            />
+            <div className={styles.heroGlow} />
           </div>
         </section>
 
@@ -50,14 +70,62 @@ export default function HomePage() {
         <section className={styles.proofBar}>
           <div className={styles.proofInner}>
             {[
-              { value: "5,000+", label: "Products Delivered" },
-              { value: "99.8%", label: "Delivery Success" },
-              { value: "Fast", label: "Digital Delivery" },
+              { value: "500+", label: "Active Users" },
+              { value: "99.8%", label: "Uptime" },
+              { value: "Instant", label: "Delivery" },
               { value: "24/7", label: "Support" },
             ].map((stat) => (
               <div key={stat.label} className={styles.proofStat}>
                 <span className={styles.proofValue}>{stat.value}</span>
                 <span className={styles.proofLabel}>{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ─── Features ─── */}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Why ArcWay Dupe?</h2>
+          <p className={styles.sectionSub}>
+            Built from the ground up for Arc Raiders players who want an edge.
+          </p>
+          <div className={styles.featureGrid}>
+            {[
+              {
+                icon: Zap,
+                title: "Lightning Fast",
+                desc: "Dupe items in seconds with our optimized memory engine. No lag, no delays.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "Undetected",
+                desc: "Advanced anti-detection keeps you safe. Updated within hours of every game patch.",
+              },
+              {
+                icon: Download,
+                title: "Instant Delivery",
+                desc: "Get your license key immediately after purchase. Start duping in under 5 minutes.",
+              },
+              {
+                icon: Headphones,
+                title: "Dedicated Support",
+                desc: "Real humans helping you 24/7. Setup guides, troubleshooting, and priority assistance.",
+              },
+              {
+                icon: Gamepad2,
+                title: "Clean Overlay",
+                desc: "Minimal, non-intrusive overlay that stays out of your way while you play.",
+              },
+              {
+                icon: Shield,
+                title: "Buyer Protection",
+                desc: "72-hour refund window on unredeemed keys. We stand behind our product.",
+              },
+            ].map((feat) => (
+              <div key={feat.title} className={styles.featureCard}>
+                <feat.icon size={24} className={styles.featureIcon} />
+                <span className={styles.featureTitle}>{feat.title}</span>
+                <span className={styles.featureDesc}>{feat.desc}</span>
               </div>
             ))}
           </div>
@@ -73,18 +141,18 @@ export default function HomePage() {
             {[
               {
                 num: 1,
-                title: "Browse",
-                desc: "Explore our curated catalog of game keys, tools, and configs.",
+                title: "Purchase",
+                desc: "Buy your ArcWay Dupe license key securely through our checkout.",
               },
               {
                 num: 2,
-                title: "Purchase",
-                desc: "Pay securely with your preferred payment method.",
+                title: "Activate",
+                desc: "Receive your key instantly and activate it in the ArcWay loader.",
               },
               {
                 num: 3,
-                title: "Receive",
-                desc: "Your product is delivered to your account, typically within seconds.",
+                title: "Dominate",
+                desc: "Launch Arc Raiders and start duping items with the clean overlay.",
               },
             ].map((step) => (
               <div key={step.num} className={styles.step}>
@@ -94,23 +162,6 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* ─── Featured products ─── */}
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <h2 className={styles.sectionTitle}>Popular right now</h2>
-            </div>
-            <Link href="/shop" className={styles.viewAll}>
-              View all →
-            </Link>
-          </div>
-          <ContentGrid columns={4}>
-            {featured.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </ContentGrid>
         </section>
 
         {/* ─── Trust block ─── */}
@@ -130,59 +181,36 @@ export default function HomePage() {
             </div>
             <div className={styles.trustCard}>
               <Zap size={28} className={styles.trustIcon} />
-              <span className={styles.trustTitle}>Fast Delivery</span>
+              <span className={styles.trustTitle}>Instant Delivery</span>
               <span className={styles.trustDesc}>
-                Most products deliver within seconds of payment confirmation.
-                Occasionally, orders go through a brief security review.
+                Your license key is delivered within seconds of payment
+                confirmation. No waiting around.
               </span>
             </div>
             <div className={styles.trustCard}>
               <Shield size={28} className={styles.trustIcon} />
               <span className={styles.trustTitle}>Buyer Protection</span>
               <span className={styles.trustDesc}>
-                Not satisfied? Contact our support team — we handle every issue
-                personally and stand behind our products.
+                Not satisfied? 72-hour refund window on unredeemed keys.
+                Contact our support team anytime.
               </span>
             </div>
-          </div>
-        </section>
-
-        {/* ─── Category discovery ─── */}
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Browse by category</h2>
-          <p className={styles.sectionSub}>
-            Find exactly what you&apos;re looking for.
-          </p>
-          <div className={styles.catGrid}>
-            {CATEGORIES.map((cat) => {
-              const Icon = CATEGORY_ICONS[cat.id] || Key;
-              return (
-                <Link
-                  key={cat.id}
-                  href={`/shop?category=${cat.id}`}
-                  className={styles.catTile}
-                >
-                  <Icon size={24} className={styles.catIcon} />
-                  <div className={styles.catInfo}>
-                    <span className={styles.catName}>{cat.name}</span>
-                    <span className={styles.catCount}>{cat.count} products</span>
-                  </div>
-                </Link>
-              );
-            })}
           </div>
         </section>
 
         {/* ─── Bottom CTA ─── */}
         <section className={styles.section}>
           <div className={styles.ctaBanner}>
-            <TrendingUp size={32} style={{ color: "var(--accent)" }} />
-            <h2 className={styles.ctaTitle}>Ready to gear up?</h2>
+            <Gamepad2 size={32} style={{ color: "var(--accent)" }} />
+            <h2 className={styles.ctaTitle}>Ready to dominate Arc Raiders?</h2>
             <p className={styles.ctaDesc}>
-              Browse our catalog and find exactly what you need.
+              Get ArcWay Dupe now and start duping items instantly.
             </p>
-            <Link href="/shop">
-              <Button size="lg">Shop Now</Button>
+            <Link href={`/shop/${product.slug}`}>
+              <Button size="lg">
+                <ShoppingCart size={18} />
+                Get it for ${product.price.toFixed(2)}
+              </Button>
             </Link>
           </div>
         </section>

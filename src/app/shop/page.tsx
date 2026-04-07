@@ -100,7 +100,7 @@ export default function ShopPage() {
       <main className={styles.main}>
         <PageHeader
           title="Shop"
-          subtitle="Game keys, tool access, and configs — curated and tested by our team"
+          subtitle="Premium game tools for Arc Raiders — tested, updated, and delivered instantly"
         />
 
         {/* Toolbar */}

@@ -7,10 +7,8 @@ const COLUMNS = [
   {
     title: "Shop",
     links: [
-      { label: "All Products", href: "/shop" },
-      { label: "Game Keys", href: "/shop?category=game-keys" },
-      { label: "Tool Access", href: "/shop?category=tool-access" },
-      { label: "Configs", href: "/shop?category=configs" },
+      { label: "ArcWay Dupe", href: "/shop/arcway-dupe" },
+      { label: "Browse All", href: "/shop" },
     ],
   },
   {
