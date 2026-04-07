@@ -44,7 +44,7 @@ export default function ProductPage() {
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
-        alert("Failed to create checkout session. Please try again.");
+        alert(data.error || "Failed to create checkout session. Please try again.");
       }
     } catch {
       alert("Something went wrong. Please try again.");

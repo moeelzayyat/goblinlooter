@@ -40,9 +40,17 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Checkout error:", error);
+    const message =
+      error instanceof Error ? error.message : "Unknown error";
+    const isTimeout = message.includes("timed out");
     return NextResponse.json(
-      { error: "Failed to create checkout session" },
-      { status: 500 }
+      {
+        error: isTimeout
+          ? "Payment server is busy syncing. Please try again in a few minutes."
+          : "Failed to create checkout session",
+        details: message,
+      },
+      { status: isTimeout ? 503 : 500 }
     );
   }
 }
