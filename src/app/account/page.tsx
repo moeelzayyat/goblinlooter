@@ -2,6 +2,7 @@
 
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/layout/Footer";
+import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
@@ -100,7 +101,7 @@ export default function AccountPage() {
           </div>
         </section>
 
-        {/* Payment */}
+        {/* Orders */}
         <section
           style={{
             marginBottom: "var(--space-2xl)",
@@ -115,23 +116,26 @@ export default function AccountPage() {
               marginBottom: "var(--space-lg)",
             }}
           >
-            Payment Methods
+            Orders & Keys
           </h2>
           <p
             style={{
-              color: "var(--text-muted)",
+              color: "var(--text-secondary)",
               fontSize: "var(--text-sm)",
+              marginBottom: "var(--space-md)",
             }}
           >
-            No payment methods added yet.
+            View your purchase history, track deliveries, and access your product keys.
+            All payments are processed via BTC or LTC — no card details are stored.
           </p>
-          <Button
-            variant="secondary"
-            size="sm"
-            style={{ marginTop: "var(--space-md)" }}
-          >
-            Add Payment Method
-          </Button>
+          <Link href="/orders">
+            <Button
+              variant="secondary"
+              size="sm"
+            >
+              View My Orders →
+            </Button>
+          </Link>
         </section>
 
         {/* Notifications */}
