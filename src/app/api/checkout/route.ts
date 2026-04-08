@@ -2,9 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { createInvoice } from "@/lib/btcpay";
 import { prisma } from "@/lib/prisma";
 import { MOCK_PRODUCTS } from "@/lib/mockData";
+import { auth } from "@/lib/auth";
+
+function getRequestOrigin(req: NextRequest) {
+  const forwardedHost = req.headers.get("x-forwarded-host");
+  const forwardedProto = req.headers.get("x-forwarded-proto");
+  const host = forwardedHost || req.headers.get("host");
+  const envOrigin = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
+
+  if (host) {
+    const proto =
+      forwardedProto || (host.includes("localhost") ? "http" : "https");
+    return `${proto}://${host}`;
+  }
+
+  return envOrigin || req.nextUrl.origin;
+}
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
     const body = await req.json();
     const { productSlug, buyerEmail } = body;
 
@@ -23,7 +40,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!session?.user?.id) {
+      const origin = getRequestOrigin(req);
+      const loginUrl = new URL("/auth/login", origin);
+      loginUrl.searchParams.set("callbackUrl", `/shop/${product.slug}`);
+
+      return NextResponse.json(
+        {
+          error: "Please log in before starting checkout.",
+          loginUrl: loginUrl.toString(),
+        },
+        { status: 401 }
+      );
+    }
+
     const orderId = `GL-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const origin = getRequestOrigin(req);
+    const successUrl = new URL("/checkout/success", origin);
+    successUrl.searchParams.set("orderId", orderId);
 
     // Create order in database
     let dbOrder;
@@ -36,7 +70,7 @@ export async function POST(req: NextRequest) {
       dbOrder = await prisma.order.create({
         data: {
           id: orderId,
-          customerId: "guest", // will link to user when auth is wired up
+          customerId: session.user.id,
           status: "pending",
           totalAmount: product.price,
           items: {
@@ -59,8 +93,8 @@ export async function POST(req: NextRequest) {
       currency: "USD",
       orderId: dbOrder?.id || orderId,
       itemDescription: product.title,
-      buyerEmail: buyerEmail || undefined,
-      redirectURL: `https://goblinlooter.com/checkout/success?orderId=${dbOrder?.id || orderId}`,
+      buyerEmail: buyerEmail || session.user.email || undefined,
+      redirectURL: successUrl.toString(),
     });
 
     // Link invoice ID back to order
@@ -103,16 +137,31 @@ export async function POST(req: NextRequest) {
     console.error("Checkout error:", error);
     const message =
       error instanceof Error ? error.message : "Unknown error";
-    const isTimeout = message.includes("timed out");
-    const isNodeSync =
-      message.includes("not available") ||
-      message.includes("Payment method unavailable") ||
-      message.includes("synchronized");
+    const normalizedMessage = message.toLowerCase();
+    const isTimeout = normalizedMessage.includes("timed out");
+    const isFullNodeUnavailable = normalizedMessage.includes(
+      "full node not available"
+    );
+    const isPaymentMethodUnavailable = normalizedMessage.includes(
+      "payment method unavailable"
+    );
+    const isRateUnavailable = normalizedMessage.includes(
+      "error retrieving a matching payment method or rate"
+    );
+    const isNodeSync = normalizedMessage.includes("synchron");
 
     let userError: string;
     let status: number;
 
-    if (isTimeout || isNodeSync) {
+    if (
+      isFullNodeUnavailable ||
+      isPaymentMethodUnavailable ||
+      isRateUnavailable
+    ) {
+      userError =
+        "Crypto payments are temporarily unavailable because our BTCPay node is offline or not fully synced. Please try again later.";
+      status = 503;
+    } else if (isTimeout || isNodeSync) {
       userError =
         "Payment system is currently syncing with the blockchain network. This is temporary — please try again in a few hours.";
       status = 503;

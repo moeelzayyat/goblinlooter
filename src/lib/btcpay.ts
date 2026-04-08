@@ -22,9 +22,18 @@ interface BTCPayInvoice {
   currency: string;
 }
 
+function assertBTCPayConfig() {
+  if (!BTCPAY_URL || !BTCPAY_API_KEY || !BTCPAY_STORE_ID) {
+    throw new Error(
+      "BTCPay is not fully configured. Set BTCPAY_URL, BTCPAY_API_KEY, and BTCPAY_STORE_ID."
+    );
+  }
+}
+
 export async function createInvoice(
   opts: CreateInvoiceOptions
 ): Promise<BTCPayInvoice> {
+  assertBTCPayConfig();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
@@ -47,8 +56,7 @@ export async function createInvoice(
             buyerEmail: opts.buyerEmail,
           },
           checkout: {
-            redirectURL:
-              opts.redirectURL || "https://goblinlooter.com/checkout/success",
+            redirectURL: opts.redirectURL,
             redirectAutomatically: true,
             defaultLanguage: "en",
           },
@@ -81,6 +89,7 @@ export async function createInvoice(
 }
 
 export async function getInvoice(invoiceId: string): Promise<BTCPayInvoice> {
+  assertBTCPayConfig();
   const res = await fetch(
     `${BTCPAY_URL}/api/v1/stores/${BTCPAY_STORE_ID}/invoices/${invoiceId}`,
     {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Gem } from "lucide-react";
@@ -11,10 +11,14 @@ import styles from "../auth.module.css";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const callbackParam = searchParams.get("callbackUrl");
+  const callbackUrl =
+    callbackParam && callbackParam.startsWith("/") ? callbackParam : "/";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,12 +30,13 @@ export default function LoginPage() {
         email,
         password,
         redirect: false,
+        callbackUrl,
       });
 
       if (result?.error) {
         setError("Invalid email or password.");
       } else {
-        router.push("/");
+        router.push(result?.url || callbackUrl);
         router.refresh();
       }
     } catch {
@@ -80,7 +85,14 @@ export default function LoginPage() {
 
         <p className={styles.toggle}>
           Don&apos;t have an account?{" "}
-          <Link href="/auth/register" className={styles.toggleLink}>
+          <Link
+            href={
+              callbackUrl === "/"
+                ? "/auth/register"
+                : `/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+            }
+            className={styles.toggleLink}
+          >
             Sign up
           </Link>
         </p>

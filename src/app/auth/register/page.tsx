@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Gem } from "lucide-react";
@@ -11,11 +11,15 @@ import styles from "../auth.module.css";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const callbackParam = searchParams.get("callbackUrl");
+  const callbackUrl =
+    callbackParam && callbackParam.startsWith("/") ? callbackParam : "/";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,13 +46,18 @@ export default function RegisterPage() {
         email,
         password,
         redirect: false,
+        callbackUrl,
       });
 
       if (signInResult?.error) {
         // Registration succeeded but auto-login failed — redirect to login
-        router.push("/auth/login");
+        router.push(
+          callbackUrl === "/"
+            ? "/auth/login"
+            : `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+        );
       } else {
-        router.push("/");
+        router.push(signInResult?.url || callbackUrl);
         router.refresh();
       }
     } catch {
@@ -105,7 +114,14 @@ export default function RegisterPage() {
 
         <p className={styles.toggle}>
           Already have an account?{" "}
-          <Link href="/auth/login" className={styles.toggleLink}>
+          <Link
+            href={
+              callbackUrl === "/"
+                ? "/auth/login"
+                : `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+            }
+            className={styles.toggleLink}
+          >
             Sign in
           </Link>
         </p>

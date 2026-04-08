@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/layout/Footer";
@@ -25,6 +25,7 @@ type TabId = "description" | "details" | "refund";
 
 export default function ProductPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params.slug as string;
   const [activeTab, setActiveTab] = useState<TabId>("description");
   const [checkingOut, setCheckingOut] = useState(false);
@@ -41,6 +42,10 @@ export default function ProductPage() {
         body: JSON.stringify({ productSlug: product.slug }),
       });
       const data = await res.json();
+      if (res.status === 401 && data.loginUrl) {
+        router.push(data.loginUrl);
+        return;
+      }
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
