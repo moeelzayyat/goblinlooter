@@ -8,9 +8,11 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { username, email, password } = body;
+    const normalizedUsername = typeof username === "string" ? username.trim() : "";
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
     // Validate input
-    if (!username || !email || !password) {
+    if (!normalizedUsername || !normalizedEmail || !password) {
       return NextResponse.json(
         { error: "Username, email, and password are required." },
         { status: 400 }
@@ -24,16 +26,16 @@ export async function POST(request: Request) {
       );
     }
 
-    if (username.length < 3 || username.length > 20) {
+    if (normalizedUsername.length < 3 || normalizedUsername.length > 20) {
       return NextResponse.json(
-        { error: "Username must be 3–20 characters." },
+        { error: "Username must be 3-20 characters." },
         { status: 400 }
       );
     }
 
     // Check for existing user
     const existingEmail = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
     if (existingEmail) {
       return NextResponse.json(
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
     }
 
     const existingUsername = await prisma.user.findUnique({
-      where: { username },
+      where: { username: normalizedUsername },
     });
     if (existingUsername) {
       return NextResponse.json(
@@ -56,8 +58,8 @@ export async function POST(request: Request) {
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
       data: {
-        username,
-        email: email.toLowerCase(),
+        username: normalizedUsername,
+        email: normalizedEmail,
         passwordHash,
       },
     });

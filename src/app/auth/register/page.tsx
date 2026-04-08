@@ -49,11 +49,13 @@ function RegisterForm() {
       });
 
       if (signInResult?.error) {
-        router.push(
-          callbackUrl === "/"
-            ? "/auth/login"
-            : `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+        setError(
+          signInResult.error === "CredentialsSignin"
+            ? "Account created. Please sign in."
+            : "Account created, but sign-in is temporarily unavailable. Please try logging in shortly."
         );
+        setLoading(false);
+        return;
       } else {
         router.push(signInResult?.url || callbackUrl);
         router.refresh();
