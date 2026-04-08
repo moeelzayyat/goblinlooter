@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/layout/Footer";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -47,11 +48,11 @@ const CATEGORIES: {
     faqs: [
       {
         q: "What payment methods are accepted?",
-        a: "We accept major credit cards (Visa, Mastercard, Amex), Apple Pay, and Google Pay. All transactions are processed securely through Stripe.",
+        a: "We accept Bitcoin (BTC) and Litecoin (LTC). Payments are processed through our self-hosted BTCPay Server — a non-custodial payment processor. No third party ever touches your funds.",
       },
       {
-        q: "Is my payment information safe?",
-        a: "Yes. Your payment details are handled entirely by Stripe and never touch our servers. All transactions use industry-standard encryption.",
+        q: "Is my payment secure?",
+        a: "Yes. BTCPay Server processes payments directly on the blockchain. We never have access to your private keys or wallet. All transactions are verified by the Bitcoin/Litecoin network.",
       },
     ],
   },
@@ -89,11 +90,11 @@ const CATEGORIES: {
       },
       {
         q: "How do I request a refund?",
-        a: "Go to My Orders, find the order, and click 'Get help with this order'. Select 'I want a refund' and our team will review your request within 48 hours.",
+        a: "Go to My Orders, find the order, and click 'Contact Support'. Select 'I want a refund' and our team will review your request within 48 hours.",
       },
       {
         q: "How long does a refund take to process?",
-        a: "Once approved, refunds are processed through Stripe and typically appear on your statement within 5-10 business days.",
+        a: "Once approved, crypto refunds are processed within 24 hours to the wallet address you provide.",
       },
     ],
   },
@@ -117,6 +118,11 @@ const CATEGORIES: {
 export default function SupportPage() {
   const [search, setSearch] = useState("");
   const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const { data: session } = useSession();
 
   const filteredCategories = search
     ? CATEGORIES.map((cat) => ({
@@ -255,11 +261,39 @@ export default function SupportPage() {
               flexDirection: "column",
               gap: "var(--space-md)",
             }}
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!subject.trim() || !message.trim() || submitting) return;
+              setSubmitting(true);
+              try {
+                const res = await fetch("/api/support", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    subject: subject.trim(),
+                    message: message.trim(),
+                    type: "general",
+                  }),
+                });
+                if (res.ok) {
+                  setSubmitted(true);
+                  setSubject("");
+                  setMessage("");
+                } else {
+                  alert("Failed to send. Please try again.");
+                }
+              } catch {
+                alert("Something went wrong. Please try again.");
+              } finally {
+                setSubmitting(false);
+              }
+            }}
           >
             <TextInput
               label="Subject"
               placeholder="Brief description of your issue"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
             />
             <div
               style={{
@@ -280,6 +314,8 @@ export default function SupportPage() {
               <textarea
                 rows={4}
                 placeholder="Describe your issue in detail..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 style={{
                   width: "100%",
                   padding: "10px var(--space-md)",
@@ -293,9 +329,25 @@ export default function SupportPage() {
                 }}
               />
             </div>
-            <Button size="sm" style={{ alignSelf: "flex-start" }}>
-              <Send size={14} /> Send Message
-            </Button>
+            {submitted ? (
+              <p style={{ color: "var(--accent)", fontSize: "var(--text-sm)", fontWeight: 500 }}>
+                ✓ Message sent! We'll get back to you within 24 hours.
+              </p>
+            ) : (
+              <Button
+                size="sm"
+                style={{ alignSelf: "flex-start" }}
+                loading={submitting}
+                disabled={!subject.trim() || !message.trim() || !session?.user}
+              >
+                <Send size={14} /> Send Message
+              </Button>
+            )}
+            {!session?.user && (
+              <p style={{ color: "var(--text-muted)", fontSize: "var(--text-xs)" }}>
+                Please log in to submit a support ticket.
+              </p>
+            )}
           </form>
         </div>
       </main>
