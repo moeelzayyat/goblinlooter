@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
 import styles from "../auth.module.css";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
@@ -41,7 +41,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // Auto-login after registration
       const signInResult = await signIn("credentials", {
         email,
         password,
@@ -50,7 +49,6 @@ export default function RegisterPage() {
       });
 
       if (signInResult?.error) {
-        // Registration succeeded but auto-login failed — redirect to login
         router.push(
           callbackUrl === "/"
             ? "/auth/login"
@@ -96,7 +94,7 @@ export default function RegisterPage() {
           <TextInput
             label="Password"
             type="password"
-            placeholder="••••••••"
+            placeholder="********"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             helperText="Must be at least 8 characters"
@@ -127,5 +125,26 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+function RegisterFallback() {
+  return (
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <Link href="/" className={styles.logo}>
+          <Gem size={24} className={styles.logoIcon} />
+          GoblinLooter
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterFallback />}>
+      <RegisterForm />
+    </Suspense>
   );
 }

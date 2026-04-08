@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
 import styles from "../auth.module.css";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -68,7 +68,7 @@ export default function LoginPage() {
           <TextInput
             label="Password"
             type="password"
-            placeholder="••••••••"
+            placeholder="********"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -98,5 +98,26 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+function LoginFallback() {
+  return (
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <Link href="/" className={styles.logo}>
+          <Gem size={24} className={styles.logoIcon} />
+          GoblinLooter
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginForm />
+    </Suspense>
   );
 }
