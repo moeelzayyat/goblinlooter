@@ -74,8 +74,8 @@ model Order {
   status           String    @default("pending")
   // 'pending' | 'paid' | 'delivered' | 'review' | 'cancelled' | 'refunded' | 'chargeback'
   totalAmount      Decimal   @db.Decimal(10, 2)
-  stripePaymentId  String?   @unique
-  chargebackStatus String?   // null | 'dispute_opened' | 'dispute_won' | 'dispute_lost'
+  btcpayInvoiceId  String?   @unique
+  paymentMethod    String?   // 'BTC' | 'LTC'
   deliveredAt      DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -110,11 +110,8 @@ model OrderMeta {
   userAgent       String
   country         String?
   fingerprint     String?
-  stripeRiskScore Int?
-  stripeRiskLevel String?  // 'normal' | 'elevated' | 'highest'
-  cardCountry     String?
-  cardLast4       String?
-  cardBrand       String?
+  txId            String?   // on-chain transaction ID
+  paymentMethod   String?   // 'BTC' | 'LTC'
   riskFlags       String[]
   createdAt       DateTime @default(now())
 

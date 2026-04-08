@@ -60,21 +60,17 @@ export type OrderStatus =
   | "delivered"
   | "review"
   | "cancelled"
-  | "refunded"
-  | "chargeback";
+  | "refunded";
 
-export type ChargebackStatus =
-  | "dispute_opened"
-  | "dispute_won"
-  | "dispute_lost";
+export type PaymentMethod = "BTC" | "LTC";
 
 export interface Order {
   id: string;
   customerId: string;
   status: OrderStatus;
   totalAmount: number;
-  stripePaymentId?: string | null;
-  chargebackStatus?: ChargebackStatus | null;
+  btcpayInvoiceId?: string | null;
+  paymentMethod?: PaymentMethod | null;
   deliveredAt?: string | null;
   createdAt: string;
   items: OrderItem[];
@@ -109,11 +105,8 @@ export interface OrderMeta {
   userAgent: string;
   country?: string | null;
   fingerprint?: string | null;
-  stripeRiskScore?: number | null;
-  stripeRiskLevel?: string | null;
-  cardCountry?: string | null;
-  cardLast4?: string | null;
-  cardBrand?: string | null;
+  txId?: string | null;
+  paymentMethod?: string | null;
   riskFlags: string[];
 }
 
