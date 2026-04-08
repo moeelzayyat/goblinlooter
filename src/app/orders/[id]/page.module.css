@@ -1,0 +1,239 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
+  width: 100%;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-xl);
+}
+
+.breadcrumbLink {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbLink:hover {
+  color: var(--accent);
+}
+
+.breadcrumbCurrent {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ── Status banner ── */
+.statusBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.statusBanner.delivered {
+  background: var(--accent-subtle);
+  border: 1px solid rgba(62, 207, 142, 0.2);
+}
+
+.statusBanner.paid {
+  background: var(--accent-subtle);
+  border: 1px solid rgba(62, 207, 142, 0.2);
+}
+
+.statusBanner.pending {
+  background: var(--info-subtle);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.statusBanner.review {
+  background: var(--warning-subtle);
+  border: 1px solid rgba(245, 166, 35, 0.2);
+}
+
+.statusBanner.cancelled,
+.statusBanner.refunded {
+  background: var(--danger-subtle);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.statusIcon {
+  flex-shrink: 0;
+}
+
+.statusInfo h2 {
+  font-size: var(--text-md);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.statusInfo p {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* ── Sections ── */
+.section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.sectionTitle {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-md);
+}
+
+/* ── Key display ── */
+.keyBox {
+  background: var(--bg-elevated);
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.keyValue {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--accent);
+  word-break: break-all;
+  user-select: all;
+}
+
+.keyHidden {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+.copyBtn {
+  background: var(--accent-subtle);
+  border: 1px solid rgba(62, 207, 142, 0.3);
+  color: var(--accent);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.copyBtn:hover {
+  background: rgba(62, 207, 142, 0.2);
+}
+
+/* ── Detail rows ── */
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) 0;
+}
+
+.detailRow + .detailRow {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.detailLabel {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.detailValue {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  font-weight: 500;
+  text-align: right;
+}
+
+.detailValue.mono {
+  font-family: var(--font-mono), monospace;
+}
+
+.detailValue.accent {
+  color: var(--accent);
+}
+
+.detailValue.warning {
+  color: var(--warning);
+}
+
+/* ── Actions ── */
+.actions {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
+}
+
+/* ── Loading / Not found ── */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-3xl);
+  flex: 1;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.notFound {
+  text-align: center;
+  padding: var(--space-3xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  color: var(--text-muted);
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .keyBox {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}
