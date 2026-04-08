@@ -228,9 +228,10 @@
 /* ─── Pricing grid ─── */
 .pricingGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: minmax(280px, 420px);
+  justify-content: center;
   gap: var(--space-xl);
-  max-width: 720px;
+  max-width: 420px;
   margin: 0 auto;
 }
 

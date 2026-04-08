@@ -18,7 +18,6 @@ import {
   AlertCircle,
   ShoppingCart,
 } from "lucide-react";
-import type { Product } from "@/types";
 import styles from "./page.module.css";
 
 type TabId = "description" | "details" | "refund";
@@ -29,12 +28,15 @@ export default function ProductPage() {
   const slug = params.slug as string;
   const [activeTab, setActiveTab] = useState<TabId>("description");
   const [checkingOut, setCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const product = MOCK_PRODUCTS.find((p) => p.slug === slug);
 
   const handleBuyNow = async () => {
     if (!product || checkingOut) return;
+    setCheckoutError(null);
     setCheckingOut(true);
+
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -42,17 +44,21 @@ export default function ProductPage() {
         body: JSON.stringify({ productSlug: product.slug }),
       });
       const data = await res.json();
+
       if (res.status === 401 && data.loginUrl) {
         router.push(data.loginUrl);
         return;
       }
+
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
-        alert(data.error || "Failed to create checkout session. Please try again.");
+        setCheckoutError(
+          data.error || "Failed to create checkout session. Please try again."
+        );
       }
     } catch {
-      alert("Something went wrong. Please try again.");
+      setCheckoutError("Something went wrong. Please try again.");
     } finally {
       setCheckingOut(false);
     }
@@ -136,9 +142,7 @@ export default function ProductPage() {
             <p className={styles.productShort}>{product.shortDescription}</p>
 
             <div className={styles.priceBlock}>
-              <span className={styles.price}>
-                ${product.price.toFixed(2)}
-              </span>
+              <span className={styles.price}>${product.price.toFixed(2)}</span>
               {product.stockCount !== undefined && product.stockCount < 10 && (
                 <span className={styles.lowStock}>
                   Only {product.stockCount} left
@@ -149,8 +153,8 @@ export default function ProductPage() {
             <div className={styles.deliveryInfo}>
               <Zap size={16} />
               <span>
-                {product.deliveryMethod === "key" && "Digital key — "}
-                {product.deliveryMethod === "download" && "Digital download — "}
+                {product.deliveryMethod === "key" && "Digital key - "}
+                {product.deliveryMethod === "download" && "Digital download - "}
                 {product.deliveryTimeEstimate}
               </span>
             </div>
@@ -176,13 +180,22 @@ export default function ProductPage() {
                 disabled={checkingOut}
               >
                 <ShoppingCart size={18} />
-                {checkingOut ? "Processing…" : "Buy Now — Pay with Crypto"}
+                {checkingOut ? "Processing..." : "Buy Now - Pay with Crypto"}
               </Button>
             </div>
 
+            {checkoutError ? (
+              <div className={styles.checkoutError} role="alert">
+                <p>{checkoutError}</p>
+                <Link href="/support" className={styles.checkoutErrorLink}>
+                  Contact support if the issue keeps happening
+                </Link>
+              </div>
+            ) : null}
+
             <div className={styles.guarantee}>
               <ShieldCheck size={16} />
-              <span>Secure checkout · Buyer protection · Real support</span>
+              <span>Secure checkout - Buyer protection - Real support</span>
             </div>
           </div>
         </div>
@@ -227,7 +240,9 @@ export default function ProductPage() {
                   </tr>
                   <tr>
                     <td>Delivery Method</td>
-                    <td style={{textTransform: "capitalize"}}>{product.deliveryMethod}</td>
+                    <td style={{ textTransform: "capitalize" }}>
+                      {product.deliveryMethod}
+                    </td>
                   </tr>
                   <tr>
                     <td>Delivery Time</td>
@@ -260,7 +275,7 @@ export default function ProductPage() {
               </p>
               <Link href="/support">
                 <Button variant="ghost" size="sm">
-                  Contact Support about this product →
+                  Contact Support about this product
                 </Button>
               </Link>
             </div>

@@ -48,7 +48,7 @@ const CATEGORIES: {
     faqs: [
       {
         q: "What payment methods are accepted?",
-        a: "We accept Bitcoin (BTC) and Litecoin (LTC). Payments are processed through our self-hosted BTCPay Server — a non-custodial payment processor. No third party ever touches your funds.",
+        a: "We accept Bitcoin (BTC) and Litecoin (LTC). Payments are processed through our self-hosted BTCPay Server - a non-custodial payment processor. No third party ever touches your funds.",
       },
       {
         q: "Is my payment secure?",
@@ -75,7 +75,7 @@ const CATEGORIES: {
       },
       {
         q: "My key doesn't work. What should I do?",
-        a: "Contact our support team immediately using the 'Get help with this order' button on your order detail page. We'll investigate and resolve the issue — usually with a replacement key.",
+        a: "Contact our support team immediately using the 'Get help with this order' button on your order detail page. We'll investigate and resolve the issue - usually with a replacement key.",
       },
     ],
   },
@@ -330,8 +330,14 @@ export default function SupportPage() {
               />
             </div>
             {submitted ? (
-              <p style={{ color: "var(--accent)", fontSize: "var(--text-sm)", fontWeight: 500 }}>
-                ✓ Message sent! We'll get back to you within 24 hours.
+              <p
+                style={{
+                  color: "var(--accent)",
+                  fontSize: "var(--text-sm)",
+                  fontWeight: 500,
+                }}
+              >
+                Message sent! We'll get back to you within 24 hours.
               </p>
             ) : (
               <Button

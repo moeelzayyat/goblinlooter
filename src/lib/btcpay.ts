@@ -3,6 +3,8 @@
 const BTCPAY_URL = process.env.BTCPAY_URL || "https://pay.goblinlooter.com";
 const BTCPAY_API_KEY = process.env.BTCPAY_API_KEY || "";
 const BTCPAY_STORE_ID = process.env.BTCPAY_STORE_ID || "";
+const BTCPAY_REQUEST_TIMEOUT_MS = 45000;
+const BTCPAY_MAX_ATTEMPTS = 2;
 
 interface CreateInvoiceOptions {
   amount: number;
@@ -30,62 +32,103 @@ function assertBTCPayConfig() {
   }
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRetriableBTCPayFailure(message: string) {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("timed out") ||
+    normalized.includes("timeout") ||
+    normalized.includes("temporarily unavailable") ||
+    normalized.includes("full node not available") ||
+    normalized.includes("payment method unavailable") ||
+    normalized.includes("matching payment method or rate") ||
+    normalized.includes("synchron")
+  );
+}
+
 export async function createInvoice(
   opts: CreateInvoiceOptions
 ): Promise<BTCPayInvoice> {
   assertBTCPayConfig();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+  let lastError: Error | null = null;
 
-  try {
-    const res = await fetch(
-      `${BTCPAY_URL}/api/v1/stores/${BTCPAY_STORE_ID}/invoices`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `token ${BTCPAY_API_KEY}`,
-        },
-        signal: controller.signal,
-        body: JSON.stringify({
-          amount: opts.amount,
-          currency: opts.currency || "USD",
-          metadata: {
-            orderId: opts.orderId,
-            itemDesc: opts.itemDescription,
-            buyerEmail: opts.buyerEmail,
-          },
-          checkout: {
-            redirectURL: opts.redirectURL,
-            redirectAutomatically: true,
-            defaultLanguage: "en",
-          },
-          receipt: {
-            enabled: true,
-            showQR: true,
-          },
-        }),
-      }
+  for (let attempt = 1; attempt <= BTCPAY_MAX_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(
+      () => controller.abort(),
+      BTCPAY_REQUEST_TIMEOUT_MS
     );
 
-    if (!res.ok) {
-      const err = await res.text();
-      console.error("[BTCPay] Invoice creation failed:", res.status, err);
-      throw new Error(
-        `BTCPay invoice creation failed: ${res.status} — ${err}`
+    try {
+      const res = await fetch(
+        `${BTCPAY_URL}/api/v1/stores/${BTCPAY_STORE_ID}/invoices`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `token ${BTCPAY_API_KEY}`,
+          },
+          signal: controller.signal,
+          body: JSON.stringify({
+            amount: opts.amount,
+            currency: opts.currency || "USD",
+            metadata: {
+              orderId: opts.orderId,
+              itemDesc: opts.itemDescription,
+              buyerEmail: opts.buyerEmail,
+            },
+            checkout: {
+              redirectURL: opts.redirectURL,
+              redirectAutomatically: true,
+              defaultLanguage: "en",
+            },
+            receipt: {
+              enabled: true,
+              showQR: true,
+            },
+          }),
+        }
       );
-    }
 
-    return res.json();
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      console.error("[BTCPay] Request timed out after 30s");
-      throw new Error("BTCPay request timed out — server may be syncing");
+      if (!res.ok) {
+        const err = await res.text();
+        console.error("[BTCPay] Invoice creation failed:", res.status, err);
+        throw new Error(`BTCPay invoice creation failed: ${res.status} - ${err}`);
+      }
+
+      return res.json();
+    } catch (error) {
+      const normalizedError =
+        error instanceof DOMException && error.name === "AbortError"
+          ? new Error("BTCPay request timed out - server may be syncing")
+          : error instanceof Error
+            ? error
+            : new Error("Unknown BTCPay error");
+
+      lastError = normalizedError;
+
+      if (
+        attempt < BTCPAY_MAX_ATTEMPTS &&
+        isRetriableBTCPayFailure(normalizedError.message)
+      ) {
+        console.warn(
+          `[BTCPay] Retrying invoice creation after attempt ${attempt}:`,
+          normalizedError.message
+        );
+        await sleep(1500);
+        continue;
+      }
+
+      throw normalizedError;
+    } finally {
+      clearTimeout(timeout);
     }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
   }
+
+  throw lastError || new Error("BTCPay invoice creation failed");
 }
 
 export async function getInvoice(invoiceId: string): Promise<BTCPayInvoice> {

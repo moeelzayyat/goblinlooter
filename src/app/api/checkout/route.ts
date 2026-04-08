@@ -59,10 +59,8 @@ export async function POST(req: NextRequest) {
     const successUrl = new URL("/checkout/success", origin);
     successUrl.searchParams.set("orderId", orderId);
 
-    // Create order in database
     let dbOrder;
     try {
-      // Try to find the product in DB first, fall back to mock ID
       const dbProduct = await prisma.product.findUnique({
         where: { slug: productSlug },
       });
@@ -83,11 +81,9 @@ export async function POST(req: NextRequest) {
         },
       });
     } catch (dbError) {
-      // DB may not be migrated yet — log but continue
       console.warn("[Checkout] Could not create DB order:", dbError);
     }
 
-    // Create BTCPay invoice
     const invoice = await createInvoice({
       amount: product.price,
       currency: "USD",
@@ -97,7 +93,6 @@ export async function POST(req: NextRequest) {
       redirectURL: successUrl.toString(),
     });
 
-    // Link invoice ID back to order
     if (dbOrder) {
       try {
         await prisma.order.update({
@@ -109,7 +104,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Capture request metadata for risk analysis
     try {
       if (dbOrder) {
         await prisma.orderMeta.create({
@@ -135,8 +129,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Checkout error:", error);
-    const message =
-      error instanceof Error ? error.message : "Unknown error";
+    const message = error instanceof Error ? error.message : "Unknown error";
     const normalizedMessage = message.toLowerCase();
     const isTimeout = normalizedMessage.includes("timed out");
     const isFullNodeUnavailable = normalizedMessage.includes(
@@ -152,6 +145,8 @@ export async function POST(req: NextRequest) {
 
     let userError: string;
     let status: number;
+    let code: string;
+    let retryable = false;
 
     if (
       isFullNodeUnavailable ||
@@ -161,17 +156,22 @@ export async function POST(req: NextRequest) {
       userError =
         "Crypto payments are temporarily unavailable because our BTCPay node is offline or not fully synced. Please try again later.";
       status = 503;
+      code = "payments_temporarily_unavailable";
+      retryable = true;
     } else if (isTimeout || isNodeSync) {
       userError =
-        "Payment system is currently syncing with the blockchain network. This is temporary — please try again in a few hours.";
+        "Payment system is currently syncing with the blockchain network. This is temporary - please try again in a little while.";
       status = 503;
+      code = "payments_temporarily_unavailable";
+      retryable = true;
     } else {
       userError = "Failed to create checkout session. Please try again later.";
       status = 500;
+      code = "checkout_failed";
     }
 
     return NextResponse.json(
-      { error: userError, details: message },
+      { error: userError, details: message, code, retryable },
       { status }
     );
   }

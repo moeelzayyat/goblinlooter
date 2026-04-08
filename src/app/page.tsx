@@ -19,40 +19,36 @@ import { MOCK_PRODUCTS } from "@/lib/mockData";
 import styles from "./page.module.css";
 
 export default function HomePage() {
-  const regular = MOCK_PRODUCTS[0];
-  const refresh = MOCK_PRODUCTS[1];
+  const product = MOCK_PRODUCTS[0];
 
   return (
     <div className={styles.page}>
       <NavBar />
       <main className={styles.main}>
-        {/* ─── Hero ─── */}
         <section className={styles.hero}>
           <div className={styles.heroContent}>
             <span className={styles.heroBadge}>
               <Gamepad2 size={14} />
               Arc Raiders
             </span>
-            <h1 className={styles.heroTitle}>
-              ArcWay
-            </h1>
+            <h1 className={styles.heroTitle}>ArcWay</h1>
             <p className={styles.heroTagline}>Helper &amp; Money Maker</p>
             <p className={styles.heroSub}>
-              The ultimate Arc Raiders tool — fast, undetected, and
-              regularly updated with every game patch.
+              The ultimate Arc Raiders tool - fast, undetected, and regularly
+              updated with every game patch.
             </p>
             <div className={styles.heroPrice}>
-              <span className={styles.priceTag}>From $35</span>
-              <span className={styles.priceNote}>Instant delivery · Crypto accepted</span>
+              <span className={styles.priceTag}>$60</span>
+              <span className={styles.priceNote}>Instant delivery - Crypto accepted</span>
             </div>
             <div className={styles.heroCtas}>
-              <Link href="#pricing">
+              <Link href={`/shop/${product.slug}`}>
                 <Button size="lg">
                   <ShoppingCart size={18} />
-                  View Pricing
+                  Buy Now
                 </Button>
               </Link>
-              <Link href={`/shop/${regular.slug}`} className={styles.heroSecondary}>
+              <Link href={`/shop/${product.slug}`} className={styles.heroSecondary}>
                 Learn more <ArrowRight size={14} />
               </Link>
             </div>
@@ -70,7 +66,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── Social proof ─── */}
         <section className={styles.proofBar}>
           <div className={styles.proofInner}>
             {[
@@ -87,7 +82,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── Features ─── */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Why ArcWay?</h2>
           <p className={styles.sectionSub}>
@@ -135,66 +129,39 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── Pricing ─── */}
         <section className={styles.section} id="pricing">
-          <h2 className={styles.sectionTitle}>Choose your plan</h2>
+          <h2 className={styles.sectionTitle}>Get ArcWay</h2>
           <p className={styles.sectionSub}>
-            Two tiers to fit your needs. Both include lifetime updates and support.
+            One premium package with lifetime updates, instant delivery, and priority support.
           </p>
           <div className={styles.pricingGrid}>
-            {/* Regular */}
-            <div className={styles.pricingCard}>
-              <span className={styles.pricingLabel}>Regular</span>
-              <div className={styles.pricingPrice}>
-                <span className={styles.pricingAmount}>$35</span>
-                <span className={styles.pricingPeriod}>one-time</span>
-              </div>
-              <p className={styles.pricingDesc}>
-                Full ArcWay helper and money maker access for Arc Raiders.
-              </p>
-              <ul className={styles.pricingFeatures}>
-                <li><Check size={16} /> Full tool access</li>
-                <li><Check size={16} /> Anti-detection</li>
-                <li><Check size={16} /> Auto-updates</li>
-                <li><Check size={16} /> Clean overlay</li>
-                <li><Check size={16} /> 24/7 support</li>
-              </ul>
-              <Link href={`/shop/${regular.slug}`} style={{ width: "100%" }}>
-                <Button size="lg" variant="secondary" style={{ width: "100%" }}>
-                  Get Regular
-                </Button>
-              </Link>
-            </div>
-
-            {/* Refresh All IDs */}
             <div className={`${styles.pricingCard} ${styles.pricingFeatured}`}>
-              <span className={styles.pricingBadge}>Most Popular</span>
+              <span className={styles.pricingBadge}>Available Now</span>
               <span className={styles.pricingLabel}>Refresh All IDs</span>
               <div className={styles.pricingPrice}>
                 <span className={styles.pricingAmount}>$60</span>
                 <span className={styles.pricingPeriod}>one-time</span>
               </div>
               <p className={styles.pricingDesc}>
-                Everything in Regular plus a complete identity refresh for a clean slate.
+                Full ArcWay access plus a complete identity refresh for a clean slate.
               </p>
               <ul className={styles.pricingFeatures}>
-                <li><Check size={16} /> Everything in Regular</li>
+                <li><Check size={16} /> Full tool access</li>
                 <li><Check size={16} /> Full hardware ID refresh</li>
                 <li><Check size={16} /> Software ID refresh</li>
-                <li><Check size={16} /> Clean slate start</li>
+                <li><Check size={16} /> Anti-detection updates</li>
                 <li><Check size={16} /> Priority support</li>
                 <li><Check size={16} /> Same-day setup help</li>
               </ul>
-              <Link href={`/shop/${refresh.slug}`} style={{ width: "100%" }}>
+              <Link href={`/shop/${product.slug}`} style={{ width: "100%" }}>
                 <Button size="lg" style={{ width: "100%" }}>
-                  Get Refresh All IDs
+                  Buy Refresh All IDs
                 </Button>
               </Link>
             </div>
           </div>
         </section>
 
-        {/* ─── How it works ─── */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>How it works</h2>
           <p className={styles.sectionSub}>
@@ -205,7 +172,7 @@ export default function HomePage() {
               {
                 num: 1,
                 title: "Purchase",
-                desc: "Choose your plan and pay securely with crypto or other methods.",
+                desc: "Buy the package and pay securely with crypto.",
               },
               {
                 num: 2,
@@ -227,7 +194,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── Trust block ─── */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Your purchase is protected</h2>
           <p className={styles.sectionSub}>
@@ -238,7 +204,7 @@ export default function HomePage() {
               <ShieldCheck size={28} className={styles.trustIcon} />
               <span className={styles.trustTitle}>Secure Payments</span>
               <span className={styles.trustDesc}>
-                Pay with Bitcoin via BTCPay Server — fully self-hosted, non-custodial, 
+                Pay with Bitcoin via BTCPay Server - fully self-hosted, non-custodial,
                 and private. Your payment goes directly to us.
               </span>
             </div>
@@ -261,18 +227,17 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── Bottom CTA ─── */}
         <section className={styles.section}>
           <div className={styles.ctaBanner}>
             <Gamepad2 size={32} style={{ color: "var(--accent)" }} />
             <h2 className={styles.ctaTitle}>Ready to dominate Arc Raiders?</h2>
             <p className={styles.ctaDesc}>
-              Get ArcWay now — helper and money maker, starting at $35.
+              Get ArcWay now - helper and money maker with full ID refresh for $60.
             </p>
-            <Link href="#pricing">
+            <Link href={`/shop/${product.slug}`}>
               <Button size="lg">
                 <ShoppingCart size={18} />
-                Choose Your Plan
+                Buy Now
               </Button>
             </Link>
           </div>

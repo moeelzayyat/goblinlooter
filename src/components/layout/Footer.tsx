@@ -7,8 +7,7 @@ const COLUMNS = [
   {
     title: "Shop",
     links: [
-      { label: "ArcWay Regular", href: "/shop/arcway-regular" },
-      { label: "ArcWay Refresh IDs", href: "/shop/arcway-refresh-ids" },
+      { label: "ArcWay Refresh All IDs", href: "/shop/arcway-refresh-ids" },
       { label: "Browse All", href: "/shop" },
     ],
   },
@@ -41,7 +40,7 @@ export function Footer() {
               GoblinLooter
             </div>
             <p className={styles.tagline}>
-              Premium digital game tools — curated, tested, delivered fast.
+              Premium digital game tools - curated, tested, delivered fast.
             </p>
           </div>
 
@@ -63,7 +62,7 @@ export function Footer() {
 
         <div className={styles.bottom}>
           <span className={styles.copyright}>
-            © {new Date().getFullYear()} GoblinLooter. All rights reserved.
+            Copyright {new Date().getFullYear()} GoblinLooter. All rights reserved.
           </span>
           <div className={styles.socials}>
             <a href="#" className={styles.socialLink} aria-label="Website">
