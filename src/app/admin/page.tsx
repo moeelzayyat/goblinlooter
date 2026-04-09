@@ -3,7 +3,7 @@ import {
   isAdminPanelConfigured,
   requireAdminRoleSession,
 } from "@/lib/admin";
-import { listAdminProducts } from "@/lib/admin-products";
+import { getAdminDashboardData } from "@/lib/admin-dashboard";
 import { AdminAccessGate } from "./AdminAccessGate";
 import { AdminDashboard } from "./AdminDashboard";
 
@@ -15,7 +15,7 @@ export default async function AdminPage() {
     return <AdminAccessGate configured={isAdminPanelConfigured()} />;
   }
 
-  const products = await listAdminProducts();
+  const dashboardData = await getAdminDashboardData();
 
-  return <AdminDashboard initialProducts={products} />;
+  return <AdminDashboard initialData={dashboardData} />;
 }

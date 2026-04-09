@@ -69,3 +69,62 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getAdminApiSession();
+  if (!session) return forbidden();
+
+  try {
+    const { id } = await params;
+    const existing = await prisma.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        slug: true,
+      },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Product not found." }, { status: 404 });
+    }
+
+    const linkedOrders = await prisma.orderItem.count({
+      where: { productId: id },
+    });
+
+    if (linkedOrders > 0) {
+      return NextResponse.json(
+        {
+          error:
+            "This product already has orders. Disable it instead of deleting it.",
+        },
+        { status: 409 }
+      );
+    }
+
+    await prisma.$transaction([
+      prisma.inventoryKey.deleteMany({
+        where: { productId: id },
+      }),
+      prisma.product.delete({
+        where: { id },
+      }),
+    ]);
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    revalidatePath(`/shop/${existing.slug}`);
+    revalidatePath("/admin");
+
+    return NextResponse.json({ deletedId: id });
+  } catch (error) {
+    console.error("[Admin] Delete product failed:", error);
+    return NextResponse.json(
+      { error: "Failed to delete product." },
+      { status: 500 }
+    );
+  }
+}
