@@ -8,7 +8,10 @@ import type {
 } from "@/types";
 
 type AdminProductWithKeys = DbProduct & {
-  inventoryKeys?: Pick<InventoryKey, "status">[];
+  inventoryKeys?: Pick<
+    InventoryKey,
+    "id" | "keyValue" | "status" | "orderId" | "assignedAt" | "createdAt"
+  >[];
 };
 
 export interface AdminProductRecord {
@@ -35,6 +38,16 @@ export interface AdminProductRecord {
   availableKeyCount: number;
   assignedKeyCount: number;
   revokedKeyCount: number;
+  inventoryKeys: AdminInventoryKeyRecord[];
+}
+
+export interface AdminInventoryKeyRecord {
+  id: string;
+  keyValue: string;
+  status: "available" | "assigned" | "revoked";
+  orderId: string | null;
+  assignedAt: string | null;
+  createdAt: string;
 }
 
 const VALID_CATEGORIES: ProductCategory[] = ["game-keys", "tool-access", "configs"];
@@ -73,6 +86,27 @@ function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
     },
     { available: 0, assigned: 0, revoked: 0 }
   );
+  const inventoryKeys = (product.inventoryKeys || [])
+    .map((key) => ({
+      id: key.id,
+      keyValue: key.keyValue,
+      status: key.status as AdminInventoryKeyRecord["status"],
+      orderId: key.orderId,
+      assignedAt: key.assignedAt?.toISOString() || null,
+      createdAt: key.createdAt.toISOString(),
+    }))
+    .sort((a, b) => {
+      const rank = {
+        available: 0,
+        revoked: 1,
+        assigned: 2,
+      } as const;
+
+      const statusDiff = rank[a.status] - rank[b.status];
+      if (statusDiff !== 0) return statusDiff;
+
+      return b.createdAt.localeCompare(a.createdAt);
+    });
 
   return {
     id: product.id,
@@ -98,6 +132,7 @@ function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
     availableKeyCount: keyCounts.available,
     assignedKeyCount: keyCounts.assigned,
     revokedKeyCount: keyCounts.revoked,
+    inventoryKeys,
   };
 }
 
@@ -220,7 +255,15 @@ export async function listAdminProducts() {
     orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     include: {
       inventoryKeys: {
-        select: { status: true },
+        select: {
+          id: true,
+          keyValue: true,
+          status: true,
+          orderId: true,
+          assignedAt: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
       },
     },
   });
@@ -233,7 +276,15 @@ export async function getAdminProductById(id: string) {
     where: { id },
     include: {
       inventoryKeys: {
-        select: { status: true },
+        select: {
+          id: true,
+          keyValue: true,
+          status: true,
+          orderId: true,
+          assignedAt: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
       },
     },
   });

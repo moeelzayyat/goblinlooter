@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/Button";
-import type { AdminProductRecord } from "@/lib/admin-products";
+import type {
+  AdminInventoryKeyRecord,
+  AdminProductRecord,
+} from "@/lib/admin-products";
 import styles from "./page.module.css";
 
 const CATEGORY_OPTIONS = [
@@ -90,8 +93,13 @@ export function AdminDashboard({
     initialProducts[0] ? formFromProduct(initialProducts[0]) : createEmptyForm()
   );
   const [keyInput, setKeyInput] = useState("");
+  const [keyDrafts, setKeyDrafts] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [addingKeys, setAddingKeys] = useState(false);
+  const [keyAction, setKeyAction] = useState<{
+    id: string;
+    mode: "save" | "delete";
+  } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,11 +112,17 @@ export function AdminDashboard({
     if (selectedProduct) {
       setForm(formFromProduct(selectedProduct));
       setKeyInput("");
+      setKeyDrafts(
+        Object.fromEntries(
+          selectedProduct.inventoryKeys.map((key) => [key.id, key.keyValue])
+        )
+      );
       return;
     }
 
     setForm(createEmptyForm());
     setKeyInput("");
+    setKeyDrafts({});
   }, [selectedProduct]);
 
   function updateField<K extends keyof ProductFormState>(
@@ -116,6 +130,20 @@ export function AdminDashboard({
     value: ProductFormState[K]
   ) {
     setForm((current) => ({ ...current, [name]: value }) as ProductFormState);
+  }
+
+  function updateProductState(savedProduct: AdminProductRecord) {
+    setProducts((current) => {
+      const exists = current.some((product) => product.id === savedProduct.id);
+      if (!exists) {
+        return [savedProduct, ...current];
+      }
+
+      return current.map((product) =>
+        product.id === savedProduct.id ? savedProduct : product
+      );
+    });
+    setSelectedId(savedProduct.id);
   }
 
   async function saveProduct(event: React.FormEvent<HTMLFormElement>) {
@@ -143,15 +171,10 @@ export function AdminDashboard({
 
       const savedProduct = data.product as AdminProductRecord;
       if (selectedProduct) {
-        setProducts((current) =>
-          current.map((product) =>
-            product.id === savedProduct.id ? savedProduct : product
-          )
-        );
+        updateProductState(savedProduct);
         setMessage("Product updated.");
       } else {
-        setProducts((current) => [savedProduct, ...current]);
-        setSelectedId(savedProduct.id);
+        updateProductState(savedProduct);
         setMessage("Product created.");
       }
     } catch (saveError) {
@@ -186,11 +209,7 @@ export function AdminDashboard({
       }
 
       const updatedProduct = data.product as AdminProductRecord;
-      setProducts((current) =>
-        current.map((product) =>
-          product.id === updatedProduct.id ? updatedProduct : product
-        )
-      );
+      updateProductState(updatedProduct);
       setKeyInput("");
       setMessage(`Added ${data.addedCount} key${data.addedCount === 1 ? "" : "s"}.`);
     } catch (keyError) {
@@ -199,6 +218,78 @@ export function AdminDashboard({
       );
     } finally {
       setAddingKeys(false);
+    }
+  }
+
+  function updateKeyDraft(keyId: string, value: string) {
+    setKeyDrafts((current) => ({ ...current, [keyId]: value }));
+  }
+
+  async function saveKey(key: AdminInventoryKeyRecord) {
+    if (!selectedProduct) return;
+
+    const nextValue = keyDrafts[key.id]?.trim() || "";
+    if (!nextValue || nextValue === key.keyValue) return;
+
+    setKeyAction({ id: key.id, mode: "save" });
+    setMessage(null);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/admin/products/${selectedProduct.id}/keys/${key.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ keyValue: nextValue }),
+        }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to update key.");
+      }
+
+      updateProductState(data.product as AdminProductRecord);
+      setMessage("Key updated.");
+    } catch (keyError) {
+      setError(
+        keyError instanceof Error ? keyError.message : "Unable to update key."
+      );
+    } finally {
+      setKeyAction(null);
+    }
+  }
+
+  async function deleteKey(key: AdminInventoryKeyRecord) {
+    if (!selectedProduct) return;
+    if (!window.confirm("Remove this key from inventory?")) return;
+
+    setKeyAction({ id: key.id, mode: "delete" });
+    setMessage(null);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/admin/products/${selectedProduct.id}/keys/${key.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to delete key.");
+      }
+
+      updateProductState(data.product as AdminProductRecord);
+      setMessage("Key removed.");
+    } catch (keyError) {
+      setError(
+        keyError instanceof Error ? keyError.message : "Unable to delete key."
+      );
+    } finally {
+      setKeyAction(null);
     }
   }
 
@@ -501,6 +592,87 @@ export function AdminDashboard({
                 <Button onClick={addKeys} loading={addingKeys}>
                   Add Keys
                 </Button>
+                <div className={styles.keyManager}>
+                  <div className={styles.keyManagerHeader}>
+                    <div>
+                      <h3>Manage Existing Keys</h3>
+                      <p>
+                        Edit or remove available inventory here. Assigned keys are
+                        locked once attached to an order.
+                      </p>
+                    </div>
+                    <span className={styles.keyCount}>
+                      {selectedProduct.inventoryKeys.length} total
+                    </span>
+                  </div>
+
+                  <div className={styles.keyList}>
+                    {selectedProduct.inventoryKeys.length === 0 ? (
+                      <div className={styles.keyEmpty}>
+                        No keys yet. Add your first batch above.
+                      </div>
+                    ) : (
+                      selectedProduct.inventoryKeys.map((key) => {
+                        const locked = key.status === "assigned" || Boolean(key.orderId);
+                        const draftValue = keyDrafts[key.id] ?? key.keyValue;
+                        const changed = draftValue.trim() !== key.keyValue;
+                        const acting = keyAction?.id === key.id;
+
+                        return (
+                          <div key={key.id} className={styles.keyRow}>
+                            <div className={styles.keyRowTop}>
+                              <span
+                                className={`${styles.keyStatus} ${
+                                  key.status === "available"
+                                    ? styles.keyStatusAvailable
+                                    : key.status === "assigned"
+                                      ? styles.keyStatusAssigned
+                                      : styles.keyStatusRevoked
+                                }`}
+                              >
+                                {key.status}
+                              </span>
+                              <span className={styles.keyMeta}>
+                                Added {new Date(key.createdAt).toLocaleString()}
+                              </span>
+                            </div>
+                            <textarea
+                              className={styles.keyValueInput}
+                              rows={2}
+                              value={draftValue}
+                              disabled={locked || acting}
+                              onChange={(event) =>
+                                updateKeyDraft(key.id, event.target.value)
+                              }
+                            />
+                            <div className={styles.keyActions}>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                disabled={!changed || locked}
+                                loading={acting && keyAction?.mode === "save"}
+                                onClick={() => saveKey(key)}
+                              >
+                                Save Key
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="danger"
+                                disabled={locked}
+                                loading={acting && keyAction?.mode === "delete"}
+                                onClick={() => deleteKey(key)}
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
               </section>
             )}
           </section>
