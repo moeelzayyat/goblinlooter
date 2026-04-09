@@ -85,23 +85,19 @@ export async function DELETE(
       return NextResponse.json({ error: "Product not found." }, { status: 404 });
     }
 
-    const removableWhere = {
-      productId: id,
-      orderId: null,
-      status: {
-        in: ["available", "revoked"],
-      },
-    } as const;
-
     const [lockedCount, removed] = await prisma.$transaction([
       prisma.inventoryKey.count({
         where: {
           productId: id,
-          OR: [{ status: "assigned" }, { NOT: { orderId: null } }],
+          OR: [{ status: "assigned" }, { orderId: { not: null } }],
         },
       }),
       prisma.inventoryKey.deleteMany({
-        where: removableWhere,
+        where: {
+          productId: id,
+          orderId: null,
+          status: { not: "assigned" },
+        },
       }),
     ]);
 
