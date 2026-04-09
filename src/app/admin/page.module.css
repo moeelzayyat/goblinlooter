@@ -12,6 +12,39 @@
   padding: var(--space-2xl) var(--space-lg);
 }
 
+.gateMain {
+  flex: 1;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--space-3xl) var(--space-lg);
+  display: flex;
+  align-items: center;
+}
+
+.gateCard {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  padding: clamp(var(--space-xl), 5vw, var(--space-2xl));
+}
+
+.gateForm,
+.gateNotice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.gateActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
 .hero {
   display: flex;
   justify-content: space-between;
@@ -235,11 +268,19 @@
     padding: var(--space-xl) var(--space-md);
   }
 
+  .gateMain {
+    padding: var(--space-xl) var(--space-md);
+  }
+
   .formGrid {
     grid-template-columns: 1fr;
   }
 
   .actions {
+    flex-direction: column;
+  }
+
+  .gateActions {
     flex-direction: column;
   }
 }
