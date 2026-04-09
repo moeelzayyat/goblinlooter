@@ -1,6 +1,8 @@
 import { buildCategoryOptions, getPublishedProducts } from "@/lib/products";
 import { ShopClientPage } from "./ShopClientPage";
 
+export const dynamic = "force-dynamic";
+
 export default async function ShopPage({
   searchParams,
 }: {

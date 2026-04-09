@@ -7,8 +7,7 @@ const COLUMNS = [
   {
     title: "Shop",
     links: [
-      { label: "ArcWay Refresh All IDs", href: "/shop/arcway-refresh-ids" },
-      { label: "Browse All", href: "/shop" },
+      { label: "Browse Catalog", href: "/shop" },
     ],
   },
   {

@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { getCatalogProductBySlug, getPublishedProducts } from "@/lib/products";
 import { ProductClientPage } from "./ProductClientPage";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductPage({
   params,
 }: {

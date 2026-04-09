@@ -49,7 +49,7 @@ function createEmptyForm() {
     refundTerms: "Refunds are available on unused keys within 72 hours.",
     images: "/arcway-dupe.png",
     featured: true,
-    status: "draft",
+    status: "published",
   };
 }
 
@@ -320,6 +320,10 @@ export function AdminDashboard({
                       </option>
                     ))}
                   </select>
+                  <small className={styles.fieldHint}>
+                    Only published products appear on the live shop. Draft and
+                    disabled products stay hidden.
+                  </small>
                 </label>
                 <label className={styles.field}>
                   <span>Delivery Method</span>
