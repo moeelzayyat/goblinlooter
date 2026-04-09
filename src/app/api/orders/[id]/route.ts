@@ -22,7 +22,14 @@ export async function GET(
       include: {
         items: {
           include: {
-            product: { select: { title: true } },
+            product: {
+              select: {
+                title: true,
+                slug: true,
+                deliveryMethod: true,
+                downloadUrl: true,
+              },
+            },
           },
         },
         key: {
@@ -61,6 +68,10 @@ export async function GET(
         id: item.id,
         productId: item.productId,
         productTitle: item.product?.title || "Unknown Product",
+        productSlug: item.product?.slug || null,
+        deliveryMethod: item.product?.deliveryMethod || null,
+        downloadUrl:
+          order.status === "delivered" ? item.product?.downloadUrl || null : null,
         quantity: item.quantity,
         unitPrice: Number(item.unitPrice),
       })),

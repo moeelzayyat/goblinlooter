@@ -35,6 +35,7 @@ export interface Product {
   compatibilityNotes: string;
   regionRestrictions?: string | null;
   deliveryMethod: DeliveryMethod;
+  downloadUrl?: string | null;
   deliveryTimeEstimate: string;
   refundEligibility: RefundEligibility;
   refundTerms: string;

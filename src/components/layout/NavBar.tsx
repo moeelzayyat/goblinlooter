@@ -12,6 +12,7 @@ import {
   LogOut,
   Settings,
   ShoppingBag,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import styles from "./NavBar.module.css";
@@ -26,6 +27,8 @@ export function NavBar() {
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userLabel = session?.user?.name || session?.user?.email || "Account";
+  const isAdmin = session?.user?.role === "admin";
 
   return (
     <nav className={styles.nav}>
@@ -67,11 +70,20 @@ export function NavBar() {
                 <div className={styles.userAvatar}>
                   <User size={16} />
                 </div>
-                <span className={styles.userName}>{session.user.name}</span>
+                <span className={styles.userName}>{userLabel}</span>
               </button>
 
               {userMenuOpen && (
                 <div className={styles.userMenu}>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className={styles.menuItem}
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <Shield size={16} /> Admin Panel
+                    </Link>
+                  )}
                   <Link
                     href="/orders"
                     className={styles.menuItem}
@@ -141,8 +153,19 @@ export function NavBar() {
                   padding: "var(--space-sm) 0",
                 }}
               >
-                Signed in as {session.user.name}
+                Signed in as {userLabel}
               </span>
+              {isAdmin && (
+                <Link href="/admin" onClick={() => setMobileOpen(false)}>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    style={{ width: "100%" }}
+                  >
+                    Admin Panel
+                  </Button>
+                </Link>
+              )}
               <Link href="/orders" onClick={() => setMobileOpen(false)}>
                 <Button
                   variant="secondary"

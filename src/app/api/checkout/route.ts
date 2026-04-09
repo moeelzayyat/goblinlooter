@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createInvoice } from "@/lib/btcpay";
 import { prisma } from "@/lib/prisma";
-import { MOCK_PRODUCTS } from "@/lib/mockData";
 import { auth } from "@/lib/auth";
+import { ensureDatabaseProduct, getCatalogProductBySlug } from "@/lib/products";
 
 function getRequestOrigin(req: NextRequest) {
   const forwardedHost = req.headers.get("x-forwarded-host");
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const product = MOCK_PRODUCTS.find((p) => p.slug === productSlug);
+    const product = await getCatalogProductBySlug(productSlug);
     if (!product) {
       return NextResponse.json(
         { error: "Product not found" },
@@ -61,9 +61,7 @@ export async function POST(req: NextRequest) {
 
     let dbOrder;
     try {
-      const dbProduct = await prisma.product.findUnique({
-        where: { slug: productSlug },
-      });
+      const dbProduct = await ensureDatabaseProduct(productSlug);
 
       dbOrder = await prisma.order.create({
         data: {

@@ -32,6 +32,9 @@ interface OrderDetail {
     id: string;
     productId: string;
     productTitle: string;
+    productSlug: string | null;
+    deliveryMethod: string | null;
+    downloadUrl: string | null;
     quantity: number;
     unitPrice: number;
   }[];
@@ -129,6 +132,11 @@ export default function OrderDetailPage() {
     }
   };
 
+  const downloads =
+    order?.status === "delivered"
+      ? order.items.filter((item) => item.downloadUrl)
+      : [];
+
   return (
     <div className={styles.page}>
       <NavBar />
@@ -223,6 +231,32 @@ export default function OrderDetailPage() {
                       </button>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {downloads.length > 0 && (
+              <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Downloads</h3>
+                <div className={styles.downloadList}>
+                  {downloads.map((item) => (
+                    <div key={item.id} className={styles.downloadCard}>
+                      <div>
+                        <div className={styles.downloadTitle}>{item.productTitle}</div>
+                        <div className={styles.downloadMeta}>
+                          Instant access after payment confirmation
+                        </div>
+                      </div>
+                      <a
+                        href={item.downloadUrl || "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={styles.downloadButton}
+                      >
+                        Download
+                      </a>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

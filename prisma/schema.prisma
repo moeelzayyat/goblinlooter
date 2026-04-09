@@ -38,6 +38,7 @@ model Product {
   compatibilityNotes   String
   regionRestrictions   String?
   deliveryMethod       String   // 'key' | 'download' | 'manual'
+  downloadUrl          String?
   deliveryTimeEstimate String
   refundEligibility    String   // 'eligible' | 'conditional' | 'non-refundable'
   refundTerms          String

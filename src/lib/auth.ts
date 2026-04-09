@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import type { UserRole } from "@/types";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -31,6 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.username,
           email: user.email,
           image: user.avatarUrl,
+          role: user.role as UserRole,
         };
       },
     }),
@@ -43,12 +45,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role = (user as { role?: UserRole }).role || "customer";
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string;
+        session.user.role = (token.role as UserRole | undefined) || "customer";
       }
       return session;
     },

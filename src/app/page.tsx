@@ -15,11 +15,14 @@ import {
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/Button";
-import { MOCK_PRODUCTS } from "@/lib/mockData";
+import { getPublishedProducts } from "@/lib/products";
 import styles from "./page.module.css";
 
-export default function HomePage() {
-  const product = MOCK_PRODUCTS[0];
+export default async function HomePage() {
+  const products = await getPublishedProducts();
+  const product = products[0] || null;
+  const shopHref = product ? `/shop/${product.slug}` : "/shop";
+  const priceLabel = product ? `$${product.price.toFixed(0)}` : null;
 
   return (
     <div className={styles.page}>
@@ -38,17 +41,25 @@ export default function HomePage() {
               updated with every game patch.
             </p>
             <div className={styles.heroPrice}>
-              <span className={styles.priceTag}>$60</span>
-              <span className={styles.priceNote}>Instant delivery - Crypto accepted</span>
+              {priceLabel ? (
+                <>
+                  <span className={styles.priceTag}>{priceLabel}</span>
+                  <span className={styles.priceNote}>Instant delivery - Crypto accepted</span>
+                </>
+              ) : (
+                <span className={styles.priceNote}>
+                  The catalog is being updated. Visit the shop for current availability.
+                </span>
+              )}
             </div>
             <div className={styles.heroCtas}>
-              <Link href={`/shop/${product.slug}`}>
+              <Link href={shopHref}>
                 <Button size="lg">
                   <ShoppingCart size={18} />
-                  Buy Now
+                  {product ? "Buy Now" : "Browse Shop"}
                 </Button>
               </Link>
-              <Link href={`/shop/${product.slug}`} className={styles.heroSecondary}>
+              <Link href={shopHref} className={styles.heroSecondary}>
                 Learn more <ArrowRight size={14} />
               </Link>
             </div>
@@ -136,14 +147,26 @@ export default function HomePage() {
           </p>
           <div className={styles.pricingGrid}>
             <div className={`${styles.pricingCard} ${styles.pricingFeatured}`}>
-              <span className={styles.pricingBadge}>Available Now</span>
-              <span className={styles.pricingLabel}>Refresh All IDs</span>
-              <div className={styles.pricingPrice}>
-                <span className={styles.pricingAmount}>$60</span>
-                <span className={styles.pricingPeriod}>one-time</span>
-              </div>
+              <span className={styles.pricingBadge}>
+                {product ? "Available Now" : "Catalog Update"}
+              </span>
+              <span className={styles.pricingLabel}>
+                {product ? product.title : "Catalog update in progress"}
+              </span>
+              {priceLabel ? (
+                <div className={styles.pricingPrice}>
+                  <span className={styles.pricingAmount}>{priceLabel}</span>
+                  <span className={styles.pricingPeriod}>one-time</span>
+                </div>
+              ) : (
+                <div className={styles.pricingPrice}>
+                  <span className={styles.pricingPeriod}>Check the shop for live products</span>
+                </div>
+              )}
               <p className={styles.pricingDesc}>
-                Full ArcWay access plus a complete identity refresh for a clean slate.
+                {product
+                  ? product.shortDescription
+                  : "Publish a product from the admin panel and it will appear here automatically."}
               </p>
               <ul className={styles.pricingFeatures}>
                 <li><Check size={16} /> Full tool access</li>
@@ -153,9 +176,9 @@ export default function HomePage() {
                 <li><Check size={16} /> Priority support</li>
                 <li><Check size={16} /> Same-day setup help</li>
               </ul>
-              <Link href={`/shop/${product.slug}`} style={{ width: "100%" }}>
+              <Link href={shopHref} style={{ width: "100%" }}>
                 <Button size="lg" style={{ width: "100%" }}>
-                  Buy Refresh All IDs
+                  {product ? "Buy Now" : "Open Shop"}
                 </Button>
               </Link>
             </div>
@@ -232,12 +255,14 @@ export default function HomePage() {
             <Gamepad2 size={32} style={{ color: "var(--accent)" }} />
             <h2 className={styles.ctaTitle}>Ready to dominate Arc Raiders?</h2>
             <p className={styles.ctaDesc}>
-              Get ArcWay now - helper and money maker with full ID refresh for $60.
+              {product
+                ? `Get ArcWay now - helper and money maker with full ID refresh for ${priceLabel}.`
+                : "Open the shop to see the latest live offers and delivery options."}
             </p>
-            <Link href={`/shop/${product.slug}`}>
+            <Link href={shopHref}>
               <Button size="lg">
                 <ShoppingCart size={18} />
-                Buy Now
+                {product ? "Buy Now" : "Browse Shop"}
               </Button>
             </Link>
           </div>
