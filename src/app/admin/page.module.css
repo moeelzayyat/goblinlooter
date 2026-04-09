@@ -259,6 +259,28 @@
   font-size: var(--text-sm);
 }
 
+.inventoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+.inventoryActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.inventoryHint {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  text-align: right;
+  max-width: 260px;
+  line-height: 1.5;
+}
+
 .keyManager {
   margin-top: var(--space-xl);
   border-top: 1px solid var(--border-default);
@@ -365,6 +387,17 @@
 
   .hero {
     flex-direction: column;
+  }
+
+  .inventoryHeader,
+  .inventoryActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inventoryHint {
+    max-width: none;
+    text-align: left;
   }
 }
 

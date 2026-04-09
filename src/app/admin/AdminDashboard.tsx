@@ -98,7 +98,7 @@ export function AdminDashboard({
   const [addingKeys, setAddingKeys] = useState(false);
   const [keyAction, setKeyAction] = useState<{
     id: string;
-    mode: "save" | "delete";
+    mode: "save" | "delete" | "clear";
   } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +107,14 @@ export function AdminDashboard({
     () => products.find((product) => product.id === selectedId) || null,
     [products, selectedId]
   );
+  const removableKeyCount = selectedProduct
+    ? selectedProduct.inventoryKeys.filter(
+        (key) => key.status !== "assigned" && !key.orderId
+      ).length
+    : 0;
+  const lockedKeyCount = selectedProduct
+    ? selectedProduct.inventoryKeys.length - removableKeyCount
+    : 0;
 
   useEffect(() => {
     if (selectedProduct) {
@@ -287,6 +295,60 @@ export function AdminDashboard({
     } catch (keyError) {
       setError(
         keyError instanceof Error ? keyError.message : "Unable to delete key."
+      );
+    } finally {
+      setKeyAction(null);
+    }
+  }
+
+  async function deleteAllKeys() {
+    if (!selectedProduct) return;
+
+    if (removableKeyCount === 0) {
+      setError("There are no removable keys on this product.");
+      setMessage(null);
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete ${removableKeyCount} removable key${
+        removableKeyCount === 1 ? "" : "s"
+      } from this product?\n\nAssigned keys stay protected.${
+        lockedKeyCount > 0
+          ? ` ${lockedKeyCount} locked key${
+              lockedKeyCount === 1 ? "" : "s"
+            } will be kept.`
+          : ""
+      }`
+    );
+
+    if (!confirmed) return;
+
+    setKeyAction({ id: selectedProduct.id, mode: "clear" });
+    setMessage(null);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/admin/products/${selectedProduct.id}/keys`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to delete keys.");
+      }
+
+      updateProductState(data.product as AdminProductRecord);
+      setMessage(
+        `Removed ${data.removedCount} key${data.removedCount === 1 ? "" : "s"}.${
+          data.lockedCount
+            ? ` ${data.lockedCount} assigned key${data.lockedCount === 1 ? "" : "s"} were kept.`
+            : ""
+        }`
+      );
+    } catch (keyError) {
+      setError(
+        keyError instanceof Error ? keyError.message : "Unable to delete keys."
       );
     } finally {
       setKeyAction(null);
@@ -578,6 +640,30 @@ export function AdminDashboard({
                       {selectedProduct.assignedKeyCount} | Revoked:{" "}
                       {selectedProduct.revokedKeyCount}
                     </p>
+                  </div>
+                  <div className={styles.inventoryActions}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="danger"
+                      disabled={removableKeyCount === 0}
+                      loading={
+                        keyAction?.id === selectedProduct.id &&
+                        keyAction.mode === "clear"
+                      }
+                      onClick={deleteAllKeys}
+                    >
+                      Delete All Removable
+                    </Button>
+                    <span className={styles.inventoryHint}>
+                      Deletes {removableKeyCount} removable key
+                      {removableKeyCount === 1 ? "" : "s"}.
+                      {lockedKeyCount > 0
+                        ? ` ${lockedKeyCount} assigned key${
+                            lockedKeyCount === 1 ? "" : "s"
+                          } stay locked.`
+                        : ""}
+                    </span>
                   </div>
                 </div>
                 <label className={styles.field}>

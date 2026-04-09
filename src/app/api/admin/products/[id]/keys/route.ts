@@ -63,3 +63,65 @@ export async function POST(
     );
   }
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getAdminApiSession();
+  if (!session) return forbidden();
+
+  try {
+    const { id } = await params;
+    const product = await prisma.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        slug: true,
+      },
+    });
+
+    if (!product) {
+      return NextResponse.json({ error: "Product not found." }, { status: 404 });
+    }
+
+    const removableWhere = {
+      productId: id,
+      orderId: null,
+      status: {
+        in: ["available", "revoked"],
+      },
+    } as const;
+
+    const [lockedCount, removed] = await prisma.$transaction([
+      prisma.inventoryKey.count({
+        where: {
+          productId: id,
+          OR: [{ status: "assigned" }, { NOT: { orderId: null } }],
+        },
+      }),
+      prisma.inventoryKey.deleteMany({
+        where: removableWhere,
+      }),
+    ]);
+
+    const updatedProduct = await getAdminProductById(id);
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    revalidatePath(`/shop/${product.slug}`);
+    revalidatePath("/admin");
+
+    return NextResponse.json({
+      product: updatedProduct,
+      removedCount: removed.count,
+      lockedCount,
+    });
+  } catch (error) {
+    console.error("[Admin] Delete all keys failed:", error);
+    return NextResponse.json(
+      { error: "Failed to delete keys." },
+      { status: 500 }
+    );
+  }
+}
