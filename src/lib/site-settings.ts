@@ -233,7 +233,7 @@ function normalizeLegalSections(value: unknown): LegalSection[] | null {
   return sections.every(Boolean) ? (sections as LegalSection[]) : null;
 }
 
-function mergeObject<T extends Record<string, unknown>>(defaults: T, stored: unknown): T {
+function mergeObject<T>(defaults: T, stored: unknown): T {
   if (!isRecord(stored)) return defaults;
   return {
     ...defaults,
