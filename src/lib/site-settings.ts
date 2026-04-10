@@ -1,4 +1,5 @@
 import "server-only";
+import type { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import {
@@ -482,7 +483,10 @@ export async function getSiteSettings(): Promise<SiteSettingsBundle> {
   };
 }
 
-export async function upsertSiteSetting(key: SiteSettingKey, value: unknown) {
+export async function upsertSiteSetting(
+  key: SiteSettingKey,
+  value: Prisma.InputJsonValue
+) {
   return prisma.siteSetting.upsert({
     where: { key },
     update: { value },
