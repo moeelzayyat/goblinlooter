@@ -161,3 +161,11 @@ model AnalyticsEvent {
   sessionId String?
   createdAt DateTime @default(now())
 }
+
+// ----- Site Settings -----
+
+model SiteSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}

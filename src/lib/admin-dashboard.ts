@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { listAdminProducts, type AdminProductRecord } from "@/lib/admin-products";
+import { getSiteSettings } from "@/lib/site-settings";
+import type { SiteSettingsBundle } from "@/lib/site-settings-schema";
 
 export type AdminOrderStatus =
   | "pending"
@@ -122,6 +124,7 @@ export interface AdminDashboardData {
   orders: AdminOrderRecord[];
   customers: AdminCustomerRecord[];
   tickets: AdminSupportTicketRecord[];
+  siteSettings: SiteSettingsBundle;
   analytics: {
     recentEvents: AdminAnalyticsRecord[];
     topEvents: { event: string; count: number }[];
@@ -448,12 +451,13 @@ export async function listAdminAnalyticsEvents(limit = 40) {
 }
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
-  const [products, orders, customers, tickets, recentEvents] = await Promise.all([
+  const [products, orders, customers, tickets, recentEvents, siteSettings] = await Promise.all([
     listAdminProducts(),
     listAdminOrders(),
     listAdminCustomers(),
     listAdminSupportTickets(),
     listAdminAnalyticsEvents(60),
+    getSiteSettings(),
   ]);
 
   const topEventsMap = new Map<string, number>();
@@ -503,6 +507,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     orders,
     customers,
     tickets,
+    siteSettings,
     analytics: {
       recentEvents: recentEvents.map(serializeAnalyticsEvent),
       topEvents,

@@ -11,6 +11,7 @@ import { Select } from "@/components/ui/Select";
 import { Pagination } from "@/components/ui/Pagination";
 import { FilterChip } from "@/components/ui/FilterChip";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import type { ShopSettings } from "@/lib/site-settings-schema";
 import type { Product } from "@/types";
 import styles from "./page.module.css";
 
@@ -27,12 +28,14 @@ interface ShopClientPageProps {
   products: Product[];
   categoryOptions: { id: Product["category"]; name: string }[];
   initialCategory: string;
+  settings: ShopSettings;
 }
 
 export function ShopClientPage({
   products,
   categoryOptions,
   initialCategory,
+  settings,
 }: ShopClientPageProps) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("popular");
@@ -116,8 +119,8 @@ export function ShopClientPage({
       <NavBar />
       <main className={styles.main}>
         <PageHeader
-          title="Shop"
-          subtitle="Premium game tools for Arc Raiders - tested, updated, and delivered instantly"
+          title={settings.title}
+          subtitle={settings.subtitle}
         />
 
         <div className={styles.toolbar}>
@@ -180,8 +183,8 @@ export function ShopClientPage({
           </>
         ) : (
           <EmptyState
-            message="No products match your filters"
-            description="Try adjusting your search or filters to find what you're looking for."
+            message={settings.emptyStateMessage}
+            description={settings.emptyStateDescription}
             action={
               <button className={styles.clearAll} onClick={clearAll}>
                 Clear all filters

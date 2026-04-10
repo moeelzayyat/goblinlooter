@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Footer } from "@/components/layout/Footer";
 import { NavBar } from "@/components/layout/NavBar";
 import { Button } from "@/components/ui/Button";
+import { AdminSiteSettingsPanel } from "./AdminSiteSettingsPanel";
 import type {
   AdminCustomerRecord,
   AdminDashboardData,
@@ -25,6 +26,7 @@ type AdminSection =
   | "orders"
   | "customers"
   | "tickets"
+  | "site"
   | "analytics";
 
 const SECTION_OPTIONS: { id: AdminSection; label: string; description: string }[] = [
@@ -52,6 +54,11 @@ const SECTION_OPTIONS: { id: AdminSection; label: string; description: string }[
     id: "tickets",
     label: "Support",
     description: "Refunds, delivery issues, and ticket resolutions.",
+  },
+  {
+    id: "site",
+    label: "Site",
+    description: "Homepage, footer, shop, support, and legal page settings.",
   },
   {
     id: "analytics",
@@ -1922,6 +1929,10 @@ export function AdminDashboard({
               )}
             </section>
           </section>
+        )}
+
+        {activeSection === "site" && (
+          <AdminSiteSettingsPanel initialSettings={initialData.siteSettings} />
         )}
 
         {activeSection === "analytics" && (
