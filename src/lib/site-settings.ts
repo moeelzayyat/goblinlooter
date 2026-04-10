@@ -485,12 +485,14 @@ export async function getSiteSettings(): Promise<SiteSettingsBundle> {
 
 export async function upsertSiteSetting(
   key: SiteSettingKey,
-  value: Prisma.InputJsonValue
+  value: unknown
 ) {
+  const jsonValue = value as Prisma.InputJsonValue;
+
   return prisma.siteSetting.upsert({
     where: { key },
-    update: { value },
-    create: { key, value },
+    update: { value: jsonValue },
+    create: { key, value: jsonValue },
   });
 }
 
