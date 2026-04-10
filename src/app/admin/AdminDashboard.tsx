@@ -8,7 +8,10 @@ import type {
   AdminCustomerRecord,
   AdminDashboardData,
   AdminOrderRecord,
+  AdminOrderStatus,
   AdminSupportTicketRecord,
+  AdminTicketStatus,
+  AdminUserRole,
 } from "@/lib/admin-dashboard";
 import type {
   AdminInventoryKeyRecord,
@@ -237,10 +240,10 @@ export function AdminDashboard({
   );
   const [keyInput, setKeyInput] = useState("");
   const [keyDrafts, setKeyDrafts] = useState<Record<string, string>>({});
-  const [orderStatus, setOrderStatus] = useState(
+  const [orderStatus, setOrderStatus] = useState<AdminOrderStatus>(
     initialData.orders[0]?.status || "pending"
   );
-  const [customerRole, setCustomerRole] = useState(
+  const [customerRole, setCustomerRole] = useState<AdminUserRole>(
     initialData.customers[0]?.role || "customer"
   );
   const [customerFlagged, setCustomerFlagged] = useState(
@@ -249,7 +252,7 @@ export function AdminDashboard({
   const [customerFlagReason, setCustomerFlagReason] = useState(
     initialData.customers[0]?.flagReason || ""
   );
-  const [ticketStatus, setTicketStatus] = useState(
+  const [ticketStatus, setTicketStatus] = useState<AdminTicketStatus>(
     initialData.tickets[0]?.status || "open"
   );
   const [ticketResolution, setTicketResolution] = useState(
@@ -1445,7 +1448,9 @@ export function AdminDashboard({
                       <span>Status</span>
                       <select
                         value={orderStatus}
-                        onChange={(event) => setOrderStatus(event.target.value)}
+                        onChange={(event) =>
+                          setOrderStatus(event.target.value as AdminOrderStatus)
+                        }
                       >
                         {ORDER_STATUS_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -1675,7 +1680,9 @@ export function AdminDashboard({
                       <span>Role</span>
                       <select
                         value={customerRole}
-                        onChange={(event) => setCustomerRole(event.target.value)}
+                        onChange={(event) =>
+                          setCustomerRole(event.target.value as AdminUserRole)
+                        }
                       >
                         {USER_ROLE_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -1842,7 +1849,9 @@ export function AdminDashboard({
                       <span>Status</span>
                       <select
                         value={ticketStatus}
-                        onChange={(event) => setTicketStatus(event.target.value)}
+                        onChange={(event) =>
+                          setTicketStatus(event.target.value as AdminTicketStatus)
+                        }
                       >
                         {TICKET_STATUS_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>
