@@ -77,9 +77,9 @@ export default async function HomePage() {
           <div className={styles.heroImage}>
             <Image
               src="/arcway-dupe.png"
-              alt="ArcWay"
-              width={560}
-              height={315}
+              alt="ArcWay Services"
+              width={1984}
+              height={793}
               className={styles.heroImg}
               priority
             />
@@ -194,7 +194,7 @@ export default async function HomePage() {
             <h2 className={styles.ctaTitle}>{settings.ctaTitle}</h2>
             <p className={styles.ctaDesc}>
               {product
-                ? `Get ArcWay now - helper and money maker with full ID refresh for ${priceLabel}.`
+                ? `Get ${product.title} with fast digital delivery for ${priceLabel}.`
                 : settings.ctaDescription}
             </p>
             <Link href={shopHref}>

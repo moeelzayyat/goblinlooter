@@ -5,12 +5,12 @@ import type { Product } from "@/types";
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: "p1",
-    title: "ArcWay - Refresh All IDs",
+    title: "ArcWay Services",
     slug: "arcway-refresh-ids",
     shortDescription:
-      "Full ArcWay helper and money maker with complete ID refresh - start completely clean.",
+      "ArcWay gaming tools with guided setup, clean overlays, and fast digital delivery.",
     fullDescription:
-      "ArcWay Refresh All IDs includes the full ArcWay package plus a complete identity refresh. All hardware and software IDs are regenerated, giving you a completely clean slate. Ideal for users who want maximum safety or need a fresh start. Includes priority support and same-day setup assistance.",
+      "ArcWay Services includes gaming utility access, setup resources, and priority assistance for Arc Raiders players. Built for straightforward configuration, clear guidance, and smooth support from purchase through activation.",
     price: 60,
     images: ["/arcway-dupe.png"],
     category: "tool-access",

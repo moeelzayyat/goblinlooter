@@ -17,8 +17,8 @@
 .thumbnail {
   width: 100%;
   aspect-ratio: 16 / 10;
-  background: var(--bg-elevated);
-  object-fit: cover;
+  background: #020713;
+  object-fit: contain;
 }
 
 .thumbnailPlaceholder {

@@ -151,10 +151,10 @@ export interface SiteSettingsBundle {
 export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
   home: {
     heroBadgeLabel: "Arc Raiders",
-    heroTitle: "ArcWay",
-    heroTagline: "Helper & Money Maker",
+    heroTitle: "ArcWay Services",
+    heroTagline: "Gaming Tools & Support",
     heroSubtitle:
-      "The ultimate Arc Raiders tool - fast, undetected, and regularly updated with every game patch.",
+      "Premium Arc Raiders gaming tools, setup resources, and support delivered fast.",
     emptyCatalogNote:
       "The catalog is being updated. Visit the shop for current availability.",
     proofStats: [
@@ -163,24 +163,24 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
       { value: "Instant", label: "Delivery" },
       { value: "24/7", label: "Support" },
     ],
-    whyTitle: "Why ArcWay?",
+    whyTitle: "Why ArcWay Services?",
     whySubtitle:
-      "Built from the ground up for Arc Raiders players who want an edge.",
+      "Built for Arc Raiders players who want reliable gaming tools and support.",
     features: [
       {
         icon: "zap",
         title: "Lightning Fast",
-        desc: "Maximize your earnings in seconds with our optimized engine. No lag, no delays.",
+        desc: "Access setup resources quickly with a streamlined delivery flow. No lag, no delays.",
       },
       {
         icon: "shield-check",
-        title: "Undetected",
-        desc: "Advanced anti-detection keeps you safe. Updated within hours of every game patch.",
+        title: "Reliable Updates",
+        desc: "Maintained with game updates and clear compatibility notes for supported builds.",
       },
       {
         icon: "download",
         title: "Instant Delivery",
-        desc: "Get your license key immediately after purchase. Start earning in under 5 minutes.",
+        desc: "Get your digital access immediately after purchase and start setup in minutes.",
       },
       {
         icon: "headphones",
@@ -198,17 +198,16 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         desc: "Pay with Bitcoin and other cryptocurrencies via our secure BTCPay checkout.",
       },
     ],
-    pricingTitle: "Get ArcWay",
+    pricingTitle: "Get ArcWay Services",
     pricingSubtitle:
       "One premium package with lifetime updates, instant delivery, and priority support.",
     pricingFallbackLabel: "Catalog update in progress",
     pricingFallbackDescription:
       "Publish a product from the admin panel and it will appear here automatically.",
     pricingFeatures: [
-      "Full tool access",
-      "Full hardware ID refresh",
-      "Software ID refresh",
-      "Anti-detection updates",
+      "Full gaming tool access",
+      "Guided setup resources",
+      "Compatibility updates",
       "Priority support",
       "Same-day setup help",
     ],
@@ -223,12 +222,12 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
       {
         num: 2,
         title: "Activate",
-        desc: "Receive your key instantly and activate it in the ArcWay loader.",
+        desc: "Receive access instantly and follow the guided ArcWay setup flow.",
       },
       {
         num: 3,
-        title: "Dominate",
-        desc: "Launch Arc Raiders and start making money with the clean overlay.",
+        title: "Play",
+        desc: "Launch Arc Raiders with a clean supported toolset and clear support options.",
       },
     ],
     protectionTitle: "Your purchase is protected",
@@ -251,7 +250,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         desc: "Not satisfied? 72-hour refund window on unredeemed keys. Contact our support team anytime.",
       },
     ],
-    ctaTitle: "Ready to dominate Arc Raiders?",
+    ctaTitle: "Ready to upgrade your Arc Raiders setup?",
     ctaDescription:
       "Open the shop to see the latest live offers and delivery options.",
   },

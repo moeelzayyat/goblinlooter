@@ -16,9 +16,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GoblinLooter - ArcWay for Arc Raiders",
+  title: "GoblinLooter - ArcWay Gaming Tools",
   description:
-    "The ultimate Arc Raiders helper and money maker. Fast, undetected, instant delivery. Pay with crypto.",
+    "Premium Arc Raiders gaming tools and support. Instant delivery, clear setup, and crypto checkout.",
 };
 
 export default function RootLayout({

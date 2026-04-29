@@ -7,12 +7,32 @@ type ProductWithKeys = DbProduct & {
   inventoryKeys?: Pick<InventoryKey, "status">[];
 };
 
+const ARCWAY_SERVICES_COPY = {
+  title: "ArcWay Services",
+  shortDescription:
+    "ArcWay gaming tools with guided setup, clean overlays, and fast digital delivery.",
+  fullDescription:
+    "ArcWay Services includes gaming utility access, setup resources, and priority assistance for Arc Raiders players. Built for straightforward configuration, clear guidance, and smooth support from purchase through activation.",
+};
+
+function normalizePublicProductCopy(product: Product): Product {
+  if (product.slug !== "arcway-refresh-ids") {
+    return product;
+  }
+
+  return {
+    ...product,
+    ...ARCWAY_SERVICES_COPY,
+    images: product.images.length > 0 ? product.images : ["/arcway-dupe.png"],
+  };
+}
+
 function toPublicProduct(product: ProductWithKeys): Product {
   const availableKeys =
     product.inventoryKeys?.filter((key) => key.status === "available").length ??
     undefined;
 
-  return {
+  return normalizePublicProductCopy({
     id: product.id,
     title: product.title,
     slug: product.slug,
@@ -34,14 +54,14 @@ function toPublicProduct(product: ProductWithKeys): Product {
     stockCount:
       product.deliveryMethod === "key" ? availableKeys : undefined,
     createdAt: product.createdAt.toISOString(),
-  };
+  });
 }
 
 function normalizeFallbackProduct(product: Product): Product {
-  return {
+  return normalizePublicProductCopy({
     ...product,
     downloadUrl: product.downloadUrl || null,
-  };
+  });
 }
 
 export function buildCategoryOptions(products: Product[]) {

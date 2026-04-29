@@ -140,7 +140,7 @@ function createEmptyProductForm() {
     category: "tool-access",
     price: "60",
     platform: "Windows 10/11",
-    compatibilityNotes: "Latest loader build",
+    compatibilityNotes: "Latest supported build",
     regionRestrictions: "",
     deliveryMethod: "key",
     downloadUrl: "",
