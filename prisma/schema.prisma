@@ -34,6 +34,8 @@ model Product {
   fullDescription      String   // markdown
   category             String   // 'game-keys' | 'tool-access' | 'configs'
   price                Decimal  @db.Decimal(10, 2)
+  monthlyPrice         Decimal? @db.Decimal(10, 2)
+  lifetimePrice        Decimal? @db.Decimal(10, 2)
   platform             String[]
   compatibilityNotes   String
   regionRestrictions   String?
@@ -92,11 +94,13 @@ model Order {
 // ───── Order Item ─────
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  productId String
-  quantity  Int     @default(1)
-  unitPrice Decimal @db.Decimal(10, 2)
+  id                  String   @id @default(cuid())
+  orderId             String
+  productId           String
+  quantity            Int      @default(1)
+  unitPrice           Decimal  @db.Decimal(10, 2)
+  purchaseOptionId    String?
+  purchaseOptionLabel String?
 
   order   Order   @relation(fields: [orderId], references: [id])
   product Product @relation(fields: [productId], references: [id])
