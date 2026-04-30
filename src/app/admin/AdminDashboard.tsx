@@ -1483,8 +1483,13 @@ export function AdminDashboard({
                       <strong>{formatDateTime(selectedOrder.deliveredAt)}</strong>
                     </div>
                     <div className={styles.detailCard}>
-                      <span>Invoice</span>
-                      <strong>{selectedOrder.btcpayInvoiceId || "None"}</strong>
+                      <span>Payment Reference</span>
+                      <strong>
+                        {selectedOrder.stripePaymentIntentId ||
+                          selectedOrder.stripeCheckoutSessionId ||
+                          selectedOrder.btcpayInvoiceId ||
+                          "None"}
+                      </strong>
                     </div>
                   </div>
 

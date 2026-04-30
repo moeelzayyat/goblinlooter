@@ -160,8 +160,8 @@ export function CheckoutSuccessClient({
         <RefreshCw className={`${styles.heroIcon} ${styles.spinning}`} />
         <h1 className={styles.title}>Finalizing Your Delivery</h1>
         <p className={styles.subtitle}>
-          Payment was received. We&apos;re waiting for the blockchain confirmation
-          and delivery webhook to finish assigning your key.
+          Payment was received. We&apos;re waiting for payment confirmation
+          and the delivery webhook to finish assigning your key.
         </p>
         <div className={styles.statusPill}>
           <Clock3 size={14} />

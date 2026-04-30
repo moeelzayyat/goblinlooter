@@ -126,7 +126,8 @@ export default function AccountPage() {
             }}
           >
             View your purchase history, track deliveries, and access your product keys.
-            All payments are processed via BTC or LTC — no card details are stored.
+            Payments are processed through secure checkout providers; no card details
+            are stored by GoblinLooter.
           </p>
           <Link href="/orders">
             <Button

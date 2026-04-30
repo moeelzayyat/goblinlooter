@@ -20,6 +20,7 @@ import {
 import styles from "./page.module.css";
 
 type TabId = "description" | "details" | "refund";
+type CheckoutProvider = "stripe" | "btcpay";
 
 interface ProductClientPageProps {
   product: Product;
@@ -36,7 +37,7 @@ export function ProductClientPage({
 }: ProductClientPageProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>("description");
-  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkingOut, setCheckingOut] = useState<CheckoutProvider | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,16 +47,16 @@ export function ProductClientPage({
     });
   }, [product.category, product.id]);
 
-  async function handleBuyNow() {
+  async function handleBuyNow(paymentProvider: CheckoutProvider) {
     if (checkingOut) return;
     setCheckoutError(null);
-    setCheckingOut(true);
+    setCheckingOut(paymentProvider);
 
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productSlug: product.slug }),
+        body: JSON.stringify({ productSlug: product.slug, paymentProvider }),
       });
       const data = await response.json();
 
@@ -75,7 +76,7 @@ export function ProductClientPage({
     } catch {
       setCheckoutError("Something went wrong. Please try again.");
     } finally {
-      setCheckingOut(false);
+      setCheckingOut(null);
     }
   }
 
@@ -153,11 +154,21 @@ export function ProductClientPage({
               <Button
                 size="lg"
                 style={{ flex: 1 }}
-                onClick={handleBuyNow}
-                disabled={checkingOut}
+                onClick={() => handleBuyNow("stripe")}
+                disabled={Boolean(checkingOut)}
               >
                 <ShoppingCart size={18} />
-                {checkingOut ? "Processing..." : "Buy Now - Pay with Crypto"}
+                {checkingOut === "stripe"
+                  ? "Processing..."
+                  : "Card / Cash App Checkout"}
+              </Button>
+              <Button
+                size="lg"
+                variant="secondary"
+                onClick={() => handleBuyNow("btcpay")}
+                disabled={Boolean(checkingOut)}
+              >
+                {checkingOut === "btcpay" ? "Processing..." : "Pay with Crypto"}
               </Button>
             </div>
 

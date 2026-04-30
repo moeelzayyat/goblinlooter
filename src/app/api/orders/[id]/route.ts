@@ -62,6 +62,8 @@ export async function GET(
       totalAmount: Number(order.totalAmount),
       paymentMethod: order.paymentMethod,
       btcpayInvoiceId: order.btcpayInvoiceId,
+      stripeCheckoutSessionId: order.stripeCheckoutSessionId,
+      stripePaymentIntentId: order.stripePaymentIntentId,
       deliveredAt: order.deliveredAt?.toISOString() || null,
       createdAt: order.createdAt.toISOString(),
       items: order.items.map((item) => ({

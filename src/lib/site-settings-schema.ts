@@ -194,8 +194,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
       },
       {
         icon: "bitcoin",
-        title: "Crypto Payments",
-        desc: "Pay with Bitcoin and other cryptocurrencies via our secure BTCPay checkout.",
+        title: "Flexible Payments",
+        desc: "Pay securely with cards, Cash App Pay, or supported cryptocurrency checkout.",
       },
     ],
     pricingTitle: "Get ArcWay Services",
@@ -217,7 +217,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
       {
         num: 1,
         title: "Purchase",
-        desc: "Buy the package and pay securely with crypto.",
+        desc: "Buy the package and pay securely with your preferred supported method.",
       },
       {
         num: 2,
@@ -237,7 +237,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
       {
         icon: "shield-check",
         title: "Secure Payments",
-        desc: "Pay with Bitcoin via BTCPay Server - fully self-hosted, non-custodial, and private. Your payment goes directly to us.",
+        desc: "Pay through secure hosted checkout with card, Cash App Pay, or supported crypto options.",
       },
       {
         icon: "zap",
@@ -297,11 +297,11 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         faqs: [
           {
             q: "What payment methods are accepted?",
-            a: "We accept Bitcoin (BTC) and Litecoin (LTC). Payments are processed through our self-hosted BTCPay Server - a non-custodial payment processor. No third party ever touches your funds.",
+            a: "We accept credit and debit cards, Cash App Pay, Bitcoin (BTC), and Litecoin (LTC) through supported checkout providers.",
           },
           {
             q: "Is my payment secure?",
-            a: "Yes. BTCPay Server processes payments directly on the blockchain. We never have access to your private keys or wallet. All transactions are verified by the Bitcoin/Litecoin network.",
+            a: "Yes. Card and Cash App Pay payments are handled through Stripe Checkout, and crypto payments are handled through BTCPay Server. We do not store card details or private wallet keys.",
           },
         ],
       },
@@ -343,7 +343,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
           },
           {
             q: "How long does a refund take to process?",
-            a: "Once approved, crypto refunds are processed within 24 hours to the wallet address you provide.",
+            a: "Once approved, refunds are processed back through the original supported payment method whenever possible.",
           },
         ],
       },
@@ -433,7 +433,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         {
           title: "Refund Processing",
           paragraphs: [
-            "Approved refunds for cryptocurrency payments are processed within 24 hours. You will need to provide a wallet address for the refund. Refunds are issued in the same cryptocurrency used for the original purchase, such as BTC or LTC.",
+            "Approved refunds are processed back through the original supported payment method whenever possible. Crypto refunds may require a wallet address from you before processing.",
           ],
         },
       ],
@@ -466,9 +466,9 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         {
           title: "Payments and Delivery",
           bullets: [
-            "Payments are accepted in supported cryptocurrencies such as BTC and LTC.",
+            "Payments are accepted through supported checkout methods, including cards, Cash App Pay, BTC, and LTC.",
             "Orders are usually delivered shortly after payment confirmation, but some orders may be delayed for fraud or inventory review.",
-            "You are responsible for providing accurate wallet, account, and contact information at checkout.",
+            "You are responsible for providing accurate account and contact information at checkout.",
           ],
         },
         {
@@ -533,8 +533,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         {
           title: "Payments",
           paragraphs: [
-            "Cryptocurrency payments are processed through our payment infrastructure and related providers. We keep transaction details required to confirm payment, fulfill orders, and handle disputes or refunds.",
-            "We do not store your private wallet keys.",
+            "Payments are processed through our payment infrastructure and related providers. We keep transaction details required to confirm payment, fulfill orders, and handle disputes or refunds.",
+            "We do not store card details or private wallet keys.",
           ],
         },
         {

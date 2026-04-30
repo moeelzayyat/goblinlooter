@@ -26,6 +26,8 @@ interface OrderDetail {
   totalAmount: number;
   paymentMethod: string | null;
   btcpayInvoiceId: string | null;
+  stripeCheckoutSessionId: string | null;
+  stripePaymentIntentId: string | null;
   deliveredAt: string | null;
   createdAt: string;
   items: {
@@ -52,7 +54,7 @@ const STATUS_MAP: Record<
   pending: {
     icon: <Clock size={24} />,
     title: "Payment Pending",
-    description: "Waiting for payment confirmation on the blockchain.",
+    description: "Waiting for payment confirmation.",
     color: "var(--info)",
   },
   paid: {

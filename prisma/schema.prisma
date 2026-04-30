@@ -78,7 +78,9 @@ model Order {
   // 'pending' | 'paid' | 'delivered' | 'review' | 'cancelled' | 'refunded' | 'chargeback'
   totalAmount      Decimal   @db.Decimal(10, 2)
   btcpayInvoiceId  String?   @unique
-  paymentMethod    String?   // 'BTC' | 'LTC'
+  stripeCheckoutSessionId String? @unique
+  stripePaymentIntentId   String? @unique
+  paymentMethod    String?   // 'BTC' | 'LTC' | 'BTCPAY' | 'CARD' | 'CASHAPP' | 'STRIPE'
   deliveredAt      DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -116,7 +118,7 @@ model OrderMeta {
   country         String?
   fingerprint     String?
   txId            String?   // on-chain transaction ID
-  paymentMethod   String?   // 'BTC' | 'LTC'
+  paymentMethod   String?   // 'BTC' | 'LTC' | 'BTCPAY' | 'CARD' | 'CASHAPP' | 'STRIPE'
   riskFlags       String[]
   createdAt       DateTime @default(now())
 

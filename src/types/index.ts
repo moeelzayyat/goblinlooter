@@ -61,9 +61,10 @@ export type OrderStatus =
   | "delivered"
   | "review"
   | "cancelled"
-  | "refunded";
+  | "refunded"
+  | "chargeback";
 
-export type PaymentMethod = "BTC" | "LTC";
+export type PaymentMethod = "BTC" | "LTC" | "BTCPAY" | "CARD" | "CASHAPP" | "STRIPE";
 
 export interface Order {
   id: string;
@@ -71,6 +72,8 @@ export interface Order {
   status: OrderStatus;
   totalAmount: number;
   btcpayInvoiceId?: string | null;
+  stripeCheckoutSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
   paymentMethod?: PaymentMethod | null;
   deliveredAt?: string | null;
   createdAt: string;

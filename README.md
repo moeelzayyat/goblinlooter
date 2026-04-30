@@ -16,6 +16,26 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Payment Configuration
+
+Stripe Checkout supports card and Cash App Pay checkout through:
+
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+
+Configure the Stripe webhook endpoint as:
+
+```txt
+https://goblinlooter.com/api/webhooks/stripe
+```
+
+The webhook must send at least `checkout.session.completed`,
+`checkout.session.async_payment_succeeded`,
+`checkout.session.async_payment_failed`, and `checkout.session.expired`.
+
+BTCPay remains available for supported cryptocurrency checkout through the
+existing `BTCPAY_*` environment variables.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 ## Learn More

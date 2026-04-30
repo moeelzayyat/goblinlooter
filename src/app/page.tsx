@@ -56,7 +56,9 @@ export default async function HomePage() {
               {priceLabel ? (
                 <>
                   <span className={styles.priceTag}>{priceLabel}</span>
-                  <span className={styles.priceNote}>Instant delivery - Crypto accepted</span>
+                  <span className={styles.priceNote}>
+                    Instant delivery - Cards, Cash App, and crypto
+                  </span>
                 </>
               ) : (
                 <span className={styles.priceNote}>{settings.emptyCatalogNote}</span>

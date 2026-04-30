@@ -21,6 +21,8 @@ export interface AdminOrderRecord {
   totalAmount: number;
   paymentMethod: string | null;
   btcpayInvoiceId: string | null;
+  stripeCheckoutSessionId: string | null;
+  stripePaymentIntentId: string | null;
   deliveredAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -170,6 +172,8 @@ function serializeOrder(order: Awaited<ReturnType<typeof getOrderSourceById>>) {
     totalAmount: Number(order.totalAmount),
     paymentMethod: order.paymentMethod,
     btcpayInvoiceId: order.btcpayInvoiceId,
+    stripeCheckoutSessionId: order.stripeCheckoutSessionId,
+    stripePaymentIntentId: order.stripePaymentIntentId,
     deliveredAt: order.deliveredAt?.toISOString() || null,
     createdAt: order.createdAt.toISOString(),
     updatedAt: order.updatedAt.toISOString(),
