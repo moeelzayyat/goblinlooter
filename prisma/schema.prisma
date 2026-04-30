@@ -42,6 +42,7 @@ model Product {
   deliveryMethod       String   // 'key' | 'download' | 'manual'
   downloadUrl          String?
   deliveryTimeEstimate String
+  thankYouMessage      String?
   refundEligibility    String   // 'eligible' | 'conditional' | 'non-refundable'
   refundTerms          String
   images               String[]

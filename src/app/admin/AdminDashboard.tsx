@@ -145,6 +145,7 @@ function createEmptyProductForm() {
     deliveryMethod: "key",
     downloadUrl: "",
     deliveryTimeEstimate: "Instant delivery",
+    thankYouMessage: "",
     refundEligibility: "conditional",
     refundTerms: "Refunds are available on unused keys within 72 hours.",
     images: "/arcway-dupe.png",
@@ -169,6 +170,7 @@ function formFromProduct(product: AdminProductRecord): ProductFormState {
     deliveryMethod: product.deliveryMethod,
     downloadUrl: product.downloadUrl || "",
     deliveryTimeEstimate: product.deliveryTimeEstimate,
+    thankYouMessage: product.thankYouMessage || "",
     refundEligibility: product.refundEligibility,
     refundTerms: product.refundTerms,
     images: product.images.join("\n"),
@@ -1198,6 +1200,18 @@ export function AdminDashboard({
                       onChange={(event) =>
                         updateProductField("fullDescription", event.target.value)
                       }
+                    />
+                  </label>
+
+                  <label className={styles.field}>
+                    <span>Thank-you Page Message</span>
+                    <textarea
+                      rows={4}
+                      value={productForm.thankYouMessage}
+                      onChange={(event) =>
+                        updateProductField("thankYouMessage", event.target.value)
+                      }
+                      placeholder="Shown on the successful payment page after delivery"
                     />
                   </label>
 

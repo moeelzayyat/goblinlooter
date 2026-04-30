@@ -28,6 +28,7 @@ interface SuccessOrder {
     id: string;
     productTitle: string;
     downloadUrl: string | null;
+    thankYouMessage: string | null;
   }[];
   key: {
     keyValue?: string;
@@ -195,6 +196,8 @@ export function CheckoutSuccessClient({
   }
 
   const delivered = order.status === "delivered";
+  const thankYouMessage =
+    order.items.find((item) => item.thankYouMessage)?.thankYouMessage || null;
 
   return (
     <div className={styles.stack}>
@@ -205,7 +208,8 @@ export function CheckoutSuccessClient({
         </h1>
         <p className={styles.subtitle}>
           {delivered
-            ? "Your order is ready below. You can reveal the key, copy it, and download the product right away."
+            ? thankYouMessage ||
+              "Your order is ready below. You can reveal the key, copy it, and download the product right away."
             : "Your payment cleared, but delivery is still finishing in the background. You can safely keep this page open or check your order details."}
         </p>
         <div className={styles.statusRow}>

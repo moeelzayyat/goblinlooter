@@ -28,6 +28,7 @@ export interface AdminProductRecord {
   deliveryMethod: DeliveryMethod;
   downloadUrl: string | null;
   deliveryTimeEstimate: string;
+  thankYouMessage: string | null;
   refundEligibility: RefundEligibility;
   refundTerms: string;
   images: string[];
@@ -122,6 +123,7 @@ function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
     deliveryMethod: product.deliveryMethod as DeliveryMethod,
     downloadUrl: product.downloadUrl,
     deliveryTimeEstimate: product.deliveryTimeEstimate,
+    thankYouMessage: product.thankYouMessage,
     refundEligibility: product.refundEligibility as RefundEligibility,
     refundTerms: product.refundTerms,
     images: product.images,
@@ -165,6 +167,10 @@ export function normalizeProductInput(input: Record<string, unknown>) {
     typeof input.deliveryTimeEstimate === "string"
       ? input.deliveryTimeEstimate.trim()
       : "";
+  const thankYouMessage =
+    typeof input.thankYouMessage === "string" && input.thankYouMessage.trim()
+      ? input.thankYouMessage.trim()
+      : null;
   const refundTerms =
     typeof input.refundTerms === "string" ? input.refundTerms.trim() : "";
   const regionRestrictions =
@@ -230,6 +236,7 @@ export function normalizeProductInput(input: Record<string, unknown>) {
       deliveryMethod,
       downloadUrl,
       deliveryTimeEstimate,
+      thankYouMessage,
       refundEligibility,
       refundTerms,
       images,

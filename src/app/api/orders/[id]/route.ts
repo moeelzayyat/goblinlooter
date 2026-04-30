@@ -28,6 +28,7 @@ export async function GET(
                 slug: true,
                 deliveryMethod: true,
                 downloadUrl: true,
+                thankYouMessage: true,
               },
             },
           },
@@ -74,6 +75,10 @@ export async function GET(
         deliveryMethod: item.product?.deliveryMethod || null,
         downloadUrl:
           order.status === "delivered" ? item.product?.downloadUrl || null : null,
+        thankYouMessage:
+          order.status === "delivered"
+            ? item.product?.thankYouMessage || null
+            : null,
         quantity: item.quantity,
         unitPrice: Number(item.unitPrice),
       })),
