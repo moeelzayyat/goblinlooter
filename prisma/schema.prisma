@@ -78,8 +78,8 @@ model Order {
   // 'pending' | 'paid' | 'delivered' | 'review' | 'cancelled' | 'refunded' | 'chargeback'
   totalAmount      Decimal   @db.Decimal(10, 2)
   btcpayInvoiceId  String?   @unique
-  stripeCheckoutSessionId String? @unique
-  stripePaymentIntentId   String? @unique
+  stripeCheckoutSessionId String?
+  stripePaymentIntentId   String?
   paymentMethod    String?   // 'BTC' | 'LTC' | 'BTCPAY' | 'CARD' | 'CASHAPP' | 'STRIPE'
   deliveredAt      DateTime?
   createdAt        DateTime  @default(now())
@@ -91,6 +91,9 @@ model Order {
   meta      OrderMeta?
   auditLogs DeliveryAuditLog[]
   tickets   SupportTicket[]
+
+  @@index([stripeCheckoutSessionId])
+  @@index([stripePaymentIntentId])
 }
 
 // ───── Order Item ─────
