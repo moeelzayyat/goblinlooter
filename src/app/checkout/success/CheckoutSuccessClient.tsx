@@ -47,6 +47,7 @@ export function CheckoutSuccessClient({
   const [order, setOrder] = useState<SuccessOrder | null>(null);
   const [loading, setLoading] = useState(Boolean(orderId));
   const [error, setError] = useState<string | null>(null);
+  const [requiresLogin, setRequiresLogin] = useState(false);
   const [keyVisible, setKeyVisible] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -69,9 +70,14 @@ export function CheckoutSuccessClient({
         });
 
         if (!response.ok) {
+          if (response.status === 401) {
+            setRequiresLogin(true);
+            throw new Error("Please log in to view your order delivery.");
+          }
+
           throw new Error(
-            response.status === 401
-              ? "Please log in to view your order delivery."
+            response.status === 404
+              ? "We could not find this order for your account."
               : "We could not load your order yet."
           );
         }
@@ -81,6 +87,7 @@ export function CheckoutSuccessClient({
 
         setOrder(data.order);
         setError(null);
+        setRequiresLogin(false);
 
         if (POLLABLE_STATUSES.has(data.order.status) && attempts < 40) {
           timeout = setTimeout(loadOrder, 3000);
@@ -173,20 +180,35 @@ export function CheckoutSuccessClient({
   }
 
   if (error || !order) {
+    const loginHref = `/auth/login?callbackUrl=${encodeURIComponent(
+      `/checkout/success?orderId=${orderId}`
+    )}`;
+
     return (
       <div className={styles.card}>
         <Package className={styles.heroIcon} />
-        <h1 className={styles.title}>Order Found, Delivery Not Ready</h1>
+        <h1 className={styles.title}>
+          {requiresLogin ? "Log In to View Your Order" : "Order Not Ready"}
+        </h1>
         <p className={styles.subtitle}>
           {error || "We could not confirm delivery yet."}
         </p>
         <div className={styles.actions}>
-          <Link href="/orders">
-            <Button>
-              <ShoppingBag size={16} />
-              My Orders
-            </Button>
-          </Link>
+          {requiresLogin ? (
+            <Link href={loginHref}>
+              <Button>
+                <ShoppingBag size={16} />
+                Log In
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/orders">
+              <Button>
+                <ShoppingBag size={16} />
+                My Orders
+              </Button>
+            </Link>
+          )}
           <Link href="/support">
             <Button variant="secondary">Contact Support</Button>
           </Link>

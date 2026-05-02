@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import styles from "./page.module.css";
 
+type LoadState = "loading" | "ready" | "unauthorized" | "not-found" | "error";
+
 interface OrderDetail {
   id: string;
   status: string;
@@ -94,22 +96,36 @@ export default function OrderDetailPage() {
   const params = useParams();
   const orderId = params.id as string;
   const [order, setOrder] = useState<OrderDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadState, setLoadState] = useState<LoadState>("loading");
   const [keyVisible, setKeyVisible] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     async function fetchOrder() {
+      setLoadState("loading");
       try {
-        const res = await fetch(`/api/orders/${orderId}`);
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+          cache: "no-store",
+        });
         if (res.ok) {
           const data = await res.json();
           setOrder(data.order);
+          setLoadState("ready");
+          return;
+        }
+
+        setOrder(null);
+        if (res.status === 401) {
+          setLoadState("unauthorized");
+        } else if (res.status === 404) {
+          setLoadState("not-found");
+        } else {
+          setLoadState("error");
         }
       } catch {
         console.error("Failed to fetch order");
-      } finally {
-        setLoading(false);
+        setOrder(null);
+        setLoadState("error");
       }
     }
     fetchOrder();
@@ -154,18 +170,38 @@ export default function OrderDetailPage() {
           </span>
         </nav>
 
-        {loading ? (
+        {loadState === "loading" ? (
           <div className={styles.loading}>
             <div className={styles.spinner} />
           </div>
         ) : !order ? (
           <div className={styles.notFound}>
             <AlertCircle size={48} strokeWidth={1} />
-            <h2>Order not found</h2>
-            <p>This order doesn&apos;t exist or you don&apos;t have access.</p>
-            <Link href="/orders">
-              <Button>Back to Orders</Button>
-            </Link>
+            <h2>
+              {loadState === "unauthorized"
+                ? "Log in to view your order"
+                : "Order not found"}
+            </h2>
+            <p>
+              {loadState === "unauthorized"
+                ? "Your payment may be complete, but this browser is not signed in. Log in with the account used at checkout to view delivery."
+                : loadState === "error"
+                  ? "We could not load this order right now. Please try again or contact support."
+                  : "This order doesn't exist or you don't have access."}
+            </p>
+            {loadState === "unauthorized" ? (
+              <Link
+                href={`/auth/login?callbackUrl=${encodeURIComponent(
+                  `/orders/${orderId}`
+                )}`}
+              >
+                <Button>Log In</Button>
+              </Link>
+            ) : (
+              <Link href="/orders">
+                <Button>Back to Orders</Button>
+              </Link>
+            )}
           </div>
         ) : (
           <>

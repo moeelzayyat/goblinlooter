@@ -8,10 +8,14 @@ import { createStripeCheckoutSession } from "@/lib/stripe";
 type CheckoutProvider = "stripe" | "btcpay";
 
 function getRequestOrigin(req: NextRequest) {
+  const envOrigin = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
+  if (envOrigin) {
+    return new URL(envOrigin).origin;
+  }
+
   const forwardedHost = req.headers.get("x-forwarded-host");
   const forwardedProto = req.headers.get("x-forwarded-proto");
   const host = forwardedHost || req.headers.get("host");
-  const envOrigin = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
 
   if (host) {
     const proto =
@@ -19,7 +23,7 @@ function getRequestOrigin(req: NextRequest) {
     return `${proto}://${host}`;
   }
 
-  return envOrigin || req.nextUrl.origin;
+  return req.nextUrl.origin;
 }
 
 function getProvider(value: unknown): CheckoutProvider {
