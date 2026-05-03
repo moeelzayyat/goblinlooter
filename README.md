@@ -52,6 +52,10 @@ URLs. Admins can also upload one MP4, WebM, OGG, or MOV video per product. When
 a video URL is set it is used first; otherwise the uploaded video is shown. When
 no video is configured, the video section is hidden.
 
+Products can also define optional feature cards in the admin editor. Each card
+has a title, short description, and bullet list. When feature cards are present,
+the product page shows them instead of the default showcase cards.
+
 ## Protected Product Downloads
 
 Admins can upload one private product file per product from the product editor.

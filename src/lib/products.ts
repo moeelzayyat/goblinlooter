@@ -1,7 +1,7 @@
 import { Prisma, type Product as DbProduct, type InventoryKey } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { MOCK_PRODUCTS } from "@/lib/mockData";
-import type { Product, PurchaseOption } from "@/types";
+import type { Product, ProductFeatureGroup, PurchaseOption } from "@/types";
 
 type ProductWithKeys = DbProduct & {
   inventoryKeys?: Pick<InventoryKey, "status">[];
@@ -53,6 +53,39 @@ function normalizePurchaseOptions(value: unknown): PurchaseOption[] {
   return options;
 }
 
+function normalizeFeatureGroups(value: unknown): ProductFeatureGroup[] {
+  if (!Array.isArray(value)) return [];
+
+  const groups: ProductFeatureGroup[] = [];
+
+  for (const entry of value) {
+    if (!isRecord(entry)) continue;
+
+    const title = typeof entry.title === "string" ? entry.title.trim() : "";
+    const idSource =
+      typeof entry.id === "string" && entry.id.trim() ? entry.id : title;
+    const id = idSource
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const description =
+      typeof entry.description === "string" && entry.description.trim()
+        ? entry.description.trim()
+        : null;
+    const items = Array.isArray(entry.items)
+      ? entry.items
+          .map((item) => (typeof item === "string" ? item.trim() : ""))
+          .filter(Boolean)
+      : [];
+
+    if (!id || !title || items.length === 0) continue;
+    groups.push({ id, title, description, items });
+  }
+
+  return groups;
+}
+
 function toPurchaseOptionsJson(
   options: PurchaseOption[] | undefined
 ): Prisma.InputJsonValue | undefined {
@@ -63,6 +96,19 @@ function toPurchaseOptionsJson(
     label: option.label,
     price: option.price,
     description: option.description || null,
+  }));
+}
+
+function toFeatureGroupsJson(
+  groups: ProductFeatureGroup[] | undefined
+): Prisma.InputJsonValue | undefined {
+  if (!groups || groups.length === 0) return undefined;
+
+  return groups.map((group) => ({
+    id: group.id,
+    title: group.title,
+    description: group.description || null,
+    items: group.items,
   }));
 }
 
@@ -102,6 +148,7 @@ function toPublicProduct(product: ProductWithKeys): Product {
         }
       : null,
     disclaimer: product.disclaimer,
+    featureGroups: normalizeFeatureGroups(product.featureGroups),
     category: product.category as Product["category"],
     price: Number(product.price),
     purchaseOptions: normalizePurchaseOptions(product.purchaseOptions),
@@ -262,6 +309,7 @@ export async function ensureDatabaseProduct(slug: string) {
       fullDescription: fallback.fullDescription,
       videoUrl: fallback.videoUrl || null,
       disclaimer: fallback.disclaimer || null,
+      featureGroups: toFeatureGroupsJson(fallback.featureGroups),
       category: fallback.category,
       price: fallback.price,
       purchaseOptions: toPurchaseOptionsJson(fallback.purchaseOptions),

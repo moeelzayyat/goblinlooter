@@ -34,6 +34,7 @@ model Product {
   fullDescription      String   // markdown
   videoUrl             String?
   disclaimer           String?
+  featureGroups        Json?
   category             String   // 'game-keys' | 'tool-access' | 'configs'
   price                Decimal  @db.Decimal(10, 2)
   monthlyPrice         Decimal? @db.Decimal(10, 2)

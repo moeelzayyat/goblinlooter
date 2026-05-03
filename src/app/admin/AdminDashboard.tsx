@@ -139,6 +139,13 @@ interface ProductOptionFormState {
   description: string;
 }
 
+interface ProductFeatureFormState {
+  id: string;
+  title: string;
+  description: string;
+  items: string;
+}
+
 const STANDARD_DURATION_OPTIONS: ProductOptionFormState[] = [
   { id: "1-day", label: "1 Day", price: "", description: "" },
   { id: "1-week", label: "1 Week", price: "", description: "" },
@@ -157,6 +164,10 @@ function createOptionDraft(): ProductOptionFormState {
   return { id: "", label: "", price: "", description: "" };
 }
 
+function createFeatureDraft(): ProductFeatureFormState {
+  return { id: "", title: "", description: "", items: "" };
+}
+
 function createEmptyProductForm() {
   return {
     title: "",
@@ -165,6 +176,7 @@ function createEmptyProductForm() {
     fullDescription: "",
     videoUrl: "",
     disclaimer: "",
+    featureGroups: [] as ProductFeatureFormState[],
     category: "tool-access",
     price: "60",
     purchaseOptions: [] as ProductOptionFormState[],
@@ -193,6 +205,12 @@ function formFromProduct(product: AdminProductRecord): ProductFormState {
     fullDescription: product.fullDescription,
     videoUrl: product.videoUrl || "",
     disclaimer: product.disclaimer || "",
+    featureGroups: (product.featureGroups || []).map((group) => ({
+      id: group.id,
+      title: group.title,
+      description: group.description || "",
+      items: group.items.join("\n"),
+    })),
     category: product.category,
     price: product.price.toString(),
     purchaseOptions: product.purchaseOptions.map((option) => ({
@@ -453,6 +471,42 @@ export function AdminDashboard({
       ...current,
       purchaseOptions: current.purchaseOptions.filter(
         (_option, optionIndex) => optionIndex !== index
+      ),
+    }));
+  }
+
+  function updateFeatureGroup(
+    index: number,
+    field: keyof ProductFeatureFormState,
+    value: string
+  ) {
+    setProductForm((current) => ({
+      ...current,
+      featureGroups: current.featureGroups.map((group, groupIndex) => {
+        if (groupIndex !== index) return group;
+
+        const nextGroup = { ...group, [field]: value };
+        if (field === "title" && !group.id.trim()) {
+          nextGroup.id = slugifyOptionId(value);
+        }
+
+        return nextGroup;
+      }),
+    }));
+  }
+
+  function addFeatureGroup() {
+    setProductForm((current) => ({
+      ...current,
+      featureGroups: [...current.featureGroups, createFeatureDraft()],
+    }));
+  }
+
+  function removeFeatureGroup(index: number) {
+    setProductForm((current) => ({
+      ...current,
+      featureGroups: current.featureGroups.filter(
+        (_group, groupIndex) => groupIndex !== index
       ),
     }));
   }
@@ -1619,6 +1673,109 @@ export function AdminDashboard({
                       }
                     />
                   </label>
+
+                  <div className={styles.featureEditor}>
+                    <div className={styles.featureEditorHeader}>
+                      <div>
+                        <h3>Feature Cards</h3>
+                        <p>
+                          Add product feature columns with a title, short summary,
+                          and one feature per line.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onClick={addFeatureGroup}
+                      >
+                        Add Feature Card
+                      </Button>
+                    </div>
+
+                    {productForm.featureGroups.length === 0 ? (
+                      <div className={styles.featureEmpty}>
+                        No feature cards. The product page will keep the standard
+                        showcase section.
+                      </div>
+                    ) : (
+                      <div className={styles.featureList}>
+                        {productForm.featureGroups.map((group, index) => (
+                          <div key={`${group.id}-${index}`} className={styles.featureRow}>
+                            <div className={styles.featureRowGrid}>
+                              <label className={styles.field}>
+                                <span>Title</span>
+                                <input
+                                  value={group.title}
+                                  placeholder="Visuals"
+                                  onChange={(event) =>
+                                    updateFeatureGroup(
+                                      index,
+                                      "title",
+                                      event.target.value
+                                    )
+                                  }
+                                />
+                              </label>
+                              <label className={styles.field}>
+                                <span>ID</span>
+                                <input
+                                  value={group.id}
+                                  placeholder="visuals"
+                                  onChange={(event) =>
+                                    updateFeatureGroup(
+                                      index,
+                                      "id",
+                                      event.target.value
+                                    )
+                                  }
+                                />
+                              </label>
+                            </div>
+                            <label className={styles.field}>
+                              <span>Description</span>
+                              <input
+                                value={group.description}
+                                placeholder="Highlight product capabilities and setup options."
+                                onChange={(event) =>
+                                  updateFeatureGroup(
+                                    index,
+                                    "description",
+                                    event.target.value
+                                  )
+                                }
+                              />
+                            </label>
+                            <label className={styles.field}>
+                              <span>Features</span>
+                              <textarea
+                                rows={6}
+                                value={group.items}
+                                placeholder={"One feature per line"}
+                                onChange={(event) =>
+                                  updateFeatureGroup(
+                                    index,
+                                    "items",
+                                    event.target.value
+                                  )
+                                }
+                              />
+                            </label>
+                            <div className={styles.optionActions}>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="danger"
+                                onClick={() => removeFeatureGroup(index)}
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   <div className={styles.formGrid}>
                     <label className={styles.field}>

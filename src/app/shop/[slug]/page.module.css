@@ -580,6 +580,72 @@
   font-size: var(--text-sm);
 }
 
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.featureCard {
+  min-height: 100%;
+  padding: var(--space-md);
+  border: 1px solid rgba(139, 92, 246, 0.48);
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 38%),
+    var(--bg-elevated);
+}
+
+.featureCardHeader {
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.featureCardHeader h3 {
+  font-size: var(--text-base);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-xs);
+}
+
+.featureCardHeader p {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.featureBulletList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.featureBulletList li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: var(--space-sm);
+  align-items: start;
+}
+
+.featureBulletList li span {
+  width: 7px;
+  height: 7px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.16);
+}
+
+.featureBulletList p {
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
 .requirementGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -766,6 +832,7 @@
 
   .heroMetrics,
   .showcaseGrid,
+  .featureGrid,
   .requirementGrid {
     grid-template-columns: 1fr;
   }

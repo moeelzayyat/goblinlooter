@@ -49,6 +49,13 @@ export interface ProductVideoFile {
   updatedAt?: string;
 }
 
+export interface ProductFeatureGroup {
+  id: string;
+  title: string;
+  description?: string | null;
+  items: string[];
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -58,6 +65,7 @@ export interface Product {
   videoUrl?: string | null;
   productVideo?: ProductVideoFile | null;
   disclaimer?: string | null;
+  featureGroups?: ProductFeatureGroup[];
   category: ProductCategory;
   price: number;
   purchaseOptions?: PurchaseOption[];

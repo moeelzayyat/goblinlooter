@@ -4,6 +4,7 @@ import type {
   DeliveryMethod,
   ProductCategory,
   ProductDownloadFile,
+  ProductFeatureGroup,
   ProductVideoFile,
   PurchaseOption,
   ProductStatus,
@@ -42,6 +43,7 @@ export interface AdminProductRecord {
   videoUrl: string | null;
   productVideo: ProductVideoFile | null;
   disclaimer: string | null;
+  featureGroups: ProductFeatureGroup[];
   category: ProductCategory;
   price: number;
   purchaseOptions: PurchaseOption[];
@@ -147,6 +149,63 @@ function parsePurchaseOptions(value: unknown) {
   return { options };
 }
 
+function parseFeatureGroups(value: unknown) {
+  if (!Array.isArray(value)) return { groups: [] as ProductFeatureGroup[] };
+
+  const groups: ProductFeatureGroup[] = [];
+  const seenIds = new Set<string>();
+
+  for (const [index, entry] of value.entries()) {
+    if (!isRecord(entry)) {
+      return { error: "Feature groups must be valid rows." };
+    }
+
+    const title = typeof entry.title === "string" ? entry.title.trim() : "";
+    const idSource =
+      typeof entry.id === "string" && entry.id.trim() ? entry.id : title;
+    const id = slugify(idSource);
+    const description =
+      typeof entry.description === "string" && entry.description.trim()
+        ? entry.description.trim()
+        : null;
+    const items = parseStringList(entry.items);
+
+    if (!title && !description && items.length === 0) continue;
+    if (!title) {
+      return { error: `Feature group ${index + 1} needs a title.` };
+    }
+    if (!id) {
+      return { error: `Feature group ${title} needs a valid ID.` };
+    }
+    if (seenIds.has(id)) {
+      return { error: `Feature group IDs must be unique. "${id}" is repeated.` };
+    }
+    if (items.length === 0) {
+      return { error: `Feature group "${title}" needs at least one feature.` };
+    }
+
+    seenIds.add(id);
+    groups.push({ id, title, description, items });
+  }
+
+  return { groups };
+}
+
+function serializeFeatureGroups(value: unknown): ProductFeatureGroup[] {
+  const parsed = parseFeatureGroups(value);
+  if ("error" in parsed) return [];
+  return parsed.groups;
+}
+
+function toFeatureGroupsJson(groups: ProductFeatureGroup[]): Prisma.InputJsonValue {
+  return groups.map((group) => ({
+    id: group.id,
+    title: group.title,
+    description: group.description || null,
+    items: group.items,
+  }));
+}
+
 function serializePurchaseOptions(value: unknown): PurchaseOption[] {
   const parsed = parsePurchaseOptions(value);
   if ("error" in parsed) return [];
@@ -213,6 +272,7 @@ function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
         }
       : null,
     disclaimer: product.disclaimer,
+    featureGroups: serializeFeatureGroups(product.featureGroups),
     category: product.category as ProductCategory,
     price: Number(product.price),
     purchaseOptions: serializePurchaseOptions(product.purchaseOptions),
@@ -276,6 +336,7 @@ export function normalizeProductInput(input: Record<string, unknown>) {
     typeof input.disclaimer === "string" && input.disclaimer.trim()
       ? input.disclaimer.trim()
       : null;
+  const featureGroups = parseFeatureGroups(input.featureGroups);
   const compatibilityNotes =
     typeof input.compatibilityNotes === "string"
       ? input.compatibilityNotes.trim()
@@ -318,6 +379,9 @@ export function normalizeProductInput(input: Record<string, unknown>) {
   if ("error" in purchaseOptions) {
     return { error: purchaseOptions.error };
   }
+  if ("error" in featureGroups) {
+    return { error: featureGroups.error };
+  }
   if (!VALID_CATEGORIES.includes(category)) {
     return { error: "Category is invalid." };
   }
@@ -351,6 +415,10 @@ export function normalizeProductInput(input: Record<string, unknown>) {
       fullDescription,
       videoUrl,
       disclaimer,
+      featureGroups:
+        featureGroups.groups.length > 0
+          ? toFeatureGroupsJson(featureGroups.groups)
+          : Prisma.JsonNull,
       category,
       price,
       purchaseOptions:

@@ -141,6 +141,7 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
     (product.productVideo
       ? { type: "video" as const, src: product.productVideo.videoUrl }
       : null);
+  const featureGroups = product.featureGroups || [];
   const productDisclaimer = product.disclaimer || DEFAULT_DISCLAIMER;
   const availabilityLabel =
     product.stockCount !== undefined && product.stockCount < 10
@@ -456,23 +457,50 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
               </section>
             ) : null}
 
-            <section className={styles.contentPanel}>
-              <div className={styles.contentHeader}>
-                <span>Product Showcase</span>
-                <h2>What is included</h2>
-              </div>
-              <div className={styles.showcaseGrid}>
-                {showcaseItems.map(({ icon: Icon, title, copy }) => (
-                  <div key={title} className={styles.showcaseItem}>
-                    <Icon size={20} />
-                    <div>
-                      <h3>{title}</h3>
-                      <p>{copy}</p>
+            {featureGroups.length > 0 ? (
+              <section className={styles.contentPanel}>
+                <div className={styles.contentHeader}>
+                  <span>Product Features</span>
+                  <h2>Included capabilities</h2>
+                </div>
+                <div className={styles.featureGrid}>
+                  {featureGroups.map((group) => (
+                    <div key={group.id} className={styles.featureCard}>
+                      <div className={styles.featureCardHeader}>
+                        <h3>{group.title}</h3>
+                        {group.description ? <p>{group.description}</p> : null}
+                      </div>
+                      <ul className={styles.featureBulletList}>
+                        {group.items.map((item) => (
+                          <li key={item}>
+                            <span />
+                            <p>{item}</p>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+                  ))}
+                </div>
+              </section>
+            ) : (
+              <section className={styles.contentPanel}>
+                <div className={styles.contentHeader}>
+                  <span>Product Showcase</span>
+                  <h2>What is included</h2>
+                </div>
+                <div className={styles.showcaseGrid}>
+                  {showcaseItems.map(({ icon: Icon, title, copy }) => (
+                    <div key={title} className={styles.showcaseItem}>
+                      <Icon size={20} />
+                      <div>
+                        <h3>{title}</h3>
+                        <p>{copy}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <section className={styles.contentPanel}>
               <div className={styles.contentHeader}>
