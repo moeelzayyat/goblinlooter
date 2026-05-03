@@ -64,7 +64,7 @@ export async function createStripeCheckoutSession({
     payment_method_types: ["card", "cashapp"],
     payment_method_options: {
       card: {
-        request_three_d_secure: "any",
+        request_three_d_secure: "challenge",
       },
     },
     client_reference_id: orderId,
