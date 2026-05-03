@@ -395,6 +395,60 @@
   gap: var(--space-md);
 }
 
+.optionEditor {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.02);
+  padding: var(--space-md);
+}
+
+.optionEditorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.optionEditorHeader h3 {
+  font-size: var(--text-base);
+  color: var(--text-primary);
+}
+
+.optionEditorHeader p,
+.optionEmpty {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  margin-top: 4px;
+}
+
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.optionRow {
+  display: grid;
+  grid-template-columns: 1fr 140px 1.2fr 160px auto;
+  gap: var(--space-sm);
+  align-items: end;
+  padding: var(--space-sm);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+}
+
+.optionRow .field input {
+  min-height: 46px;
+}
+
+.optionActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -646,6 +700,7 @@
   .surfaceHeader,
   .panelHeader,
   .keyManagerHeader,
+  .optionEditorHeader,
   .keyRowTop,
   .keyActions,
   .dataRow,
@@ -656,7 +711,8 @@
 
   .sectionGrid,
   .twoColumnGrid,
-  .infoGrid {
+  .infoGrid,
+  .optionRow {
     grid-template-columns: 1fr;
   }
 

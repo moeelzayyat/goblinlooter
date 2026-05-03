@@ -23,6 +23,13 @@ export type RefundEligibility = "eligible" | "conditional" | "non-refundable";
 
 export type ProductStatus = "draft" | "published" | "disabled";
 
+export interface PurchaseOption {
+  id: string;
+  label: string;
+  price: number;
+  description?: string | null;
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -31,6 +38,7 @@ export interface Product {
   fullDescription: string;
   category: ProductCategory;
   price: number;
+  purchaseOptions?: PurchaseOption[];
   platform: string[];
   compatibilityNotes: string;
   regionRestrictions?: string | null;
@@ -87,6 +95,8 @@ export interface OrderItem {
   product?: Product;
   quantity: number;
   unitPrice: number;
+  purchaseOptionId?: string | null;
+  purchaseOptionLabel?: string | null;
 }
 
 /* ───── Inventory Keys ───── */

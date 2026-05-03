@@ -132,10 +132,73 @@
   color: var(--warning);
 }
 
+.priceOption {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--accent);
+}
+
 .lowStock {
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--danger);
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-sm);
+}
+
+.optionCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 74px;
+  padding: var(--space-md);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.optionCard:hover {
+  border-color: rgba(62, 207, 142, 0.45);
+  transform: translateY(-1px);
+}
+
+.optionCardActive {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(62, 207, 142, 0.3);
+}
+
+.optionCard span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.optionCard strong,
+.optionCard b {
+  font-size: var(--text-sm);
+}
+
+.optionCard small {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+.optionCard b {
+  color: var(--warning);
+  white-space: nowrap;
 }
 
 .deliveryInfo {

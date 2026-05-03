@@ -7,6 +7,37 @@ import { createStripeCheckoutSession } from "@/lib/stripe";
 
 type CheckoutProvider = "stripe" | "btcpay";
 
+function resolvePurchaseSelection(
+  product: NonNullable<Awaited<ReturnType<typeof getCatalogProductBySlug>>>,
+  value: unknown
+) {
+  const options = product.purchaseOptions || [];
+  if (options.length === 0) {
+    return {
+      amount: product.price,
+      optionId: null,
+      optionLabel: null,
+      itemTitle: product.title,
+    };
+  }
+
+  const requestedId = typeof value === "string" ? value : "";
+  const selected =
+    options.find((option) => option.id === requestedId) ||
+    (!requestedId ? options[0] : null);
+
+  if (!selected) {
+    return { error: "Selected duration option is invalid." };
+  }
+
+  return {
+    amount: selected.price,
+    optionId: selected.id,
+    optionLabel: selected.label,
+    itemTitle: `${product.title} - ${selected.label}`,
+  };
+}
+
 function getRequestOrigin(req: NextRequest) {
   const envOrigin = process.env.AUTH_URL || process.env.NEXTAUTH_URL;
   if (envOrigin) {
@@ -51,7 +82,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     const body = await req.json();
-    const { productSlug, buyerEmail } = body;
+    const { productSlug, buyerEmail, purchaseOptionId } = body;
     const paymentProvider = getProvider(body.paymentProvider);
 
     if (!productSlug) {
@@ -87,6 +118,7 @@ export async function POST(req: NextRequest) {
     const origin = getRequestOrigin(req);
     const customerEmail = buyerEmail || session.user.email || undefined;
     const dbProduct = await ensureDatabaseProduct(productSlug);
+    const purchaseSelection = resolvePurchaseSelection(product, purchaseOptionId);
 
     if (!dbProduct) {
       return NextResponse.json(
@@ -95,18 +127,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if ("error" in purchaseSelection) {
+      return NextResponse.json(
+        { error: purchaseSelection.error },
+        { status: 400 }
+      );
+    }
+
     const dbOrder = await prisma.order.create({
       data: {
         id: orderId,
         customerId: session.user.id,
         status: "pending",
-        totalAmount: product.price,
+        totalAmount: purchaseSelection.amount,
         paymentMethod: paymentProvider === "stripe" ? "STRIPE" : "BTCPAY",
         items: {
           create: {
             productId: dbProduct.id,
             quantity: 1,
-            unitPrice: product.price,
+            unitPrice: purchaseSelection.amount,
+            purchaseOptionId: purchaseSelection.optionId,
+            purchaseOptionLabel: purchaseSelection.optionLabel,
           },
         },
       },
@@ -131,10 +172,10 @@ export async function POST(req: NextRequest) {
 
     if (paymentProvider === "btcpay") {
       const invoice = await createInvoice({
-        amount: product.price,
+        amount: purchaseSelection.amount,
         currency: "USD",
         orderId: dbOrder.id,
-        itemDescription: product.title,
+        itemDescription: purchaseSelection.itemTitle,
         buyerEmail: customerEmail,
         redirectURL: getSuccessUrl(origin, dbOrder.id, paymentProvider),
       });
@@ -153,12 +194,12 @@ export async function POST(req: NextRequest) {
     }
 
     const checkoutSession = await createStripeCheckoutSession({
-      amount: product.price,
+      amount: purchaseSelection.amount,
       buyerEmail: customerEmail,
       cancelUrl: getCancelUrl(origin, product.slug),
       orderId: dbOrder.id,
       productSlug: product.slug,
-      productTitle: product.title,
+      productTitle: purchaseSelection.itemTitle,
       successUrl: getSuccessUrl(origin, dbOrder.id, paymentProvider),
     });
 

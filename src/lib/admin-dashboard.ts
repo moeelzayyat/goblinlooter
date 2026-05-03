@@ -38,6 +38,8 @@ export interface AdminOrderRecord {
     id: string;
     quantity: number;
     unitPrice: number;
+    purchaseOptionId: string | null;
+    purchaseOptionLabel: string | null;
     productId: string;
     productTitle: string;
     productSlug: string | null;
@@ -189,6 +191,8 @@ function serializeOrder(order: Awaited<ReturnType<typeof getOrderSourceById>>) {
       id: item.id,
       quantity: item.quantity,
       unitPrice: Number(item.unitPrice),
+      purchaseOptionId: item.purchaseOptionId,
+      purchaseOptionLabel: item.purchaseOptionLabel,
       productId: item.productId,
       productTitle: item.product?.title || "Unknown Product",
       productSlug: item.product?.slug || null,

@@ -24,6 +24,12 @@ const SORT_OPTIONS = [
 
 const ITEMS_PER_PAGE = 12;
 
+function getLowestProductPrice(product: Product) {
+  return product.purchaseOptions && product.purchaseOptions.length > 0
+    ? Math.min(...product.purchaseOptions.map((option) => option.price))
+    : product.price;
+}
+
 interface ShopClientPageProps {
   products: Product[];
   categoryOptions: { id: Product["category"]; name: string }[];
@@ -77,10 +83,10 @@ export function ShopClientPage({
         );
         break;
       case "price-low":
-        items.sort((a, b) => a.price - b.price);
+        items.sort((a, b) => getLowestProductPrice(a) - getLowestProductPrice(b));
         break;
       case "price-high":
-        items.sort((a, b) => b.price - a.price);
+        items.sort((a, b) => getLowestProductPrice(b) - getLowestProductPrice(a));
         break;
       default:
         break;

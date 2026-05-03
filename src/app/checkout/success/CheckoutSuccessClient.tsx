@@ -30,6 +30,7 @@ interface SuccessOrder {
     productTitle: string;
     downloadUrl: string | null;
     thankYouMessage: string | null;
+    purchaseOptionLabel: string | null;
   }[];
   key: {
     keyValue?: string;
@@ -397,7 +398,12 @@ export function CheckoutSuccessClient({
             {downloads.map((item) => (
               <div key={item.id} className={styles.downloadCard}>
                 <div>
-                  <div className={styles.downloadTitle}>{item.productTitle}</div>
+                  <div className={styles.downloadTitle}>
+                    {item.productTitle}
+                    {item.purchaseOptionLabel
+                      ? ` - ${item.purchaseOptionLabel}`
+                      : ""}
+                  </div>
                   <div className={styles.downloadMeta}>
                     Secure delivery for this order
                   </div>

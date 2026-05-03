@@ -1,7 +1,7 @@
-import type { Product as DbProduct, InventoryKey } from "@prisma/client";
+import { Prisma, type Product as DbProduct, type InventoryKey } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { MOCK_PRODUCTS } from "@/lib/mockData";
-import type { Product } from "@/types";
+import type { Product, PurchaseOption } from "@/types";
 
 type ProductWithKeys = DbProduct & {
   inventoryKeys?: Pick<InventoryKey, "status">[];
@@ -14,6 +14,49 @@ const ARCWAY_SERVICES_COPY = {
   fullDescription:
     "ArcWay Services includes gaming utility access, setup resources, and priority assistance for Arc Raiders players. Built for straightforward configuration, clear guidance, and smooth support from purchase through activation.",
 };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function normalizePurchaseOptions(value: unknown): PurchaseOption[] {
+  if (!Array.isArray(value)) return [];
+
+  const options: PurchaseOption[] = [];
+
+  for (const entry of value) {
+    if (!isRecord(entry)) continue;
+
+      const id = typeof entry.id === "string" ? entry.id.trim() : "";
+      const label = typeof entry.label === "string" ? entry.label.trim() : "";
+      const price = Number(entry.price);
+      const description =
+        typeof entry.description === "string" && entry.description.trim()
+          ? entry.description.trim()
+          : null;
+
+      if (!id || !label || !Number.isFinite(price) || price < 0.5) {
+        continue;
+      }
+
+    options.push({ id, label, price, description });
+  }
+
+  return options;
+}
+
+function toPurchaseOptionsJson(
+  options: PurchaseOption[] | undefined
+): Prisma.InputJsonValue | undefined {
+  if (!options || options.length === 0) return undefined;
+
+  return options.map((option) => ({
+    id: option.id,
+    label: option.label,
+    price: option.price,
+    description: option.description || null,
+  }));
+}
 
 function normalizePublicProductCopy(product: Product): Product {
   if (product.slug !== "arcway-refresh-ids") {
@@ -40,6 +83,7 @@ function toPublicProduct(product: ProductWithKeys): Product {
     fullDescription: product.fullDescription,
     category: product.category as Product["category"],
     price: Number(product.price),
+    purchaseOptions: normalizePurchaseOptions(product.purchaseOptions),
     platform: product.platform,
     compatibilityNotes: product.compatibilityNotes,
     regionRestrictions: product.regionRestrictions,
@@ -167,6 +211,7 @@ export async function ensureDatabaseProduct(slug: string) {
       fullDescription: fallback.fullDescription,
       category: fallback.category,
       price: fallback.price,
+      purchaseOptions: toPurchaseOptionsJson(fallback.purchaseOptions),
       platform: fallback.platform,
       compatibilityNotes: fallback.compatibilityNotes,
       regionRestrictions: fallback.regionRestrictions,

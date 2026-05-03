@@ -39,6 +39,10 @@ export function ProductClientPage({
   const [activeTab, setActiveTab] = useState<TabId>("description");
   const [checkingOut, setCheckingOut] = useState<CheckoutProvider | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const purchaseOptions = product.purchaseOptions || [];
+  const [selectedOptionId, setSelectedOptionId] = useState(
+    purchaseOptions[0]?.id || ""
+  );
 
   useEffect(() => {
     trackEvent("product_view", {
@@ -46,6 +50,16 @@ export function ProductClientPage({
       category: product.category,
     });
   }, [product.category, product.id]);
+
+  useEffect(() => {
+    setSelectedOptionId(product.purchaseOptions?.[0]?.id || "");
+  }, [product.id, product.purchaseOptions]);
+
+  const selectedOption =
+    purchaseOptions.find((option) => option.id === selectedOptionId) ||
+    purchaseOptions[0] ||
+    null;
+  const displayPrice = selectedOption?.price ?? product.price;
 
   async function handleBuyNow(paymentProvider: CheckoutProvider) {
     if (checkingOut) return;
@@ -56,7 +70,11 @@ export function ProductClientPage({
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productSlug: product.slug, paymentProvider }),
+        body: JSON.stringify({
+          productSlug: product.slug,
+          paymentProvider,
+          purchaseOptionId: selectedOption?.id || null,
+        }),
       });
       const data = await response.json();
 
@@ -123,11 +141,35 @@ export function ProductClientPage({
             <p className={styles.productShort}>{product.shortDescription}</p>
 
             <div className={styles.priceBlock}>
-              <span className={styles.price}>${product.price.toFixed(2)}</span>
+              <span className={styles.price}>${displayPrice.toFixed(2)}</span>
+              {selectedOption ? (
+                <span className={styles.priceOption}>{selectedOption.label}</span>
+              ) : null}
               {product.stockCount !== undefined && product.stockCount < 10 && (
                 <span className={styles.lowStock}>Only {product.stockCount} left</span>
               )}
             </div>
+
+            {purchaseOptions.length > 0 ? (
+              <div className={styles.optionGrid}>
+                {purchaseOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className={`${styles.optionCard} ${
+                      selectedOption?.id === option.id ? styles.optionCardActive : ""
+                    }`}
+                    onClick={() => setSelectedOptionId(option.id)}
+                  >
+                    <span>
+                      <strong>{option.label}</strong>
+                      {option.description ? <small>{option.description}</small> : null}
+                    </span>
+                    <b>${option.price.toFixed(2)}</b>
+                  </button>
+                ))}
+              </div>
+            ) : null}
 
             <div className={styles.deliveryInfo}>
               <Zap size={16} />

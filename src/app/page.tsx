@@ -37,7 +37,13 @@ export default async function HomePage() {
   const products = await getPublishedProducts();
   const product = products[0] || null;
   const shopHref = product ? `/shop/${product.slug}` : "/shop";
-  const priceLabel = product ? `$${product.price.toFixed(0)}` : null;
+  const lowestPrice =
+    product?.purchaseOptions && product.purchaseOptions.length > 0
+      ? Math.min(...product.purchaseOptions.map((option) => option.price))
+      : product?.price;
+  const priceLabel = lowestPrice !== undefined
+    ? `${product?.purchaseOptions?.length ? "From " : ""}$${lowestPrice.toFixed(0)}`
+    : null;
 
   return (
     <div className={styles.page}>

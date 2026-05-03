@@ -36,6 +36,7 @@ model Product {
   price                Decimal  @db.Decimal(10, 2)
   monthlyPrice         Decimal? @db.Decimal(10, 2)
   lifetimePrice        Decimal? @db.Decimal(10, 2)
+  purchaseOptions      Json?
   platform             String[]
   compatibilityNotes   String
   regionRestrictions   String?

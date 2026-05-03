@@ -1,8 +1,9 @@
-import type { InventoryKey, Product as DbProduct } from "@prisma/client";
+import { Prisma, type InventoryKey, type Product as DbProduct } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type {
   DeliveryMethod,
   ProductCategory,
+  PurchaseOption,
   ProductStatus,
   RefundEligibility,
 } from "@/types";
@@ -22,6 +23,7 @@ export interface AdminProductRecord {
   fullDescription: string;
   category: ProductCategory;
   price: number;
+  purchaseOptions: PurchaseOption[];
   platform: string[];
   compatibilityNotes: string;
   regionRestrictions: string | null;
@@ -60,6 +62,10 @@ const VALID_REFUND_ELIGIBILITY: RefundEligibility[] = [
 ];
 const VALID_STATUSES: ProductStatus[] = ["draft", "published", "disabled"];
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function parseStringList(value: unknown) {
   if (Array.isArray(value)) {
     return value
@@ -75,6 +81,63 @@ function parseStringList(value: unknown) {
     .split(/\r?\n|,/)
     .map((entry) => entry.trim())
     .filter(Boolean);
+}
+
+function parsePurchaseOptions(value: unknown) {
+  if (!Array.isArray(value)) return { options: [] as PurchaseOption[] };
+
+  const options: PurchaseOption[] = [];
+  const seenIds = new Set<string>();
+
+  for (const [index, entry] of value.entries()) {
+    if (!isRecord(entry)) {
+      return { error: "Purchase options must be valid option rows." };
+    }
+
+    const label = typeof entry.label === "string" ? entry.label.trim() : "";
+    const idSource =
+      typeof entry.id === "string" && entry.id.trim() ? entry.id : label;
+    const id = slugify(idSource);
+    const description =
+      typeof entry.description === "string" && entry.description.trim()
+        ? entry.description.trim()
+        : null;
+    const price = Number(entry.price);
+
+    if (!label && !idSource && !Number.isFinite(price)) continue;
+    if (!label) {
+      return { error: `Purchase option ${index + 1} needs a label.` };
+    }
+    if (!id) {
+      return { error: `Purchase option ${label} needs a valid ID.` };
+    }
+    if (seenIds.has(id)) {
+      return { error: `Purchase option IDs must be unique. "${id}" is repeated.` };
+    }
+    if (!Number.isFinite(price) || price < 0.5) {
+      return { error: `Purchase option "${label}" must be at least $0.50.` };
+    }
+
+    seenIds.add(id);
+    options.push({ id, label, price, description });
+  }
+
+  return { options };
+}
+
+function serializePurchaseOptions(value: unknown): PurchaseOption[] {
+  const parsed = parsePurchaseOptions(value);
+  if ("error" in parsed) return [];
+  return parsed.options;
+}
+
+function toPurchaseOptionsJson(options: PurchaseOption[]): Prisma.InputJsonValue {
+  return options.map((option) => ({
+    id: option.id,
+    label: option.label,
+    price: option.price,
+    description: option.description || null,
+  }));
 }
 
 function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
@@ -117,6 +180,7 @@ function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
     fullDescription: product.fullDescription,
     category: product.category as ProductCategory,
     price: Number(product.price),
+    purchaseOptions: serializePurchaseOptions(product.purchaseOptions),
     platform: product.platform,
     compatibilityNotes: product.compatibilityNotes,
     regionRestrictions: product.regionRestrictions,
@@ -187,6 +251,7 @@ export function normalizeProductInput(input: Record<string, unknown>) {
   const refundEligibility = input.refundEligibility as RefundEligibility;
   const status = input.status as ProductStatus;
   const price = Number(input.price);
+  const purchaseOptions = parsePurchaseOptions(input.purchaseOptions);
   const platform = parseStringList(input.platform);
   const images = parseStringList(input.images);
 
@@ -196,6 +261,9 @@ export function normalizeProductInput(input: Record<string, unknown>) {
   if (!fullDescription) return { error: "Full description is required." };
   if (!Number.isFinite(price) || price < 0) {
     return { error: "Price must be a valid non-negative number." };
+  }
+  if ("error" in purchaseOptions) {
+    return { error: purchaseOptions.error };
   }
   if (!VALID_CATEGORIES.includes(category)) {
     return { error: "Category is invalid." };
@@ -230,6 +298,10 @@ export function normalizeProductInput(input: Record<string, unknown>) {
       fullDescription,
       category,
       price,
+      purchaseOptions:
+        purchaseOptions.options.length > 0
+          ? toPurchaseOptionsJson(purchaseOptions.options)
+          : Prisma.JsonNull,
       platform,
       compatibilityNotes,
       regionRestrictions,

@@ -41,6 +41,8 @@ interface OrderDetail {
     downloadUrl: string | null;
     quantity: number;
     unitPrice: number;
+    purchaseOptionId: string | null;
+    purchaseOptionLabel: string | null;
   }[];
   key: {
     id: string;
@@ -350,7 +352,11 @@ export default function OrderDetailPage() {
               {order.items.map((item) => (
                 <div key={item.id} className={styles.detailRow}>
                   <span className={styles.detailLabel}>
-                    {item.productTitle} × {item.quantity}
+                    {item.productTitle}
+                    {item.purchaseOptionLabel
+                      ? ` - ${item.purchaseOptionLabel}`
+                      : ""}{" "}
+                    × {item.quantity}
                   </span>
                   <span className={`${styles.detailValue} ${styles.warning}`}>
                     ${(item.unitPrice * item.quantity).toFixed(2)}

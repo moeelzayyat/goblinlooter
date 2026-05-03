@@ -8,6 +8,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const lowestPrice =
+    product.purchaseOptions && product.purchaseOptions.length > 0
+      ? Math.min(...product.purchaseOptions.map((option) => option.price))
+      : product.price;
+
   return (
     <Link href={`/shop/${product.slug}`} className={styles.card}>
       {product.images.length > 0 ? (
@@ -33,7 +38,9 @@ export function ProductCard({ product }: ProductCardProps) {
             <span>{product.deliveryTimeEstimate}</span>
           </div>
           <span className={styles.price}>
-            ${product.price.toFixed(2)}
+            {product.purchaseOptions && product.purchaseOptions.length > 0
+              ? `From $${lowestPrice.toFixed(2)}`
+              : `$${lowestPrice.toFixed(2)}`}
           </span>
         </div>
       </div>

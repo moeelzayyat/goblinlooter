@@ -131,6 +131,31 @@ function formatCompactDate(value: string | null | undefined) {
   return new Date(value).toLocaleDateString();
 }
 
+interface ProductOptionFormState {
+  id: string;
+  label: string;
+  price: string;
+  description: string;
+}
+
+const STANDARD_DURATION_OPTIONS: ProductOptionFormState[] = [
+  { id: "1-day", label: "1 Day", price: "", description: "" },
+  { id: "1-week", label: "1 Week", price: "", description: "" },
+  { id: "1-month", label: "1 Month", price: "", description: "" },
+];
+
+function slugifyOptionId(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function createOptionDraft(): ProductOptionFormState {
+  return { id: "", label: "", price: "", description: "" };
+}
+
 function createEmptyProductForm() {
   return {
     title: "",
@@ -139,6 +164,7 @@ function createEmptyProductForm() {
     fullDescription: "",
     category: "tool-access",
     price: "60",
+    purchaseOptions: [] as ProductOptionFormState[],
     platform: "Windows 10/11",
     compatibilityNotes: "Latest supported build",
     regionRestrictions: "",
@@ -164,6 +190,12 @@ function formFromProduct(product: AdminProductRecord): ProductFormState {
     fullDescription: product.fullDescription,
     category: product.category,
     price: product.price.toString(),
+    purchaseOptions: product.purchaseOptions.map((option) => ({
+      id: option.id,
+      label: option.label,
+      price: option.price.toString(),
+      description: option.description || "",
+    })),
     platform: product.platform.join("\n"),
     compatibilityNotes: product.compatibilityNotes,
     regionRestrictions: product.regionRestrictions || "",
@@ -356,6 +388,58 @@ export function AdminDashboard({
     value: ProductFormState[K]
   ) {
     setProductForm((current) => ({ ...current, [name]: value }));
+  }
+
+  function updatePurchaseOption(
+    index: number,
+    field: keyof ProductOptionFormState,
+    value: string
+  ) {
+    setProductForm((current) => ({
+      ...current,
+      purchaseOptions: current.purchaseOptions.map((option, optionIndex) => {
+        if (optionIndex !== index) return option;
+
+        const nextOption = { ...option, [field]: value };
+        if (field === "label" && !option.id.trim()) {
+          nextOption.id = slugifyOptionId(value);
+        }
+
+        return nextOption;
+      }),
+    }));
+  }
+
+  function addPurchaseOption() {
+    setProductForm((current) => ({
+      ...current,
+      purchaseOptions: [...current.purchaseOptions, createOptionDraft()],
+    }));
+  }
+
+  function addStandardDurations() {
+    setProductForm((current) => {
+      const existingIds = new Set(
+        current.purchaseOptions.map((option) => slugifyOptionId(option.id))
+      );
+      const additions = STANDARD_DURATION_OPTIONS.filter(
+        (option) => !existingIds.has(option.id)
+      );
+
+      return {
+        ...current,
+        purchaseOptions: [...current.purchaseOptions, ...additions],
+      };
+    });
+  }
+
+  function removePurchaseOption(index: number) {
+    setProductForm((current) => ({
+      ...current,
+      purchaseOptions: current.purchaseOptions.filter(
+        (_option, optionIndex) => optionIndex !== index
+      ),
+    }));
   }
 
   function updateProductState(product: AdminProductRecord) {
@@ -1181,6 +1265,106 @@ export function AdminDashboard({
                     </label>
                   </div>
 
+                  <div className={styles.optionEditor}>
+                    <div className={styles.optionEditorHeader}>
+                      <div>
+                        <h3>Duration Options</h3>
+                        <p>
+                          Add selectable prices such as 1 Day, 1 Week, and 1 Month.
+                          When options exist, customers must choose one before checkout.
+                        </p>
+                      </div>
+                      <div className={styles.inlineActions}>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          onClick={addStandardDurations}
+                        >
+                          Add 1D / 1W / 1M
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          onClick={addPurchaseOption}
+                        >
+                          Add Option
+                        </Button>
+                      </div>
+                    </div>
+
+                    {productForm.purchaseOptions.length === 0 ? (
+                      <div className={styles.optionEmpty}>
+                        No duration options. The product will use the base price.
+                      </div>
+                    ) : (
+                      <div className={styles.optionList}>
+                        {productForm.purchaseOptions.map((option, index) => (
+                          <div key={`purchase-option-${index}`} className={styles.optionRow}>
+                            <label className={styles.field}>
+                              <span>Label</span>
+                              <input
+                                value={option.label}
+                                placeholder="1 Day"
+                                onChange={(event) =>
+                                  updatePurchaseOption(index, "label", event.target.value)
+                                }
+                              />
+                            </label>
+                            <label className={styles.field}>
+                              <span>Price</span>
+                              <input
+                                type="number"
+                                min="0.50"
+                                step="0.01"
+                                value={option.price}
+                                placeholder="14.99"
+                                onChange={(event) =>
+                                  updatePurchaseOption(index, "price", event.target.value)
+                                }
+                              />
+                            </label>
+                            <label className={styles.field}>
+                              <span>Description</span>
+                              <input
+                                value={option.description}
+                                placeholder="Best for testing"
+                                onChange={(event) =>
+                                  updatePurchaseOption(
+                                    index,
+                                    "description",
+                                    event.target.value
+                                  )
+                                }
+                              />
+                            </label>
+                            <label className={styles.field}>
+                              <span>ID</span>
+                              <input
+                                value={option.id}
+                                placeholder="1-day"
+                                onChange={(event) =>
+                                  updatePurchaseOption(index, "id", event.target.value)
+                                }
+                              />
+                            </label>
+                            <div className={styles.optionActions}>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="danger"
+                                onClick={() => removePurchaseOption(index)}
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <label className={styles.field}>
                     <span>Short Description</span>
                     <textarea
@@ -1558,7 +1742,12 @@ export function AdminDashboard({
                         {selectedOrder.items.map((item) => (
                           <div key={item.id} className={styles.dataRowStatic}>
                             <div>
-                              <strong>{item.productTitle}</strong>
+                              <strong>
+                                {item.productTitle}
+                                {item.purchaseOptionLabel
+                                  ? ` - ${item.purchaseOptionLabel}`
+                                  : ""}
+                              </strong>
                               <p>
                                 Qty {item.quantity} · {formatCurrency(item.unitPrice)}
                               </p>

@@ -81,6 +81,8 @@ export async function GET(
             : null,
         quantity: item.quantity,
         unitPrice: Number(item.unitPrice),
+        purchaseOptionId: item.purchaseOptionId,
+        purchaseOptionLabel: item.purchaseOptionLabel,
       })),
       key: keyData,
     };

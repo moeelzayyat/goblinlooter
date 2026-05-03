@@ -36,6 +36,14 @@ The webhook must send at least `checkout.session.completed`,
 BTCPay remains available for supported cryptocurrency checkout through the
 existing `BTCPAY_*` environment variables.
 
+## Product Duration Options
+
+Products can optionally define duration-based purchase options in the admin
+product editor, such as `1 Day`, `1 Week`, and `1 Month`. When options are
+configured, the product page requires the customer to select one option before
+checkout. Checkout charges the selected option price and stores the selected
+option label on the order item.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 ## Learn More
