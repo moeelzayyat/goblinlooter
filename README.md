@@ -48,7 +48,9 @@ option label on the order item.
 
 Each product can define an optional video URL and disclaimer in the admin
 product editor. Product videos support YouTube, Vimeo, and direct MP4/WebM/OGG
-URLs. When no video is configured, the video section is hidden.
+URLs. Admins can also upload one MP4, WebM, OGG, or MOV video per product. When
+a video URL is set it is used first; otherwise the uploaded video is shown. When
+no video is configured, the video section is hidden.
 
 ## Protected Product Downloads
 

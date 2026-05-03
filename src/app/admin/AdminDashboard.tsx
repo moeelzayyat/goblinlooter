@@ -286,6 +286,7 @@ export function AdminDashboard({
   );
   const [keyInput, setKeyInput] = useState("");
   const [productFileUpload, setProductFileUpload] = useState<File | null>(null);
+  const [productVideoUpload, setProductVideoUpload] = useState<File | null>(null);
   const [keyDrafts, setKeyDrafts] = useState<Record<string, string>>({});
   const [orderStatus, setOrderStatus] = useState<AdminOrderStatus>(
     initialData.orders[0]?.status || "pending"
@@ -312,6 +313,8 @@ export function AdminDashboard({
   const [deletingProduct, setDeletingProduct] = useState(false);
   const [uploadingProductFile, setUploadingProductFile] = useState(false);
   const [removingProductFile, setRemovingProductFile] = useState(false);
+  const [uploadingProductVideo, setUploadingProductVideo] = useState(false);
+  const [removingProductVideo, setRemovingProductVideo] = useState(false);
   const [addingKeys, setAddingKeys] = useState(false);
   const [keyAction, setKeyAction] = useState<{
     id: string;
@@ -355,6 +358,7 @@ export function AdminDashboard({
       setProductForm(createEmptyProductForm());
       setKeyInput("");
       setProductFileUpload(null);
+      setProductVideoUpload(null);
       setKeyDrafts({});
       return;
     }
@@ -362,6 +366,7 @@ export function AdminDashboard({
     setProductForm(formFromProduct(selectedProduct));
     setKeyInput("");
     setProductFileUpload(null);
+    setProductVideoUpload(null);
     setKeyDrafts(
       Object.fromEntries(
         selectedProduct.inventoryKeys.map((key) => [key.id, key.keyValue])
@@ -627,6 +632,77 @@ export function AdminDashboard({
       );
     } finally {
       setRemovingProductFile(false);
+    }
+  }
+
+  async function uploadProductVideo() {
+    if (!selectedProduct || !productVideoUpload) return;
+
+    setUploadingProductVideo(true);
+    clearBanner();
+
+    try {
+      const formData = new FormData();
+      formData.append("video", productVideoUpload);
+
+      const response = await fetch(
+        `/api/admin/products/${selectedProduct.id}/video`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to upload product video.");
+      }
+
+      updateProductState(data.product as AdminProductRecord);
+      setProductVideoUpload(null);
+      setMessage("Product video uploaded.");
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Unable to upload product video."
+      );
+    } finally {
+      setUploadingProductVideo(false);
+    }
+  }
+
+  async function removeProductVideo() {
+    if (!selectedProduct?.productVideo) return;
+
+    const confirmed = window.confirm("Remove the uploaded product video?");
+    if (!confirmed) return;
+
+    setRemovingProductVideo(true);
+    clearBanner();
+
+    try {
+      const response = await fetch(
+        `/api/admin/products/${selectedProduct.id}/video`,
+        { method: "DELETE" }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to remove product video.");
+      }
+
+      updateProductState(data.product as AdminProductRecord);
+      setProductVideoUpload(null);
+      setMessage("Product video removed.");
+    } catch (removeError) {
+      setError(
+        removeError instanceof Error
+          ? removeError.message
+          : "Unable to remove product video."
+      );
+    } finally {
+      setRemovingProductVideo(false);
     }
   }
 
@@ -1569,6 +1645,82 @@ export function AdminDashboard({
                         placeholder="Shown in the product disclaimer section"
                       />
                     </label>
+                  </div>
+
+                  <div className={styles.fileManager}>
+                    <div className={styles.fileManagerHeader}>
+                      <div>
+                        <h3>Uploaded Product Video</h3>
+                        <p>
+                          Upload an MP4, WebM, OGG, or MOV file for the product page.
+                          The uploaded video is used when no video URL is set.
+                        </p>
+                      </div>
+                      {selectedProduct?.productVideo ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          loading={removingProductVideo}
+                          onClick={removeProductVideo}
+                        >
+                          Remove Video
+                        </Button>
+                      ) : null}
+                    </div>
+
+                    {selectedProduct ? (
+                      <>
+                        {selectedProduct.productVideo ? (
+                          <div className={styles.fileSummary}>
+                            <strong>{selectedProduct.productVideo.fileName}</strong>
+                            <span>
+                              {formatProductFileSize(
+                                selectedProduct.productVideo.sizeBytes
+                              )}{" "}
+                              - Uploaded{" "}
+                              {formatCompactDate(
+                                selectedProduct.productVideo.createdAt
+                              )}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className={styles.fileEmpty}>
+                            No uploaded video. The product page will use the Product
+                            Video URL if one is set.
+                          </div>
+                        )}
+
+                        <div className={styles.fileUploadRow}>
+                          <label className={styles.field}>
+                            <span>Upload Video</span>
+                            <input
+                              type="file"
+                              accept="video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.ogg,.mov"
+                              onChange={(event) =>
+                                setProductVideoUpload(event.target.files?.[0] || null)
+                              }
+                            />
+                            <small className={styles.fieldHint}>
+                              Allowed: MP4, WebM, OGG, or MOV. Max size: 250 MB.
+                            </small>
+                          </label>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            loading={uploadingProductVideo}
+                            disabled={!productVideoUpload}
+                            onClick={uploadProductVideo}
+                          >
+                            Upload Video
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className={styles.fileEmpty}>
+                        Save the product before uploading its product video.
+                      </div>
+                    )}
                   </div>
 
                   <label className={styles.field}>

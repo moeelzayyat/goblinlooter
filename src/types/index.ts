@@ -39,6 +39,16 @@ export interface ProductDownloadFile {
   updatedAt?: string;
 }
 
+export interface ProductVideoFile {
+  id: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  videoUrl: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -46,6 +56,7 @@ export interface Product {
   shortDescription: string;
   fullDescription: string;
   videoUrl?: string | null;
+  productVideo?: ProductVideoFile | null;
   disclaimer?: string | null;
   category: ProductCategory;
   price: number;

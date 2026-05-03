@@ -5,6 +5,14 @@ import type { Product, PurchaseOption } from "@/types";
 
 type ProductWithKeys = DbProduct & {
   inventoryKeys?: Pick<InventoryKey, "status">[];
+  productVideo?: {
+    id: string;
+    fileName: string;
+    contentType: string;
+    sizeBytes: number;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
 };
 
 const ARCWAY_SERVICES_COPY = {
@@ -82,6 +90,17 @@ function toPublicProduct(product: ProductWithKeys): Product {
     shortDescription: product.shortDescription,
     fullDescription: product.fullDescription,
     videoUrl: product.videoUrl,
+    productVideo: product.productVideo
+      ? {
+          id: product.productVideo.id,
+          fileName: product.productVideo.fileName,
+          contentType: product.productVideo.contentType,
+          sizeBytes: product.productVideo.sizeBytes,
+          videoUrl: `/api/products/${product.id}/video`,
+          createdAt: product.productVideo.createdAt.toISOString(),
+          updatedAt: product.productVideo.updatedAt.toISOString(),
+        }
+      : null,
     disclaimer: product.disclaimer,
     category: product.category as Product["category"],
     price: Number(product.price),
@@ -130,6 +149,16 @@ export async function getPublishedProducts(): Promise<Product[]> {
       where: { status: "published" },
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
       include: {
+        productVideo: {
+          select: {
+            id: true,
+            fileName: true,
+            contentType: true,
+            sizeBytes: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
         inventoryKeys: {
           select: { status: true },
         },
@@ -158,6 +187,16 @@ export async function getCatalogProductBySlug(slug: string): Promise<Product | n
     const product = await prisma.product.findUnique({
       where: { slug },
       include: {
+        productVideo: {
+          select: {
+            id: true,
+            fileName: true,
+            contentType: true,
+            sizeBytes: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
         inventoryKeys: {
           select: { status: true },
         },
@@ -186,6 +225,16 @@ export async function getAdminProducts(): Promise<Product[]> {
   const products = await prisma.product.findMany({
     orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     include: {
+      productVideo: {
+        select: {
+          id: true,
+          fileName: true,
+          contentType: true,
+          sizeBytes: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
       inventoryKeys: {
         select: { status: true },
       },

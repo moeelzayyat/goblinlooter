@@ -4,6 +4,7 @@ import type {
   DeliveryMethod,
   ProductCategory,
   ProductDownloadFile,
+  ProductVideoFile,
   PurchaseOption,
   ProductStatus,
   RefundEligibility,
@@ -22,6 +23,14 @@ type AdminProductWithKeys = DbProduct & {
     createdAt: Date;
     updatedAt: Date;
   } | null;
+  productVideo?: {
+    id: string;
+    fileName: string;
+    contentType: string;
+    sizeBytes: number;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
 };
 
 export interface AdminProductRecord {
@@ -31,6 +40,7 @@ export interface AdminProductRecord {
   shortDescription: string;
   fullDescription: string;
   videoUrl: string | null;
+  productVideo: ProductVideoFile | null;
   disclaimer: string | null;
   category: ProductCategory;
   price: number;
@@ -191,6 +201,17 @@ function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
     shortDescription: product.shortDescription,
     fullDescription: product.fullDescription,
     videoUrl: product.videoUrl,
+    productVideo: product.productVideo
+      ? {
+          id: product.productVideo.id,
+          fileName: product.productVideo.fileName,
+          contentType: product.productVideo.contentType,
+          sizeBytes: product.productVideo.sizeBytes,
+          videoUrl: `/api/products/${product.id}/video`,
+          createdAt: product.productVideo.createdAt.toISOString(),
+          updatedAt: product.productVideo.updatedAt.toISOString(),
+        }
+      : null,
     disclaimer: product.disclaimer,
     category: product.category as ProductCategory,
     price: Number(product.price),
@@ -377,6 +398,16 @@ export async function listAdminProducts() {
           updatedAt: true,
         },
       },
+      productVideo: {
+        select: {
+          id: true,
+          fileName: true,
+          contentType: true,
+          sizeBytes: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
       inventoryKeys: {
         select: {
           id: true,
@@ -399,6 +430,16 @@ export async function getAdminProductById(id: string) {
     where: { id },
     include: {
       productFile: {
+        select: {
+          id: true,
+          fileName: true,
+          contentType: true,
+          sizeBytes: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
+      productVideo: {
         select: {
           id: true,
           fileName: true,

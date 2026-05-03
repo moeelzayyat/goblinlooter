@@ -136,7 +136,11 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
   const images = product.images.filter(Boolean);
   const mainImage = images[mainImageIndex] || images[0] || "";
   const descriptionParagraphs = splitDescription(product.fullDescription);
-  const videoEmbed = resolveProductVideoEmbed(product.videoUrl);
+  const videoEmbed =
+    resolveProductVideoEmbed(product.videoUrl) ||
+    (product.productVideo
+      ? { type: "video" as const, src: product.productVideo.videoUrl }
+      : null);
   const productDisclaimer = product.disclaimer || DEFAULT_DISCLAIMER;
   const availabilityLabel =
     product.stockCount !== undefined && product.stockCount < 10
