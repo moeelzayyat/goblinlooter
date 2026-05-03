@@ -30,6 +30,15 @@ export interface PurchaseOption {
   description?: string | null;
 }
 
+export interface ProductDownloadFile {
+  id: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface Product {
   id: string;
   title: string;

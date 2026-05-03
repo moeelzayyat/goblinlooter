@@ -56,6 +56,22 @@ model Product {
 
   inventoryKeys InventoryKey[]
   orderItems    OrderItem[]
+  productFile   ProductFile?
+}
+
+// ───── Product File ─────
+
+model ProductFile {
+  id          String   @id @default(cuid())
+  productId   String   @unique
+  fileName    String
+  contentType String
+  sizeBytes   Int
+  data        Bytes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id])
 }
 
 // ───── Inventory Key ─────

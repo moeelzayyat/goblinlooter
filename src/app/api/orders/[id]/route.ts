@@ -29,6 +29,11 @@ export async function GET(
                 deliveryMethod: true,
                 downloadUrl: true,
                 thankYouMessage: true,
+                productFile: {
+                  select: {
+                    id: true,
+                  },
+                },
               },
             },
           },
@@ -74,7 +79,11 @@ export async function GET(
         productSlug: item.product?.slug || null,
         deliveryMethod: item.product?.deliveryMethod || null,
         downloadUrl:
-          order.status === "delivered" ? item.product?.downloadUrl || null : null,
+          order.status === "delivered"
+            ? item.product?.productFile
+              ? `/api/orders/${order.id}/downloads/${item.id}`
+              : item.product?.downloadUrl || null
+            : null,
         thankYouMessage:
           order.status === "delivered"
             ? item.product?.thankYouMessage || null

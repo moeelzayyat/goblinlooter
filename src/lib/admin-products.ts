@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import type {
   DeliveryMethod,
   ProductCategory,
+  ProductDownloadFile,
   PurchaseOption,
   ProductStatus,
   RefundEligibility,
@@ -13,6 +14,14 @@ type AdminProductWithKeys = DbProduct & {
     InventoryKey,
     "id" | "keyValue" | "status" | "orderId" | "assignedAt" | "createdAt"
   >[];
+  productFile?: {
+    id: string;
+    fileName: string;
+    contentType: string;
+    sizeBytes: number;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
 };
 
 export interface AdminProductRecord {
@@ -26,6 +35,7 @@ export interface AdminProductRecord {
   category: ProductCategory;
   price: number;
   purchaseOptions: PurchaseOption[];
+  productFile: ProductDownloadFile | null;
   platform: string[];
   compatibilityNotes: string;
   regionRestrictions: string | null;
@@ -185,6 +195,16 @@ function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
     category: product.category as ProductCategory,
     price: Number(product.price),
     purchaseOptions: serializePurchaseOptions(product.purchaseOptions),
+    productFile: product.productFile
+      ? {
+          id: product.productFile.id,
+          fileName: product.productFile.fileName,
+          contentType: product.productFile.contentType,
+          sizeBytes: product.productFile.sizeBytes,
+          createdAt: product.productFile.createdAt.toISOString(),
+          updatedAt: product.productFile.updatedAt.toISOString(),
+        }
+      : null,
     platform: product.platform,
     compatibilityNotes: product.compatibilityNotes,
     regionRestrictions: product.regionRestrictions,
@@ -347,6 +367,16 @@ export async function listAdminProducts() {
   const products = await prisma.product.findMany({
     orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     include: {
+      productFile: {
+        select: {
+          id: true,
+          fileName: true,
+          contentType: true,
+          sizeBytes: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
       inventoryKeys: {
         select: {
           id: true,
@@ -368,6 +398,16 @@ export async function getAdminProductById(id: string) {
   const product = await prisma.product.findUnique({
     where: { id },
     include: {
+      productFile: {
+        select: {
+          id: true,
+          fileName: true,
+          contentType: true,
+          sizeBytes: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
       inventoryKeys: {
         select: {
           id: true,

@@ -106,6 +106,9 @@ export async function DELETE(
     }
 
     await prisma.$transaction([
+      prisma.productFile.deleteMany({
+        where: { productId: id },
+      }),
       prisma.inventoryKey.deleteMany({
         where: { productId: id },
       }),

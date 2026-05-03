@@ -395,6 +395,7 @@
   gap: var(--space-md);
 }
 
+.fileManager,
 .optionEditor {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
@@ -402,6 +403,7 @@
   padding: var(--space-md);
 }
 
+.fileManagerHeader,
 .optionEditorHeader {
   display: flex;
   justify-content: space-between;
@@ -410,17 +412,48 @@
   margin-bottom: var(--space-md);
 }
 
+.fileManagerHeader h3,
 .optionEditorHeader h3 {
   font-size: var(--text-base);
   color: var(--text-primary);
 }
 
+.fileManagerHeader p,
 .optionEditorHeader p,
+.fileEmpty,
 .optionEmpty {
   color: var(--text-muted);
   font-size: var(--text-sm);
   line-height: 1.6;
   margin-top: 4px;
+}
+
+.fileSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-md);
+  border: 1px solid rgba(62, 207, 142, 0.28);
+  border-radius: var(--radius-lg);
+  background: rgba(62, 207, 142, 0.08);
+}
+
+.fileSummary strong {
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.fileSummary span {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.fileUploadRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-sm);
+  align-items: end;
+  margin-top: var(--space-md);
 }
 
 .optionList {
@@ -700,6 +733,7 @@
   .surfaceHeader,
   .panelHeader,
   .keyManagerHeader,
+  .fileManagerHeader,
   .optionEditorHeader,
   .keyRowTop,
   .keyActions,
@@ -712,6 +746,7 @@
   .sectionGrid,
   .twoColumnGrid,
   .infoGrid,
+  .fileUploadRow,
   .optionRow {
     grid-template-columns: 1fr;
   }

@@ -50,6 +50,13 @@ Each product can define an optional video URL and disclaimer in the admin
 product editor. Product videos support YouTube, Vimeo, and direct MP4/WebM/OGG
 URLs. When no video is configured, the video section is hidden.
 
+## Protected Product Downloads
+
+Admins can upload one private product file per product from the product editor.
+Uploaded EXE, MSI, ZIP, 7Z, and RAR files are stored outside the public asset
+folder and served through an authenticated order download endpoint. Customers
+only receive the protected download link after the order is delivered.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 ## Learn More

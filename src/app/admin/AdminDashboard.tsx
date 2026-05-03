@@ -18,6 +18,7 @@ import type {
   AdminInventoryKeyRecord,
   AdminProductRecord,
 } from "@/lib/admin-products";
+import { formatProductFileSize } from "@/lib/product-files";
 import styles from "./page.module.css";
 
 type AdminSection =
@@ -284,6 +285,7 @@ export function AdminDashboard({
       : createEmptyProductForm()
   );
   const [keyInput, setKeyInput] = useState("");
+  const [productFileUpload, setProductFileUpload] = useState<File | null>(null);
   const [keyDrafts, setKeyDrafts] = useState<Record<string, string>>({});
   const [orderStatus, setOrderStatus] = useState<AdminOrderStatus>(
     initialData.orders[0]?.status || "pending"
@@ -308,6 +310,8 @@ export function AdminDashboard({
   const [error, setError] = useState<string | null>(null);
   const [savingProduct, setSavingProduct] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState(false);
+  const [uploadingProductFile, setUploadingProductFile] = useState(false);
+  const [removingProductFile, setRemovingProductFile] = useState(false);
   const [addingKeys, setAddingKeys] = useState(false);
   const [keyAction, setKeyAction] = useState<{
     id: string;
@@ -350,12 +354,14 @@ export function AdminDashboard({
     if (!selectedProduct) {
       setProductForm(createEmptyProductForm());
       setKeyInput("");
+      setProductFileUpload(null);
       setKeyDrafts({});
       return;
     }
 
     setProductForm(formFromProduct(selectedProduct));
     setKeyInput("");
+    setProductFileUpload(null);
     setKeyDrafts(
       Object.fromEntries(
         selectedProduct.inventoryKeys.map((key) => [key.id, key.keyValue])
@@ -550,6 +556,77 @@ export function AdminDashboard({
       );
     } finally {
       setDeletingProduct(false);
+    }
+  }
+
+  async function uploadProductFile() {
+    if (!selectedProduct || !productFileUpload) return;
+
+    setUploadingProductFile(true);
+    clearBanner();
+
+    try {
+      const formData = new FormData();
+      formData.append("file", productFileUpload);
+
+      const response = await fetch(
+        `/api/admin/products/${selectedProduct.id}/file`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to upload product file.");
+      }
+
+      updateProductState(data.product as AdminProductRecord);
+      setProductFileUpload(null);
+      setMessage("Product file uploaded.");
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Unable to upload product file."
+      );
+    } finally {
+      setUploadingProductFile(false);
+    }
+  }
+
+  async function removeProductFile() {
+    if (!selectedProduct?.productFile) return;
+
+    const confirmed = window.confirm("Remove the uploaded product file?");
+    if (!confirmed) return;
+
+    setRemovingProductFile(true);
+    clearBanner();
+
+    try {
+      const response = await fetch(
+        `/api/admin/products/${selectedProduct.id}/file`,
+        { method: "DELETE" }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to remove product file.");
+      }
+
+      updateProductState(data.product as AdminProductRecord);
+      setProductFileUpload(null);
+      setMessage("Product file removed.");
+    } catch (removeError) {
+      setError(
+        removeError instanceof Error
+          ? removeError.message
+          : "Unable to remove product file."
+      );
+    } finally {
+      setRemovingProductFile(false);
     }
   }
 
@@ -1267,6 +1344,82 @@ export function AdminDashboard({
                         }
                       />
                     </label>
+                  </div>
+
+                  <div className={styles.fileManager}>
+                    <div className={styles.fileManagerHeader}>
+                      <div>
+                        <h3>Product Download File</h3>
+                        <p>
+                          Upload the executable or installer customers receive after
+                          their order is delivered.
+                        </p>
+                      </div>
+                      {selectedProduct?.productFile ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          loading={removingProductFile}
+                          onClick={removeProductFile}
+                        >
+                          Remove File
+                        </Button>
+                      ) : null}
+                    </div>
+
+                    {selectedProduct ? (
+                      <>
+                        {selectedProduct.productFile ? (
+                          <div className={styles.fileSummary}>
+                            <strong>{selectedProduct.productFile.fileName}</strong>
+                            <span>
+                              {formatProductFileSize(
+                                selectedProduct.productFile.sizeBytes
+                              )}{" "}
+                              - Uploaded{" "}
+                              {formatCompactDate(
+                                selectedProduct.productFile.createdAt
+                              )}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className={styles.fileEmpty}>
+                            No product file uploaded. Customers will use the Download
+                            URL if one is set.
+                          </div>
+                        )}
+
+                        <div className={styles.fileUploadRow}>
+                          <label className={styles.field}>
+                            <span>Upload File</span>
+                            <input
+                              type="file"
+                              accept=".exe,.msi,.zip,.7z,.rar"
+                              onChange={(event) =>
+                                setProductFileUpload(event.target.files?.[0] || null)
+                              }
+                            />
+                            <small className={styles.fieldHint}>
+                              Allowed: EXE, MSI, ZIP, 7Z, or RAR. Max size: 100 MB.
+                            </small>
+                          </label>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            loading={uploadingProductFile}
+                            disabled={!productFileUpload}
+                            onClick={uploadProductFile}
+                          >
+                            Upload File
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className={styles.fileEmpty}>
+                        Save the product before uploading its download file.
+                      </div>
+                    )}
                   </div>
 
                   <div className={styles.optionEditor}>
