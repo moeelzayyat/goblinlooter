@@ -21,6 +21,23 @@ const NAV_LINKS = [
   { href: "/support", label: "Support" },
 ];
 
+const DISCORD_URL = "https://discord.gg/arcway";
+
+function DiscordIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="currentColor"
+      focusable="false"
+    >
+      <path d="M20.32 4.37A18.18 18.18 0 0 0 15.83 3c-.2.36-.42.85-.58 1.23a16.9 16.9 0 0 0-5.01 0A12.4 12.4 0 0 0 9.65 3a18.27 18.27 0 0 0-4.5 1.38C2.3 8.68 1.53 12.87 1.92 17a18.32 18.32 0 0 0 5.52 2.8c.44-.6.84-1.24 1.18-1.92-.65-.24-1.27-.54-1.86-.9.16-.12.31-.24.46-.37a13.04 13.04 0 0 0 11.06 0l.46.37c-.59.36-1.21.66-1.86.9.34.68.74 1.32 1.18 1.92A18.27 18.27 0 0 0 23.58 17c.47-4.79-.8-8.94-3.26-12.63ZM8.47 14.45c-1.08 0-1.96-.99-1.96-2.2 0-1.22.86-2.21 1.96-2.21s1.98 1 1.96 2.2c0 1.22-.86 2.21-1.96 2.21Zm7.06 0c-1.08 0-1.96-.99-1.96-2.2 0-1.22.86-2.21 1.96-2.21s1.98 1 1.96 2.2c0 1.22-.86 2.21-1.96 2.21Z" />
+    </svg>
+  );
+}
+
 export function NavBar() {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -56,6 +73,16 @@ export function NavBar() {
               {link.label}
             </Link>
           ))}
+          <a
+            href={DISCORD_URL}
+            className={styles.discordLink}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Join Discord"
+          >
+            <DiscordIcon />
+            <span>Discord</span>
+          </a>
         </div>
 
         <div className={styles.actions}>
@@ -132,6 +159,16 @@ export function NavBar() {
             {link.label}
           </Link>
         ))}
+        <a
+          href={DISCORD_URL}
+          className={styles.mobileDiscordLink}
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => setMobileOpen(false)}
+        >
+          <DiscordIcon />
+          <span>Discord</span>
+        </a>
         <div className={styles.mobileActions}>
           {session?.user ? (
             <>
