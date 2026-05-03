@@ -21,6 +21,8 @@ export interface AdminProductRecord {
   slug: string;
   shortDescription: string;
   fullDescription: string;
+  videoUrl: string | null;
+  disclaimer: string | null;
   category: ProductCategory;
   price: number;
   purchaseOptions: PurchaseOption[];
@@ -178,6 +180,8 @@ function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
     slug: product.slug,
     shortDescription: product.shortDescription,
     fullDescription: product.fullDescription,
+    videoUrl: product.videoUrl,
+    disclaimer: product.disclaimer,
     category: product.category as ProductCategory,
     price: Number(product.price),
     purchaseOptions: serializePurchaseOptions(product.purchaseOptions),
@@ -223,6 +227,14 @@ export function normalizeProductInput(input: Record<string, unknown>) {
     typeof input.fullDescription === "string"
       ? input.fullDescription.trim()
       : "";
+  const videoUrl =
+    typeof input.videoUrl === "string" && input.videoUrl.trim()
+      ? input.videoUrl.trim()
+      : null;
+  const disclaimer =
+    typeof input.disclaimer === "string" && input.disclaimer.trim()
+      ? input.disclaimer.trim()
+      : null;
   const compatibilityNotes =
     typeof input.compatibilityNotes === "string"
       ? input.compatibilityNotes.trim()
@@ -296,6 +308,8 @@ export function normalizeProductInput(input: Record<string, unknown>) {
       slug,
       shortDescription,
       fullDescription,
+      videoUrl,
+      disclaimer,
       category,
       price,
       purchaseOptions:

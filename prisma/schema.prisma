@@ -32,6 +32,8 @@ model Product {
   slug                 String   @unique
   shortDescription     String
   fullDescription      String   // markdown
+  videoUrl             String?
+  disclaimer           String?
   category             String   // 'game-keys' | 'tool-access' | 'configs'
   price                Decimal  @db.Decimal(10, 2)
   monthlyPrice         Decimal? @db.Decimal(10, 2)

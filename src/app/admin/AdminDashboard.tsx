@@ -162,6 +162,8 @@ function createEmptyProductForm() {
     slug: "",
     shortDescription: "",
     fullDescription: "",
+    videoUrl: "",
+    disclaimer: "",
     category: "tool-access",
     price: "60",
     purchaseOptions: [] as ProductOptionFormState[],
@@ -188,6 +190,8 @@ function formFromProduct(product: AdminProductRecord): ProductFormState {
     slug: product.slug,
     shortDescription: product.shortDescription,
     fullDescription: product.fullDescription,
+    videoUrl: product.videoUrl || "",
+    disclaimer: product.disclaimer || "",
     category: product.category,
     price: product.price.toString(),
     purchaseOptions: product.purchaseOptions.map((option) => ({
@@ -1386,6 +1390,33 @@ export function AdminDashboard({
                       }
                     />
                   </label>
+
+                  <div className={styles.formGrid}>
+                    <label className={styles.field}>
+                      <span>Product Video URL</span>
+                      <input
+                        value={productForm.videoUrl}
+                        onChange={(event) =>
+                          updateProductField("videoUrl", event.target.value)
+                        }
+                        placeholder="YouTube, Vimeo, or direct MP4/WebM URL"
+                      />
+                      <small className={styles.fieldHint}>
+                        The product page embeds this video when a supported URL is set.
+                      </small>
+                    </label>
+                    <label className={styles.field}>
+                      <span>Product Disclaimer</span>
+                      <textarea
+                        rows={4}
+                        value={productForm.disclaimer}
+                        onChange={(event) =>
+                          updateProductField("disclaimer", event.target.value)
+                        }
+                        placeholder="Shown in the product disclaimer section"
+                      />
+                    </label>
+                  </div>
 
                   <label className={styles.field}>
                     <span>Thank-you Page Message</span>

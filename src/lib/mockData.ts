@@ -11,6 +11,9 @@ export const MOCK_PRODUCTS: Product[] = [
       "ArcWay gaming tools with guided setup, clean overlays, and fast digital delivery.",
     fullDescription:
       "ArcWay Services includes gaming utility access, setup resources, and priority assistance for Arc Raiders players. Built for straightforward configuration, clear guidance, and smooth support from purchase through activation.",
+    videoUrl: null,
+    disclaimer:
+      "Use this product only on systems and accounts where you understand and accept the applicable game, platform, and service terms. Confirm compatibility before purchase.",
     price: 60,
     images: ["/arcway-dupe.png"],
     category: "tool-access",

@@ -11,16 +11,29 @@ import { ContentGrid } from "@/components/layout/ContentGrid";
 import { trackEvent } from "@/lib/analytics";
 import type { Product } from "@/types";
 import {
-  Package,
-  Zap,
+  AlertTriangle,
+  Check,
   ChevronRight,
+  Download,
+  Gamepad2,
+  Headphones,
+  Package,
+  PlayCircle,
   ShieldCheck,
   ShoppingCart,
+  Zap,
 } from "lucide-react";
 import styles from "./page.module.css";
 
-type TabId = "description" | "details" | "refund";
 type CheckoutProvider = "stripe" | "btcpay";
+
+const DEFAULT_DISCLAIMER =
+  "Use this product only on systems and accounts where you understand and accept the applicable game, platform, and service terms. Confirm compatibility before purchase.";
+
+type ProductVideoEmbed = {
+  type: "iframe" | "video";
+  src: string;
+};
 
 interface ProductClientPageProps {
   product: Product;
@@ -31,14 +44,72 @@ function formatCategoryLabel(category: string) {
   return category.replace("-", " ").replace(/\b\w/g, (value) => value.toUpperCase());
 }
 
-export function ProductClientPage({
-  product,
-  related,
-}: ProductClientPageProps) {
+function formatDeliveryMethod(method: Product["deliveryMethod"]) {
+  return method.replace("-", " ").replace(/\b\w/g, (value) => value.toUpperCase());
+}
+
+function splitDescription(value: string) {
+  const paragraphs = value
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  return paragraphs.length > 0 ? paragraphs : [value];
+}
+
+function resolveProductVideoEmbed(videoUrl: string | null | undefined): ProductVideoEmbed | null {
+  if (!videoUrl?.trim()) return null;
+
+  try {
+    const url = new URL(videoUrl.trim());
+    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+
+    const host = url.hostname.replace(/^www\./, "").toLowerCase();
+    const path = url.pathname;
+
+    if (host === "youtu.be") {
+      const id = path.split("/").filter(Boolean)[0];
+      return id ? { type: "iframe", src: `https://www.youtube.com/embed/${id}` } : null;
+    }
+
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      const watchId = url.searchParams.get("v");
+      if (watchId) {
+        return {
+          type: "iframe",
+          src: `https://www.youtube.com/embed/${watchId}`,
+        };
+      }
+
+      if (path.startsWith("/embed/")) {
+        return { type: "iframe", src: url.toString() };
+      }
+    }
+
+    if (host === "vimeo.com") {
+      const id = path.split("/").filter(Boolean)[0];
+      return id ? { type: "iframe", src: `https://player.vimeo.com/video/${id}` } : null;
+    }
+
+    if (host === "player.vimeo.com" && path.startsWith("/video/")) {
+      return { type: "iframe", src: url.toString() };
+    }
+
+    if (/\.(mp4|webm|ogg)$/i.test(path)) {
+      return { type: "video", src: url.toString() };
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+export function ProductClientPage({ product, related }: ProductClientPageProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabId>("description");
   const [checkingOut, setCheckingOut] = useState<CheckoutProvider | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [mainImageIndex, setMainImageIndex] = useState(0);
   const purchaseOptions = product.purchaseOptions || [];
   const [selectedOptionId, setSelectedOptionId] = useState(
     purchaseOptions[0]?.id || ""
@@ -53,6 +124,7 @@ export function ProductClientPage({
 
   useEffect(() => {
     setSelectedOptionId(product.purchaseOptions?.[0]?.id || "");
+    setMainImageIndex(0);
   }, [product.id, product.purchaseOptions]);
 
   const selectedOption =
@@ -60,6 +132,17 @@ export function ProductClientPage({
     purchaseOptions[0] ||
     null;
   const displayPrice = selectedOption?.price ?? product.price;
+  const categoryLabel = formatCategoryLabel(product.category);
+  const images = product.images.filter(Boolean);
+  const mainImage = images[mainImageIndex] || images[0] || "";
+  const descriptionParagraphs = splitDescription(product.fullDescription);
+  const videoEmbed = resolveProductVideoEmbed(product.videoUrl);
+  const productDisclaimer = product.disclaimer || DEFAULT_DISCLAIMER;
+  const availabilityLabel =
+    product.stockCount !== undefined && product.stockCount < 10
+      ? `Only ${product.stockCount} left`
+      : "Available";
+  const isLowStock = product.stockCount !== undefined && product.stockCount < 10;
 
   async function handleBuyNow(paymentProvider: CheckoutProvider) {
     if (checkingOut) return;
@@ -98,12 +181,40 @@ export function ProductClientPage({
     }
   }
 
-  const tabs: { id: TabId; label: string }[] = [
-    { id: "description", label: "Description" },
-    { id: "details", label: "Details" },
-    { id: "refund", label: "Refund Info" },
+  const productDetails = [
+    ["Category", categoryLabel],
+    ["Platform", product.platform.join(", ")],
+    ["Compatibility", product.compatibilityNotes],
+    ["Delivery Method", formatDeliveryMethod(product.deliveryMethod)],
+    ["Delivery Time", product.deliveryTimeEstimate],
   ];
-  const categoryLabel = formatCategoryLabel(product.category);
+
+  if (product.regionRestrictions) {
+    productDetails.push(["Region", product.regionRestrictions]);
+  }
+
+  const showcaseItems = [
+    {
+      icon: Gamepad2,
+      title: "Player-focused setup",
+      copy: "Configured for a smooth gaming workflow with clear setup guidance.",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Secure checkout",
+      copy: "Card, Cash App, and crypto checkout stay connected to your order.",
+    },
+    {
+      icon: Download,
+      title: "Fast delivery",
+      copy: product.deliveryTimeEstimate,
+    },
+    {
+      icon: Headphones,
+      title: "Support access",
+      copy: "Support is available if you need help after purchase.",
+    },
+  ];
 
   return (
     <div className={styles.page}>
@@ -111,7 +222,7 @@ export function ProductClientPage({
       <main className={styles.main}>
         <nav className={styles.breadcrumb}>
           <Link href="/shop" className={styles.breadcrumbLink}>
-            Shop
+            Store
           </Link>
           <ChevronRight size={14} />
           <Link
@@ -124,52 +235,134 @@ export function ProductClientPage({
           <span className={styles.breadcrumbCurrent}>{product.title}</span>
         </nav>
 
-        <div className={styles.productHero}>
-          <div className={styles.productImage}>
-            {product.images.length > 0 ? (
-              <img src={product.images[0]} alt={product.title} />
-            ) : (
-              <div className={styles.imagePlaceholder}>
-                <Package size={64} strokeWidth={1} />
-              </div>
-            )}
+        <section className={styles.storeHero}>
+          <div className={styles.storeHeroCopy}>
+            <span className={styles.heroEyebrow}>GoblinLooter Store</span>
+            <h1>Premium Gaming Tools. Fast Access.</h1>
+            <p>
+              Stable product access, clear delivery, secure checkout, and real
+              support from purchase through activation.
+            </p>
+            <div className={styles.heroActions}>
+              <Link href="/shop" className={styles.heroLink}>
+                Browse products
+              </Link>
+              <Link href="/support" className={styles.heroLinkSecondary}>
+                Contact support
+              </Link>
+            </div>
           </div>
+          <div className={styles.heroMetrics} aria-label="Store highlights">
+            <div>
+              <strong>{product.deliveryTimeEstimate}</strong>
+              <span>Delivery</span>
+            </div>
+            <div>
+              <strong>24/7</strong>
+              <span>Order access</span>
+            </div>
+            <div>
+              <strong>Secure</strong>
+              <span>Checkout</span>
+            </div>
+          </div>
+        </section>
 
-          <div className={styles.productInfo}>
-            <span className={styles.categoryBadge}>{categoryLabel}</span>
-            <h1 className={styles.productTitle}>{product.title}</h1>
-            <p className={styles.productShort}>{product.shortDescription}</p>
-
-            <div className={styles.priceBlock}>
-              <span className={styles.price}>${displayPrice.toFixed(2)}</span>
-              {selectedOption ? (
-                <span className={styles.priceOption}>{selectedOption.label}</span>
-              ) : null}
-              {product.stockCount !== undefined && product.stockCount < 10 && (
-                <span className={styles.lowStock}>Only {product.stockCount} left</span>
+        <section className={styles.productLayout}>
+          <div className={styles.galleryPanel}>
+            <div className={styles.mainImage}>
+              {mainImage ? (
+                <img src={mainImage} alt={product.title} />
+              ) : (
+                <div className={styles.imagePlaceholder}>
+                  <Package size={64} strokeWidth={1} />
+                </div>
               )}
             </div>
 
-            {purchaseOptions.length > 0 ? (
-              <div className={styles.optionGrid}>
-                {purchaseOptions.map((option) => (
+            {images.length > 1 ? (
+              <div className={styles.thumbnailRail} aria-label="Product images">
+                {images.map((image, index) => (
                   <button
-                    key={option.id}
+                    key={`${image}-${index}`}
                     type="button"
-                    className={`${styles.optionCard} ${
-                      selectedOption?.id === option.id ? styles.optionCardActive : ""
+                    className={`${styles.thumbnailButton} ${
+                      index === mainImageIndex ? styles.thumbnailButtonActive : ""
                     }`}
-                    onClick={() => setSelectedOptionId(option.id)}
+                    onClick={() => setMainImageIndex(index)}
+                    aria-label={`Show product image ${index + 1}`}
                   >
-                    <span>
-                      <strong>{option.label}</strong>
-                      {option.description ? <small>{option.description}</small> : null}
-                    </span>
-                    <b>${option.price.toFixed(2)}</b>
+                    <span
+                      className={styles.thumbnailPreview}
+                      style={{ backgroundImage: `url("${image}")` }}
+                    />
                   </button>
                 ))}
               </div>
             ) : null}
+          </div>
+
+          <aside className={styles.purchasePanel}>
+            <div className={styles.productHeader}>
+              <div className={styles.headerBadges}>
+                <span className={styles.categoryBadge}>{categoryLabel}</span>
+                <span
+                  className={`${styles.stockBadge} ${
+                    isLowStock ? styles.lowStockBadge : ""
+                  }`}
+                >
+                  {availabilityLabel}
+                </span>
+              </div>
+              <h2>{product.title}</h2>
+              <p>{product.shortDescription}</p>
+            </div>
+
+            <div className={styles.priceSummary}>
+              <span>Starting at</span>
+              <strong>${displayPrice.toFixed(2)}</strong>
+              {selectedOption ? <em>{selectedOption.label}</em> : null}
+            </div>
+
+            <div className={styles.optionSection}>
+              <div className={styles.sectionLabel}>
+                {purchaseOptions.length > 0 ? "Select Price Per Key" : "Price"}
+              </div>
+
+              {purchaseOptions.length > 0 ? (
+                <div className={styles.optionList}>
+                  {purchaseOptions.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`${styles.optionCard} ${
+                        selectedOption?.id === option.id
+                          ? styles.optionCardActive
+                          : ""
+                      }`}
+                      onClick={() => setSelectedOptionId(option.id)}
+                      aria-pressed={selectedOption?.id === option.id}
+                    >
+                      <span>
+                        <strong>{option.label}</strong>
+                        {option.description ? (
+                          <small>{option.description}</small>
+                        ) : null}
+                      </span>
+                      <b>${option.price.toFixed(2)}</b>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className={`${styles.optionCard} ${styles.optionCardActive}`}>
+                  <span>
+                    <strong>Standard access</strong>
+                    <small>{product.deliveryTimeEstimate}</small>
+                  </span>
+                  <b>${product.price.toFixed(2)}</b>
+                </div>
+              )}
+            </div>
 
             <div className={styles.deliveryInfo}>
               <Zap size={16} />
@@ -181,21 +374,10 @@ export function ProductClientPage({
               </span>
             </div>
 
-            <div className={styles.platformTags}>
-              {product.platform.map((platform) => (
-                <span key={platform} className={styles.platformTag}>
-                  {platform}
-                </span>
-              ))}
-              {product.regionRestrictions && (
-                <span className={styles.regionTag}>{product.regionRestrictions}</span>
-              )}
-            </div>
-
             <div className={styles.actions}>
               <Button
                 size="lg"
-                style={{ flex: 1 }}
+                className={styles.checkoutButton}
                 onClick={() => handleBuyNow("stripe")}
                 disabled={Boolean(checkingOut)}
               >
@@ -207,6 +389,7 @@ export function ProductClientPage({
               <Button
                 size="lg"
                 variant="secondary"
+                className={styles.checkoutButton}
                 onClick={() => handleBuyNow("btcpay")}
                 disabled={Boolean(checkingOut)}
               >
@@ -227,89 +410,145 @@ export function ProductClientPage({
               <ShieldCheck size={16} />
               <span>Secure checkout - Buyer protection - Real support</span>
             </div>
-          </div>
-        </div>
+          </aside>
+        </section>
 
-        <div className={styles.tabs}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={`${styles.tab} ${
-                activeTab === tab.id ? styles.tabActive : ""
-              }`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        <div className={styles.tabContent}>
-          {activeTab === "description" && (
-            <div className={styles.descriptionTab}>
-              <p>{product.fullDescription}</p>
-            </div>
-          )}
-
-          {activeTab === "details" && (
-            <div className={styles.detailsTab}>
-              <table className={styles.detailsTable}>
-                <tbody>
-                  <tr>
-                    <td>Category</td>
-                    <td>{categoryLabel}</td>
-                  </tr>
-                  <tr>
-                    <td>Platform</td>
-                    <td>{product.platform.join(", ")}</td>
-                  </tr>
-                  <tr>
-                    <td>Compatibility</td>
-                    <td>{product.compatibilityNotes}</td>
-                  </tr>
-                  <tr>
-                    <td>Delivery Method</td>
-                    <td style={{ textTransform: "capitalize" }}>
-                      {product.deliveryMethod}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Delivery Time</td>
-                    <td>{product.deliveryTimeEstimate}</td>
-                  </tr>
-                  {product.regionRestrictions && (
-                    <tr>
-                      <td>Region</td>
-                      <td>{product.regionRestrictions}</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {activeTab === "refund" && (
-            <div className={styles.refundTab}>
-              <div className={styles.refundBadge}>
-                Refund Eligibility:{" "}
-                <strong style={{ textTransform: "capitalize" }}>
-                  {product.refundEligibility.replace("-", " ")}
-                </strong>
+        <section className={styles.contentLayout}>
+          <article className={styles.articleStack}>
+            <section className={styles.contentPanel}>
+              <div className={styles.contentHeader}>
+                <span>Product Overview</span>
+                <h2>{product.title}</h2>
               </div>
-              <p className={styles.refundTerms}>{product.refundTerms}</p>
-              <p className={styles.refundGeneral}>
-                All refund requests are handled through our support team within
-                72 hours of purchase. See our full{" "}
-                <Link href="/refund-policy">Refund Policy</Link> for details.
-              </p>
-              <Link href="/support">
-                <Button variant="ghost" size="sm">
-                  Contact Support about this product
-                </Button>
+              <div className={styles.descriptionCopy}>
+                {descriptionParagraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </section>
+
+            {videoEmbed ? (
+              <section className={styles.contentPanel}>
+                <div className={styles.contentHeader}>
+                  <span>Product Video</span>
+                  <h2>Preview and setup</h2>
+                </div>
+                <div className={styles.videoLabel}>
+                  <PlayCircle size={18} />
+                  <span>Product media</span>
+                </div>
+                <div className={styles.videoFrame}>
+                  {videoEmbed.type === "iframe" ? (
+                    <iframe
+                      src={videoEmbed.src}
+                      title={`${product.title} video`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video src={videoEmbed.src} controls preload="metadata" />
+                  )}
+                </div>
+              </section>
+            ) : null}
+
+            <section className={styles.contentPanel}>
+              <div className={styles.contentHeader}>
+                <span>Product Showcase</span>
+                <h2>What is included</h2>
+              </div>
+              <div className={styles.showcaseGrid}>
+                {showcaseItems.map(({ icon: Icon, title, copy }) => (
+                  <div key={title} className={styles.showcaseItem}>
+                    <Icon size={20} />
+                    <div>
+                      <h3>{title}</h3>
+                      <p>{copy}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className={styles.contentPanel}>
+              <div className={styles.contentHeader}>
+                <span>Requirements</span>
+                <h2>Before you buy</h2>
+              </div>
+              <div className={styles.requirementGrid}>
+                {productDetails.map(([label, value]) => (
+                  <div key={label} className={styles.requirementItem}>
+                    <span>{label}</span>
+                    <strong>{value}</strong>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className={styles.noticePanel}>
+              <AlertTriangle size={20} />
+              <div>
+                <h2>Important notice</h2>
+                <p>
+                  Make sure your system matches the requirements above before
+                  purchase. If you are unsure, contact support first so the team
+                  can confirm compatibility.
+                </p>
+              </div>
+            </section>
+
+            <section className={styles.disclaimerPanel}>
+              <AlertTriangle size={20} />
+              <div>
+                <span>Disclaimer</span>
+                <h2>Use responsibly</h2>
+                <p>{productDisclaimer}</p>
+              </div>
+            </section>
+          </article>
+
+          <aside className={styles.sideStack}>
+            <section className={styles.sidePanel}>
+              <h2>Access summary</h2>
+              <ul className={styles.checkList}>
+                <li>
+                  <Check size={16} />
+                  <span>{formatDeliveryMethod(product.deliveryMethod)}</span>
+                </li>
+                <li>
+                  <Check size={16} />
+                  <span>{product.deliveryTimeEstimate}</span>
+                </li>
+                <li>
+                  <Check size={16} />
+                  <span>{product.platform.join(", ")}</span>
+                </li>
+              </ul>
+            </section>
+
+            <section className={styles.sidePanel}>
+              <h2>Refund info</h2>
+              <div className={styles.refundBadge}>
+                {product.refundEligibility.replace("-", " ")}
+              </div>
+              <p>{product.refundTerms}</p>
+              <Link href="/refund-policy" className={styles.inlineLink}>
+                Read refund policy
               </Link>
-            </div>
-          )}
-        </div>
+            </section>
+
+            <section className={styles.sidePanel}>
+              <h2>Need help?</h2>
+              <p>
+                Questions before purchase or after activation can be sent to the
+                support team.
+              </p>
+              <Link href="/support" className={styles.supportLink}>
+                Contact support
+              </Link>
+            </section>
+          </aside>
+        </section>
 
         {related.length > 0 && (
           <section className={styles.relatedSection}>

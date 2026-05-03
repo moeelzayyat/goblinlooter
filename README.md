@@ -44,6 +44,12 @@ configured, the product page requires the customer to select one option before
 checkout. Checkout charges the selected option price and stores the selected
 option label on the order item.
 
+## Product Page Media And Disclaimer
+
+Each product can define an optional video URL and disclaimer in the admin
+product editor. Product videos support YouTube, Vimeo, and direct MP4/WebM/OGG
+URLs. When no video is configured, the video section is hidden.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 ## Learn More

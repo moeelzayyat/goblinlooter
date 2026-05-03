@@ -36,6 +36,8 @@ export interface Product {
   slug: string;
   shortDescription: string;
   fullDescription: string;
+  videoUrl?: string | null;
+  disclaimer?: string | null;
   category: ProductCategory;
   price: number;
   purchaseOptions?: PurchaseOption[];
