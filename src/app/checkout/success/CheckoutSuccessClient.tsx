@@ -12,6 +12,7 @@ import {
   Download,
   Eye,
   EyeOff,
+  ExternalLink,
   Package,
   RefreshCw,
   ShieldCheck,
@@ -40,6 +41,61 @@ interface CheckoutSuccessClientProps {
 }
 
 const POLLABLE_STATUSES = new Set(["pending", "paid"]);
+const URL_PATTERN = /https?:\/\/[^\s]+/g;
+
+function getAccessLinkTitle(url: string, index: number) {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, "");
+
+    if (hostname.startsWith("arc.")) return "Main Download Portal";
+    if (hostname.startsWith("web.")) return "Web Tool";
+    if (hostname.startsWith("solo.")) return "Solo Tool";
+
+    return hostname;
+  } catch {
+    return index === 0 ? "Access Link" : `Access Link ${index + 1}`;
+  }
+}
+
+function parseAccessInstructions(message: string) {
+  const links = [...message.matchAll(URL_PATTERN)].map((match, index) => {
+    const url = match[0].replace(/[),.;]+$/, "");
+
+    return {
+      url,
+      title: getAccessLinkTitle(url, index),
+      host: (() => {
+        try {
+          return new URL(url).hostname.replace(/^www\./, "");
+        } catch {
+          return url;
+        }
+      })(),
+    };
+  });
+  const cleanedMessage = message.replace(URL_PATTERN, " ").replace(/\s+/g, " ").trim();
+  const firstHeadingIndex = cleanedMessage.search(
+    /access your product|main download portal|web tool|solo tool|important notes/i
+  );
+  const importantNotesIndex = cleanedMessage.search(/important notes/i);
+  const intro =
+    firstHeadingIndex > -1
+      ? cleanedMessage.slice(0, firstHeadingIndex).trim()
+      : cleanedMessage;
+  const note =
+    importantNotesIndex > -1
+      ? cleanedMessage
+          .slice(importantNotesIndex)
+          .replace(/^important notes/i, "")
+          .trim()
+      : "";
+
+  return {
+    intro,
+    note,
+    links,
+  };
+}
 
 export function CheckoutSuccessClient({
   orderId,
@@ -220,6 +276,9 @@ export function CheckoutSuccessClient({
   const delivered = order.status === "delivered";
   const thankYouMessage =
     order.items.find((item) => item.thankYouMessage)?.thankYouMessage || null;
+  const accessInstructions = thankYouMessage
+    ? parseAccessInstructions(thankYouMessage)
+    : null;
 
   return (
     <div className={styles.stack}>
@@ -230,8 +289,7 @@ export function CheckoutSuccessClient({
         </h1>
         <p className={styles.subtitle}>
           {delivered
-            ? thankYouMessage ||
-              "Your order is ready below. You can reveal the key, copy it, and download the product right away."
+            ? "Your payment was successful. Your access details are ready below."
             : "Your payment cleared, but delivery is still finishing in the background. You can safely keep this page open or check your order details."}
         </p>
         <div className={styles.statusRow}>
@@ -250,6 +308,50 @@ export function CheckoutSuccessClient({
           </div>
         </div>
       </div>
+
+      {accessInstructions && delivered && (
+        <section className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <h2>Access Instructions</h2>
+            <span>Use these links and notes to get started.</span>
+          </div>
+
+          {accessInstructions.intro ? (
+            <p className={styles.instructionIntro}>
+              {accessInstructions.intro}
+            </p>
+          ) : null}
+
+          {accessInstructions.links.length > 0 ? (
+            <div className={styles.accessGrid}>
+              {accessInstructions.links.map((link) => (
+                <a
+                  key={link.url}
+                  href={link.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.accessLink}
+                >
+                  <span>
+                    <strong>{link.title}</strong>
+                    <small>{link.host}</small>
+                  </span>
+                  <ExternalLink size={16} />
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className={styles.instructionBody}>{thankYouMessage}</p>
+          )}
+
+          {accessInstructions.note ? (
+            <div className={styles.noteBox}>
+              <strong>Important</strong>
+              <p>{accessInstructions.note}</p>
+            </div>
+          ) : null}
+        </section>
+      )}
 
       {order.key?.keyValue && delivered && (
         <section className={styles.panel}>
