@@ -461,6 +461,39 @@
   margin-top: var(--space-md);
 }
 
+.imageList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.imageRow {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr) auto;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: var(--space-sm);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+}
+
+.imagePreview {
+  width: 84px;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background-color: #080a12;
+  background-position: center;
+  background-size: cover;
+}
+
+.imageRow code {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  word-break: break-all;
+}
+
 .featureList {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -776,6 +809,7 @@
   .twoColumnGrid,
   .infoGrid,
   .fileUploadRow,
+  .imageRow,
   .featureList,
   .featureRowGrid,
   .optionRow {

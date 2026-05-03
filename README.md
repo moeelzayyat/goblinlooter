@@ -62,6 +62,10 @@ Products can also define optional feature cards in the admin editor. Each card
 has a title, short description, and bullet list. When feature cards are present,
 the product page shows them instead of the default showcase cards.
 
+Product images can be pasted as URLs or uploaded directly from the admin product
+editor. Uploaded JPG, PNG, WebP, and GIF images are stored per product and added
+to the product image list automatically.
+
 ## Protected Product Downloads
 
 Admins can upload one private product file per product from the product editor.

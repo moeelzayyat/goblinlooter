@@ -307,6 +307,7 @@ export function AdminDashboard({
   const [keyInput, setKeyInput] = useState("");
   const [productFileUpload, setProductFileUpload] = useState<File | null>(null);
   const [productVideoUpload, setProductVideoUpload] = useState<File | null>(null);
+  const [productImageUpload, setProductImageUpload] = useState<File | null>(null);
   const [keyDrafts, setKeyDrafts] = useState<Record<string, string>>({});
   const [orderStatus, setOrderStatus] = useState<AdminOrderStatus>(
     initialData.orders[0]?.status || "pending"
@@ -335,6 +336,10 @@ export function AdminDashboard({
   const [removingProductFile, setRemovingProductFile] = useState(false);
   const [uploadingProductVideo, setUploadingProductVideo] = useState(false);
   const [removingProductVideo, setRemovingProductVideo] = useState(false);
+  const [uploadingProductImage, setUploadingProductImage] = useState(false);
+  const [removingProductImageUrl, setRemovingProductImageUrl] = useState<
+    string | null
+  >(null);
   const [addingKeys, setAddingKeys] = useState(false);
   const [keyAction, setKeyAction] = useState<{
     id: string;
@@ -379,6 +384,7 @@ export function AdminDashboard({
       setKeyInput("");
       setProductFileUpload(null);
       setProductVideoUpload(null);
+      setProductImageUpload(null);
       setKeyDrafts({});
       return;
     }
@@ -387,6 +393,7 @@ export function AdminDashboard({
     setKeyInput("");
     setProductFileUpload(null);
     setProductVideoUpload(null);
+    setProductImageUpload(null);
     setKeyDrafts(
       Object.fromEntries(
         selectedProduct.inventoryKeys.map((key) => [key.id, key.keyValue])
@@ -759,6 +766,77 @@ export function AdminDashboard({
       );
     } finally {
       setRemovingProductVideo(false);
+    }
+  }
+
+  async function uploadProductImage() {
+    if (!selectedProduct || !productImageUpload) return;
+
+    setUploadingProductImage(true);
+    clearBanner();
+
+    try {
+      const formData = new FormData();
+      formData.append("image", productImageUpload);
+
+      const response = await fetch(
+        `/api/admin/products/${selectedProduct.id}/images`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to upload product image.");
+      }
+
+      updateProductState(data.product as AdminProductRecord);
+      setProductImageUpload(null);
+      setMessage("Product image uploaded.");
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Unable to upload product image."
+      );
+    } finally {
+      setUploadingProductImage(false);
+    }
+  }
+
+  async function removeProductImage(imageUrl: string) {
+    if (!selectedProduct) return;
+
+    setRemovingProductImageUrl(imageUrl);
+    clearBanner();
+
+    try {
+      const response = await fetch(
+        `/api/admin/products/${selectedProduct.id}/images`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageUrl }),
+        }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to remove product image.");
+      }
+
+      updateProductState(data.product as AdminProductRecord);
+      setMessage("Product image removed.");
+    } catch (removeError) {
+      setError(
+        removeError instanceof Error
+          ? removeError.message
+          : "Unable to remove product image."
+      );
+    } finally {
+      setRemovingProductImageUrl(null);
     }
   }
 
@@ -1935,6 +2013,79 @@ export function AdminDashboard({
                         }
                       />
                     </label>
+                  </div>
+
+                  <div className={styles.fileManager}>
+                    <div className={styles.fileManagerHeader}>
+                      <div>
+                        <h3>Uploaded Product Images</h3>
+                        <p>
+                          Upload product-specific JPG, PNG, WebP, or GIF images.
+                          New uploads are added to the Images list automatically.
+                        </p>
+                      </div>
+                    </div>
+
+                    {selectedProduct ? (
+                      <>
+                        {selectedProduct.images.length > 0 ? (
+                          <div className={styles.imageList}>
+                            {selectedProduct.images.map((imageUrl) => (
+                              <div key={imageUrl} className={styles.imageRow}>
+                                <span
+                                  className={styles.imagePreview}
+                                  style={{ backgroundImage: `url("${imageUrl}")` }}
+                                />
+                                <code>{imageUrl}</code>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="danger"
+                                  loading={removingProductImageUrl === imageUrl}
+                                  onClick={() => removeProductImage(imageUrl)}
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className={styles.fileEmpty}>
+                            No images yet. Upload one or paste image URLs in the
+                            Images field.
+                          </div>
+                        )}
+
+                        <div className={styles.fileUploadRow}>
+                          <label className={styles.field}>
+                            <span>Upload Image</span>
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
+                              onChange={(event) =>
+                                setProductImageUpload(event.target.files?.[0] || null)
+                              }
+                            />
+                            <small className={styles.fieldHint}>
+                              Allowed: JPG, PNG, WebP, or GIF. Max size: 12 MB.
+                            </small>
+                          </label>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            loading={uploadingProductImage}
+                            disabled={!productImageUpload}
+                            onClick={uploadProductImage}
+                          >
+                            Upload Image
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className={styles.fileEmpty}>
+                        Save the product before uploading product images.
+                      </div>
+                    )}
                   </div>
 
                   <label className={styles.field}>
