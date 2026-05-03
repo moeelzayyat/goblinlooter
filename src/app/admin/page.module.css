@@ -491,7 +491,7 @@
 
 .optionRow {
   display: grid;
-  grid-template-columns: 1fr 140px 1.2fr 160px auto;
+  grid-template-columns: 1fr 140px 1.2fr 160px;
   gap: var(--space-sm);
   align-items: end;
   padding: var(--space-sm);
@@ -507,6 +507,7 @@
 .optionActions {
   display: flex;
   justify-content: flex-end;
+  grid-column: 1 / -1;
 }
 
 .field {

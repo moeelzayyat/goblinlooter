@@ -126,6 +126,10 @@ function parsePurchaseOptions(value: unknown) {
       typeof entry.description === "string" && entry.description.trim()
         ? entry.description.trim()
         : null;
+    const providerKeyUrl =
+      typeof entry.providerKeyUrl === "string" && entry.providerKeyUrl.trim()
+        ? entry.providerKeyUrl.trim()
+        : null;
     const price = Number(entry.price);
 
     if (!label && !idSource && !Number.isFinite(price)) continue;
@@ -143,7 +147,7 @@ function parsePurchaseOptions(value: unknown) {
     }
 
     seenIds.add(id);
-    options.push({ id, label, price, description });
+    options.push({ id, label, price, description, providerKeyUrl });
   }
 
   return { options };
@@ -218,6 +222,7 @@ function toPurchaseOptionsJson(options: PurchaseOption[]): Prisma.InputJsonValue
     label: option.label,
     price: option.price,
     description: option.description || null,
+    providerKeyUrl: option.providerKeyUrl || null,
   }));
 }
 

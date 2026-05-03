@@ -44,6 +44,12 @@ configured, the product page requires the customer to select one option before
 checkout. Checkout charges the selected option price and stores the selected
 option label on the order item.
 
+Each duration option can optionally define a provider key API URL. When set, the
+paid-order fulfillment flow requests one provider key for the selected duration
+after payment confirmation, stores it as the assigned order key, and then uses
+the existing delivered-order success page. Leave the provider URL blank to use
+local inventory keys.
+
 ## Product Page Media And Disclaimer
 
 Each product can define an optional video URL and disclaimer in the admin

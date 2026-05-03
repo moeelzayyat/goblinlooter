@@ -28,6 +28,7 @@ export interface PurchaseOption {
   label: string;
   price: number;
   description?: string | null;
+  providerKeyUrl?: string | null;
 }
 
 export interface ProductDownloadFile {

@@ -137,6 +137,7 @@ interface ProductOptionFormState {
   label: string;
   price: string;
   description: string;
+  providerKeyUrl: string;
 }
 
 interface ProductFeatureFormState {
@@ -147,9 +148,9 @@ interface ProductFeatureFormState {
 }
 
 const STANDARD_DURATION_OPTIONS: ProductOptionFormState[] = [
-  { id: "1-day", label: "1 Day", price: "", description: "" },
-  { id: "1-week", label: "1 Week", price: "", description: "" },
-  { id: "1-month", label: "1 Month", price: "", description: "" },
+  { id: "1-day", label: "1 Day", price: "", description: "", providerKeyUrl: "" },
+  { id: "1-week", label: "1 Week", price: "", description: "", providerKeyUrl: "" },
+  { id: "1-month", label: "1 Month", price: "", description: "", providerKeyUrl: "" },
 ];
 
 function slugifyOptionId(value: string) {
@@ -161,7 +162,7 @@ function slugifyOptionId(value: string) {
 }
 
 function createOptionDraft(): ProductOptionFormState {
-  return { id: "", label: "", price: "", description: "" };
+  return { id: "", label: "", price: "", description: "", providerKeyUrl: "" };
 }
 
 function createFeatureDraft(): ProductFeatureFormState {
@@ -218,6 +219,7 @@ function formFromProduct(product: AdminProductRecord): ProductFormState {
       label: option.label,
       price: option.price.toString(),
       description: option.description || "",
+      providerKeyUrl: option.providerKeyUrl || "",
     })),
     platform: product.platform.join("\n"),
     compatibilityNotes: product.compatibilityNotes,
@@ -1635,6 +1637,26 @@ export function AdminDashboard({
                                   updatePurchaseOption(index, "id", event.target.value)
                                 }
                               />
+                            </label>
+                            <label className={styles.field}>
+                              <span>Provider API URL</span>
+                              <input
+                                type="password"
+                                value={option.providerKeyUrl}
+                                placeholder="Optional: provider key endpoint"
+                                autoComplete="off"
+                                onChange={(event) =>
+                                  updatePurchaseOption(
+                                    index,
+                                    "providerKeyUrl",
+                                    event.target.value
+                                  )
+                                }
+                              />
+                              <small className={styles.fieldHint}>
+                                Used after payment to request one key for this
+                                duration. Leave blank to use local inventory keys.
+                              </small>
                             </label>
                             <div className={styles.optionActions}>
                               <Button

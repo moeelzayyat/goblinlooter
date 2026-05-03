@@ -1,12 +1,92 @@
 import { prisma } from "@/lib/prisma";
+import {
+  getProviderKeyUrlForOption,
+  requestProviderKey,
+} from "@/lib/provider-keys";
 
-async function assignKey(orderId: string, productId: string) {
+async function assignProviderKey(
+  orderId: string,
+  productId: string,
+  purchaseOptionId: string | null,
+  purchaseOptions: unknown
+) {
+  const providerKeyUrl = getProviderKeyUrlForOption(
+    purchaseOptions,
+    purchaseOptionId
+  );
+
+  if (!providerKeyUrl) return undefined;
+
+  const result = await requestProviderKey(providerKeyUrl);
+
+  if ("error" in result) {
+    console.error(
+      `[Fulfillment] Provider key request failed for product ${productId}, order ${orderId}`
+    );
+    await prisma.deliveryAuditLog.create({
+      data: {
+        orderId,
+        action: "delivery_failed",
+        metadata: {
+          reason: result.error,
+          providerStatus: result.status || null,
+          productId,
+          purchaseOptionId,
+          source: "provider",
+        },
+        performedBy: "system",
+      },
+    });
+    return null;
+  }
+
+  const assigned = await prisma.inventoryKey.create({
+    data: {
+      productId,
+      keyValue: result.keyValue,
+      status: "assigned",
+      orderId,
+      assignedAt: new Date(),
+    },
+  });
+
+  await prisma.deliveryAuditLog.create({
+    data: {
+      orderId,
+      keyId: assigned.id,
+      action: "key_assigned",
+      metadata: { productId, purchaseOptionId, source: "provider" },
+      performedBy: "system",
+    },
+  });
+
+  console.log(`[Fulfillment] Provider key assigned to order ${orderId}`);
+  return assigned;
+}
+
+async function assignKey(
+  orderId: string,
+  productId: string,
+  purchaseOptionId: string | null,
+  purchaseOptions: unknown
+) {
   const existingKey = await prisma.inventoryKey.findFirst({
     where: { orderId, productId },
   });
 
   if (existingKey) {
     return existingKey;
+  }
+
+  const providerKey = await assignProviderKey(
+    orderId,
+    productId,
+    purchaseOptionId,
+    purchaseOptions
+  );
+
+  if (providerKey !== undefined) {
+    return providerKey;
   }
 
   const key = await prisma.inventoryKey.findFirst({
@@ -55,7 +135,17 @@ async function assignKey(orderId: string, productId: string) {
 export async function fulfillPaidOrder(orderId: string) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { items: true },
+    include: {
+      items: {
+        include: {
+          product: {
+            select: {
+              purchaseOptions: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!order) {
@@ -71,7 +161,12 @@ export async function fulfillPaidOrder(orderId: string) {
 
   for (const item of order.items) {
     for (let i = 0; i < item.quantity; i += 1) {
-      const key = await assignKey(order.id, item.productId);
+      const key = await assignKey(
+        order.id,
+        item.productId,
+        item.purchaseOptionId,
+        item.product?.purchaseOptions
+      );
       if (!key) {
         allKeysAssigned = false;
       }
