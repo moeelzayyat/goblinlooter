@@ -62,6 +62,11 @@ export async function createStripeCheckoutSession({
   return getStripe().checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card", "cashapp"],
+    payment_method_options: {
+      card: {
+        request_three_d_secure: "any",
+      },
+    },
     client_reference_id: orderId,
     customer_email: buyerEmail || undefined,
     line_items: [
