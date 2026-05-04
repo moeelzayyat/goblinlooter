@@ -32,6 +32,15 @@ export function LiveChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messageCount = ticket?.messages.length || 0;
 
+  const scrollToLatestMessage = useCallback((behavior: ScrollBehavior = "smooth") => {
+    window.requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({
+        block: "end",
+        behavior,
+      });
+    });
+  }, []);
+
   const loadChat = useCallback(async () => {
     if (!session?.user) return;
 
@@ -73,11 +82,8 @@ export function LiveChatWidget() {
   useEffect(() => {
     if (!open || !session?.user) return;
 
-    messagesEndRef.current?.scrollIntoView({
-      block: "end",
-      behavior: "smooth",
-    });
-  }, [messageCount, open, session?.user]);
+    scrollToLatestMessage();
+  }, [messageCount, open, scrollToLatestMessage, session?.user]);
 
   if (pathname.startsWith("/admin")) {
     return null;
@@ -105,6 +111,7 @@ export function LiveChatWidget() {
 
       setTicket(data.ticket || null);
       setMessage("");
+      scrollToLatestMessage();
     } catch (sendError) {
       setError(sendError instanceof Error ? sendError.message : "Unable to send message.");
     } finally {
