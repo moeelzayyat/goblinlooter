@@ -5,6 +5,7 @@ import type {
   ProductCategory,
   ProductDownloadFile,
   ProductFeatureGroup,
+  ProductSetupFix,
   ProductSetupGuide,
   ProductVideoFile,
   PurchaseOption,
@@ -215,22 +216,65 @@ function toFeatureGroupsJson(groups: ProductFeatureGroup[]): Prisma.InputJsonVal
 }
 
 function parseSetupFixes(value: unknown) {
-  const lines = parseStringList(value);
-  const fixes = lines
-    .map((line) => {
-      const [error, ...fixParts] = line.split("=>");
-      return {
-        error: error?.trim() || "",
-        fix: fixParts.join("=>").trim(),
-      };
-    })
-    .filter((item) => item.error || item.fix);
+  const lines = Array.isArray(value)
+    ? value
+        .map((entry) => (typeof entry === "string" ? entry.trim() : ""))
+        .filter(Boolean)
+    : typeof value === "string"
+      ? value
+          .split(/\r?\n/)
+          .map((entry) => entry.trim())
+          .filter((entry) => entry && !entry.startsWith("```"))
+      : [];
 
-  for (const [index, fix] of fixes.entries()) {
-    if (!fix.error || !fix.fix) {
-      return {
-        error: `Setup guide fix ${index + 1} must use "Error => Fix" format.`,
+  const fixes: ProductSetupFix[] = [];
+  let pendingError = "";
+
+  for (const [index, line] of lines.entries()) {
+    if (line.includes("=>")) {
+      const [error, ...fixParts] = line.split("=>");
+      const fix = {
+        error: error?.replace(/^ERROR:\s*/i, "").trim() || "",
+        fix: fixParts.join("=>").replace(/^(FIX|NOTICE):\s*/i, "").trim(),
       };
+
+      if (!fix.error || !fix.fix) {
+        return {
+          error: `Setup guide fix ${index + 1} must use "Error => Fix" format.`,
+        };
+      }
+
+      fixes.push(fix);
+      pendingError = "";
+      continue;
+    }
+
+    const errorMatch = line.match(/^ERROR:\s*(.+)$/i);
+    if (errorMatch) {
+      if (pendingError) {
+        return {
+          error: `Setup guide fix ${index} is missing a matching "FIX:" line.`,
+        };
+      }
+      pendingError = errorMatch[1].trim();
+      continue;
+    }
+
+    const fixMatch = line.match(/^(FIX|NOTICE):\s*(.+)$/i);
+    if (fixMatch && pendingError) {
+      fixes.push({ error: pendingError, fix: fixMatch[2].trim() });
+      pendingError = "";
+      continue;
+    }
+
+    return {
+      error: `Setup guide fix ${index + 1} must use "Error => Fix" or "ERROR:" followed by "FIX:" format.`,
+    };
+  }
+
+  if (pendingError) {
+    return {
+      error: `Setup guide fix ${lines.length} is missing a matching "FIX:" line.`,
     }
   }
 
