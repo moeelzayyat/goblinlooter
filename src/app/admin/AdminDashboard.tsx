@@ -1542,6 +1542,25 @@ export function AdminDashboard({
                         Only published products appear on the live shop.
                       </small>
                     </label>
+                    <label className={styles.toggleField}>
+                      <div>
+                        <span>Show on storefront</span>
+                        <small className={styles.fieldHint}>
+                          Show this product on the shop, front page, and public
+                          product pages.
+                        </small>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={productForm.status === "published"}
+                        onChange={(event) =>
+                          updateProductField(
+                            "status",
+                            event.target.checked ? "published" : "disabled",
+                          )
+                        }
+                      />
+                    </label>
                     <label className={styles.field}>
                       <span>Delivery Method</span>
                       <select
