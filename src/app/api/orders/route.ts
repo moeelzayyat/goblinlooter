@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { getPublicProductTitle } from "@/lib/products";
 
 export async function GET() {
   try {
@@ -26,7 +25,8 @@ export async function GET() {
       id: order.id,
       status: order.status,
       totalAmount: Number(order.totalAmount),
-      productTitle: getPublicProductTitle(order.items[0]?.product?.title),
+      productTitle:
+        order.items[0]?.product?.title || "Unknown Product",
       paymentMethod: order.paymentMethod,
       createdAt: order.createdAt.toISOString(),
       deliveredAt: order.deliveredAt?.toISOString() || null,

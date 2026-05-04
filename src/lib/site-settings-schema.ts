@@ -150,11 +150,11 @@ export interface SiteSettingsBundle {
 
 export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
   home: {
-    heroBadgeLabel: "Digital Support",
-    heroTitle: "ArcWay Support Services",
-    heroTagline: "Setup Resources & Support",
+    heroBadgeLabel: "Arc Raiders",
+    heroTitle: "ArcWay Services",
+    heroTagline: "Gaming Tools & Support",
     heroSubtitle:
-      "Digital setup resources, account access support, and responsive help delivered fast.",
+      "Premium Arc Raiders gaming tools, setup resources, and support delivered fast.",
     emptyCatalogNote:
       "The catalog is being updated. Visit the shop for current availability.",
     proofStats: [
@@ -163,9 +163,9 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
       { value: "Instant", label: "Delivery" },
       { value: "24/7", label: "Support" },
     ],
-    whyTitle: "Why ArcWay Support Services?",
+    whyTitle: "Why ArcWay Services?",
     whySubtitle:
-      "Built for PC players who want clear setup resources, fast delivery, and real support.",
+      "Built for Arc Raiders players who want reliable gaming tools and support.",
     features: [
       {
         icon: "zap",
@@ -189,23 +189,23 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
       },
       {
         icon: "gamepad",
-        title: "Clear Setup",
-        desc: "Straightforward setup notes and compatibility details before you begin.",
+        title: "Clean Overlay",
+        desc: "Minimal, non-intrusive overlay that stays out of your way while you play.",
       },
       {
-        icon: "shield",
+        icon: "bitcoin",
         title: "Flexible Payments",
-        desc: "Checkout is designed with account records, delivery logs, and support follow-up.",
+        desc: "Pay securely with cards, Cash App Pay, or supported cryptocurrency checkout.",
       },
     ],
-    pricingTitle: "Get ArcWay Support Services",
+    pricingTitle: "Get ArcWay Services",
     pricingSubtitle:
       "One premium package with lifetime updates, instant delivery, and priority support.",
     pricingFallbackLabel: "Catalog update in progress",
     pricingFallbackDescription:
       "Publish a product from the admin panel and it will appear here automatically.",
     pricingFeatures: [
-      "Digital access resources",
+      "Full gaming tool access",
       "Guided setup resources",
       "Compatibility updates",
       "Priority support",
@@ -227,7 +227,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
       {
         num: 3,
         title: "Play",
-        desc: "Use your account page and support ticket history whenever you need help.",
+        desc: "Launch Arc Raiders with a clean supported toolset and clear support options.",
       },
     ],
     protectionTitle: "Your purchase is protected",
@@ -237,7 +237,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
       {
         icon: "shield-check",
         title: "Secure Payments",
-        desc: "Checkout records are tied to your account so orders, support, and delivery stay traceable.",
+        desc: "Pay through secure hosted checkout with card, Cash App Pay, or supported crypto options.",
       },
       {
         icon: "zap",
@@ -250,14 +250,14 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         desc: "Not satisfied? 72-hour refund window on unredeemed keys. Contact our support team anytime.",
       },
     ],
-    ctaTitle: "Ready to get started?",
+    ctaTitle: "Ready to upgrade your Arc Raiders setup?",
     ctaDescription:
       "Open the shop to see the latest live offers and delivery options.",
   },
   shop: {
     title: "Shop",
     subtitle:
-      "Digital access resources, setup support, and fast delivery",
+      "Premium game tools for Arc Raiders - tested, updated, and delivered instantly",
     emptyStateMessage: "No products match your filters",
     emptyStateDescription:
       "Try adjusting your search or filters to find what you're looking for.",
@@ -297,11 +297,11 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         faqs: [
           {
             q: "What payment methods are accepted?",
-            a: "Available payment methods are shown during checkout. Every order is tied to your account for delivery and support records.",
+            a: "We accept credit and debit cards, Cash App Pay, Bitcoin (BTC), and Litecoin (LTC) through supported checkout providers.",
           },
           {
             q: "Is my payment secure?",
-            a: "Yes. We keep checkout and delivery records so support can verify your order if you need help.",
+            a: "Yes. Card and Cash App Pay payments are handled through Stripe Checkout, and crypto payments are handled through BTCPay Server. We do not store card details or private wallet keys.",
           },
         ],
       },
@@ -433,7 +433,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         {
           title: "Refund Processing",
           paragraphs: [
-            "Approved refunds are processed back through the original supported payment method whenever possible. Our team will provide instructions if additional information is needed.",
+            "Approved refunds are processed back through the original supported payment method whenever possible. Crypto refunds may require a wallet address from you before processing.",
           ],
         },
       ],
@@ -466,7 +466,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         {
           title: "Payments and Delivery",
           bullets: [
-            "Available payment methods are shown during checkout.",
+            "Payments are accepted through supported checkout methods, including cards, Cash App Pay, BTC, and LTC.",
             "Orders are usually delivered shortly after payment confirmation, but some orders may be delayed for fraud or inventory review.",
             "You are responsible for providing accurate account and contact information at checkout.",
           ],

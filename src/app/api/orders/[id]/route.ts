@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { getPublicProductTitle } from "@/lib/products";
 
 export async function GET(
   req: NextRequest,
@@ -77,7 +76,7 @@ export async function GET(
       items: order.items.map((item) => ({
         id: item.id,
         productId: item.productId,
-        productTitle: getPublicProductTitle(item.product?.title),
+        productTitle: item.product?.title || "Unknown Product",
         productSlug: item.product?.slug || null,
         deliveryMethod: item.product?.deliveryMethod || null,
         downloadUrl:

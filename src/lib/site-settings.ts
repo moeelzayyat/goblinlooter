@@ -310,140 +310,6 @@ function mergeLegalSettings(stored: unknown): LegalSettings {
   };
 }
 
-function sanitizePublicText(value: string) {
-  return value
-    .replace(/\bArc Raiders\b/gi, "PC games")
-    .replace(/\b(gaming|game) tools\b/gi, "digital resources")
-    .replace(/\bclean overlays?\b/gi, "clear setup")
-    .replace(/\boverlays?\b/gi, "setup")
-    .replace(/\bcrypto(?:currency|currencies)?\b/gi, "payment")
-    .replace(/\bBitcoin\b|\bLitecoin\b|\bBTC\b|\bLTC\b|\bBTCPay(?: Server)?\b/gi, "payment processor")
-    .replace(/\bcheats?\b|\bhacks?\b|\baimbot\b|\btriggerbot\b|\bwallhack\b|\besp\b|\bradar\b/gi, "digital resources")
-    .replace(/\bundetected\b|\bbypass(?:es|ing)?\b|\bexploits?\b|\binject(?:or|ing)?\b|\bspoof(?:er|ing)?\b/gi, "supported")
-    .replace(/\bhwid\b/gi, "account")
-    .replace(/\bunban(?:ned)?\b|\bflagging\b|\bunflagged\b/gi, "account support");
-}
-
-function sanitizeFeature(feature: HomeFeature): HomeFeature {
-  return {
-    ...feature,
-    title: sanitizePublicText(feature.title),
-    desc: sanitizePublicText(feature.desc),
-  };
-}
-
-function sanitizeLegalPage(page: LegalPageSettings): LegalPageSettings {
-  return {
-    ...page,
-    metaTitle: sanitizePublicText(page.metaTitle),
-    metaDescription: sanitizePublicText(page.metaDescription),
-    title: sanitizePublicText(page.title),
-    subtitle: sanitizePublicText(page.subtitle),
-    ctaDescription: sanitizePublicText(page.ctaDescription),
-    ctaLabel: sanitizePublicText(page.ctaLabel),
-    sections: page.sections.map((section) => ({
-      ...section,
-      title: sanitizePublicText(section.title),
-      paragraphs: section.paragraphs?.map(sanitizePublicText),
-      bullets: section.bullets?.map(sanitizePublicText),
-      orderedBullets: section.orderedBullets?.map(sanitizePublicText),
-    })),
-  };
-}
-
-function sanitizeSiteSettings(settings: SiteSettingsBundle): SiteSettingsBundle {
-  return {
-    home: {
-      ...settings.home,
-      heroBadgeLabel: sanitizePublicText(settings.home.heroBadgeLabel),
-      heroTitle: sanitizePublicText(settings.home.heroTitle),
-      heroTagline: sanitizePublicText(settings.home.heroTagline),
-      heroSubtitle: sanitizePublicText(settings.home.heroSubtitle),
-      emptyCatalogNote: sanitizePublicText(settings.home.emptyCatalogNote),
-      whyTitle: sanitizePublicText(settings.home.whyTitle),
-      whySubtitle: sanitizePublicText(settings.home.whySubtitle),
-      features: settings.home.features.map(sanitizeFeature),
-      pricingTitle: sanitizePublicText(settings.home.pricingTitle),
-      pricingSubtitle: sanitizePublicText(settings.home.pricingSubtitle),
-      pricingFallbackLabel: sanitizePublicText(settings.home.pricingFallbackLabel),
-      pricingFallbackDescription: sanitizePublicText(
-        settings.home.pricingFallbackDescription
-      ),
-      pricingFeatures: settings.home.pricingFeatures.map(sanitizePublicText),
-      stepsTitle: sanitizePublicText(settings.home.stepsTitle),
-      stepsSubtitle: sanitizePublicText(settings.home.stepsSubtitle),
-      steps: settings.home.steps.map((step) => ({
-        ...step,
-        title: sanitizePublicText(step.title),
-        desc: sanitizePublicText(step.desc),
-      })),
-      protectionTitle: sanitizePublicText(settings.home.protectionTitle),
-      protectionSubtitle: sanitizePublicText(settings.home.protectionSubtitle),
-      trustCards: settings.home.trustCards.map(sanitizeFeature),
-      ctaTitle: sanitizePublicText(settings.home.ctaTitle),
-      ctaDescription: sanitizePublicText(settings.home.ctaDescription),
-    },
-    shop: {
-      ...settings.shop,
-      title: sanitizePublicText(settings.shop.title),
-      subtitle: sanitizePublicText(settings.shop.subtitle),
-      emptyStateMessage: sanitizePublicText(settings.shop.emptyStateMessage),
-      emptyStateDescription: sanitizePublicText(settings.shop.emptyStateDescription),
-    },
-    support: {
-      ...settings.support,
-      title: sanitizePublicText(settings.support.title),
-      subtitle: sanitizePublicText(settings.support.subtitle),
-      searchPlaceholder: sanitizePublicText(settings.support.searchPlaceholder),
-      contactTitle: sanitizePublicText(settings.support.contactTitle),
-      contactSubjectLabel: sanitizePublicText(settings.support.contactSubjectLabel),
-      contactSubjectPlaceholder: sanitizePublicText(
-        settings.support.contactSubjectPlaceholder
-      ),
-      contactMessageLabel: sanitizePublicText(settings.support.contactMessageLabel),
-      contactMessagePlaceholder: sanitizePublicText(
-        settings.support.contactMessagePlaceholder
-      ),
-      contactSubmitLabel: sanitizePublicText(settings.support.contactSubmitLabel),
-      contactSuccessMessage: sanitizePublicText(
-        settings.support.contactSuccessMessage
-      ),
-      contactLoggedOutHint: sanitizePublicText(settings.support.contactLoggedOutHint),
-      categories: settings.support.categories.map((category) => ({
-        ...category,
-        name: sanitizePublicText(category.name),
-        faqs: category.faqs.map((faq) => ({
-          q: sanitizePublicText(faq.q),
-          a: sanitizePublicText(faq.a),
-        })),
-      })),
-    },
-    footer: {
-      ...settings.footer,
-      brandName: sanitizePublicText(settings.footer.brandName),
-      brandTagline: sanitizePublicText(settings.footer.brandTagline),
-      copyrightNotice: sanitizePublicText(settings.footer.copyrightNotice),
-      columns: settings.footer.columns.map((column) => ({
-        ...column,
-        title: sanitizePublicText(column.title),
-        links: column.links.map((link) => ({
-          ...link,
-          label: sanitizePublicText(link.label),
-        })),
-      })),
-      socials: settings.footer.socials.map((social) => ({
-        ...social,
-        label: sanitizePublicText(social.label),
-      })),
-    },
-    legal: {
-      refundPolicy: sanitizeLegalPage(settings.legal.refundPolicy),
-      terms: sanitizeLegalPage(settings.legal.terms),
-      privacy: sanitizeLegalPage(settings.legal.privacy),
-    },
-  };
-}
-
 function normalizeHomeSettings(input: unknown) {
   if (!isRecord(input)) return { error: "Home settings are invalid." as const };
 
@@ -605,21 +471,23 @@ export function normalizeSiteSettingInput(key: SiteSettingKey, input: unknown) {
 }
 
 export async function getSiteSettings(): Promise<SiteSettingsBundle> {
-  try {
-    const rows = await prisma.siteSetting.findMany();
-    const stored = new Map(rows.map((row) => [row.key, row.value]));
+  let rows: Awaited<ReturnType<typeof prisma.siteSetting.findMany>> = [];
 
-    return sanitizeSiteSettings({
-      home: mergeHomeSettings(stored.get("home")),
-      shop: mergeObject(DEFAULT_SITE_SETTINGS.shop, stored.get("shop")),
-      support: mergeSupportSettings(stored.get("support")),
-      footer: mergeFooterSettings(stored.get("footer")),
-      legal: mergeLegalSettings(stored.get("legal")),
-    });
+  try {
+    rows = await prisma.siteSetting.findMany();
   } catch (error) {
-    console.warn("[Site] Falling back to default site settings:", error);
-    return sanitizeSiteSettings(DEFAULT_SITE_SETTINGS);
+    console.error("[Site] Falling back to default site settings:", error);
   }
+
+  const stored = new Map(rows.map((row) => [row.key, row.value]));
+
+  return {
+    home: mergeHomeSettings(stored.get("home")),
+    shop: mergeObject(DEFAULT_SITE_SETTINGS.shop, stored.get("shop")),
+    support: mergeSupportSettings(stored.get("support")),
+    footer: mergeFooterSettings(stored.get("footer")),
+    legal: mergeLegalSettings(stored.get("legal")),
+  };
 }
 
 export async function upsertSiteSetting(

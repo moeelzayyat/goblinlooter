@@ -41,7 +41,7 @@ interface ProductClientPageProps {
 }
 
 function formatCategoryLabel(category: string) {
-  return category === "configs" ? "Configuration" : "Digital Service";
+  return category.replace("-", " ").replace(/\b\w/g, (value) => value.toUpperCase());
 }
 
 function formatDeliveryMethod(method: Product["deliveryMethod"]) {
@@ -219,12 +219,12 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
     {
       icon: Gamepad2,
       title: "Player-focused setup",
-      copy: "Configured for a smooth PC workflow with clear setup guidance.",
+      copy: "Configured for a smooth gaming workflow with clear setup guidance.",
     },
     {
       icon: ShieldCheck,
       title: "Secure checkout",
-      copy: "Checkout and delivery stay connected to your order.",
+      copy: "Crypto checkout stays connected to your order.",
     },
     {
       icon: Download,
@@ -260,9 +260,9 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
         <section className={styles.storeHero}>
           <div className={styles.storeHeroCopy}>
             <span className={styles.heroEyebrow}>GoblinLooter Store</span>
-            <h1>Digital Setup Resources. Fast Access.</h1>
+            <h1>Premium Gaming Tools. Fast Access.</h1>
             <p>
-              Stable digital access, clear delivery, secure checkout, and real
+              Stable product access, clear delivery, secure checkout, and real
               support from purchase through activation.
             </p>
             <div className={styles.heroActions}>
