@@ -193,7 +193,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsBundle = {
         desc: "Straightforward setup notes and compatibility details before you begin.",
       },
       {
-        icon: "bitcoin",
+        icon: "shield",
         title: "Flexible Payments",
         desc: "Checkout is designed with account records, delivery logs, and support follow-up.",
       },

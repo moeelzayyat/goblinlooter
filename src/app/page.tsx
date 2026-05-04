@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
-  Bitcoin,
   Clock3,
   Download,
   Gamepad2,
@@ -31,7 +30,7 @@ const HOME_ICON_MAP: Record<HomeFeatureIcon, typeof Zap> = {
   download: Download,
   headphones: Headphones,
   gamepad: Gamepad2,
-  bitcoin: Bitcoin,
+  bitcoin: Shield,
   shield: Shield,
 };
 
