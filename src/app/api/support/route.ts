@@ -35,6 +35,13 @@ export async function POST(req: NextRequest) {
         type: ticketType,
         orderId: orderId || null,
         status: "open",
+        messages: {
+          create: {
+            senderId: session.user.id!,
+            senderRole: "customer",
+            body: message.trim(),
+          },
+        },
       },
     });
 

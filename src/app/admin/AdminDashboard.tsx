@@ -327,6 +327,7 @@ export function AdminDashboard({
   const [ticketResolution, setTicketResolution] = useState(
     initialData.tickets[0]?.resolution || ""
   );
+  const [ticketReply, setTicketReply] = useState("");
 
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -348,6 +349,7 @@ export function AdminDashboard({
   const [savingOrder, setSavingOrder] = useState(false);
   const [savingCustomer, setSavingCustomer] = useState(false);
   const [savingTicket, setSavingTicket] = useState(false);
+  const [sendingTicketReply, setSendingTicketReply] = useState(false);
 
   const selectedProduct = useMemo(
     () => products.find((product) => product.id === selectedProductId) || null,
@@ -418,6 +420,7 @@ export function AdminDashboard({
     if (!selectedTicket) return;
     setTicketStatus(selectedTicket.status);
     setTicketResolution(selectedTicket.resolution || "");
+    setTicketReply("");
   }, [selectedTicket]);
 
   function clearBanner() {
@@ -1087,6 +1090,37 @@ export function AdminDashboard({
       );
     } finally {
       setSavingTicket(false);
+    }
+  }
+
+  async function sendTicketReply() {
+    if (!selectedTicket || !ticketReply.trim()) return;
+
+    setSendingTicketReply(true);
+    clearBanner();
+
+    try {
+      const response = await fetch(
+        `/api/admin/support/${selectedTicket.id}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: ticketReply.trim() }),
+        }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to send reply.");
+      }
+
+      updateTicketState(data.ticket as AdminSupportTicketRecord);
+      setTicketReply("");
+      setMessage("Reply sent.");
+    } catch (replyError) {
+      setError(replyError instanceof Error ? replyError.message : "Unable to send reply.");
+    } finally {
+      setSendingTicketReply(false);
     }
   }
 
@@ -2795,6 +2829,62 @@ export function AdminDashboard({
                           placeholder="How this case was handled"
                         />
                       </label>
+                    </div>
+                  </div>
+
+                  <div className={styles.chatManager}>
+                    <div className={styles.surfaceHeader}>
+                      <div>
+                        <h3>Chat Thread</h3>
+                        <p>Reply here to send a message back to the customer widget.</p>
+                      </div>
+                    </div>
+
+                    <div className={styles.chatThread}>
+                      {selectedTicket.messages.length > 0 ? (
+                        selectedTicket.messages.map((chatMessage) => (
+                          <div
+                            key={chatMessage.id}
+                            className={`${styles.chatBubble} ${
+                              chatMessage.senderRole === "admin"
+                                ? styles.chatBubbleAdmin
+                                : ""
+                            }`}
+                          >
+                            <span>
+                              {chatMessage.senderRole === "admin"
+                                ? "Support"
+                                : selectedTicket.customer.username}{" "}
+                              - {formatCompactDate(chatMessage.createdAt)}
+                            </span>
+                            <p>{chatMessage.body}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className={styles.keyEmpty}>
+                          No chat messages yet. The original ticket text is shown above.
+                        </div>
+                      )}
+                    </div>
+
+                    <label className={styles.field}>
+                      <span>Reply to customer</span>
+                      <textarea
+                        rows={4}
+                        value={ticketReply}
+                        onChange={(event) => setTicketReply(event.target.value)}
+                        placeholder="Type a customer-visible reply"
+                      />
+                    </label>
+                    <div className={styles.actions}>
+                      <Button
+                        type="button"
+                        loading={sendingTicketReply}
+                        disabled={!ticketReply.trim()}
+                        onClick={sendTicketReply}
+                      >
+                        Send Reply
+                      </Button>
                     </div>
                   </div>
                 </>

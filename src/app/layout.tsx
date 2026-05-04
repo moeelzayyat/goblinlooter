@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import "@/styles/globals.css";
 
@@ -29,7 +30,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body>
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider>
+          {children}
+          <LiveChatWidget />
+        </SessionProvider>
       </body>
     </html>
   );

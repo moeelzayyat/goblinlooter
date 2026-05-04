@@ -93,6 +93,15 @@ export interface AdminSupportTicketRecord {
     email: string;
     role: AdminUserRole;
   };
+  messages: AdminSupportMessageRecord[];
+}
+
+export interface AdminSupportMessageRecord {
+  id: string;
+  senderId: string | null;
+  senderRole: string;
+  body: string;
+  createdAt: string;
 }
 
 export interface AdminAnalyticsRecord {
@@ -270,6 +279,13 @@ function serializeTicket(ticket: Awaited<ReturnType<typeof getTicketSourceById>>
       email: ticket.customer.email,
       role: ticket.customer.role as AdminUserRole,
     },
+    messages: ticket.messages.map((message) => ({
+      id: message.id,
+      senderId: message.senderId,
+      senderRole: message.senderRole,
+      body: message.body,
+      createdAt: message.createdAt.toISOString(),
+    })),
   } satisfies AdminSupportTicketRecord;
 }
 
@@ -353,6 +369,9 @@ async function getTicketSourceById(id: string) {
           email: true,
           role: true,
         },
+      },
+      messages: {
+        orderBy: { createdAt: "asc" },
       },
     },
   });
@@ -439,6 +458,9 @@ export async function listAdminSupportTickets() {
           email: true,
           role: true,
         },
+      },
+      messages: {
+        orderBy: { createdAt: "asc" },
       },
     },
   });

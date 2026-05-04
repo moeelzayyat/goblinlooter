@@ -644,6 +644,55 @@
   word-break: break-word;
 }
 
+.chatManager {
+  margin-top: var(--space-lg);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.chatThread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-height: 420px;
+  overflow-y: auto;
+  margin-bottom: var(--space-md);
+  padding-right: 4px;
+}
+
+.chatBubble {
+  align-self: flex-start;
+  max-width: 78%;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  padding: var(--space-sm);
+}
+
+.chatBubbleAdmin {
+  align-self: flex-end;
+  border-color: rgba(62, 207, 142, 0.28);
+  background: rgba(62, 207, 142, 0.1);
+}
+
+.chatBubble span {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.chatBubble p {
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .tagWrap {
   display: flex;
   flex-wrap: wrap;

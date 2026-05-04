@@ -210,6 +210,18 @@ model SupportTicket {
 
   customer User   @relation(fields: [customerId], references: [id])
   order    Order? @relation(fields: [orderId], references: [id])
+  messages SupportMessage[]
+}
+
+model SupportMessage {
+  id         String   @id @default(cuid())
+  ticketId   String
+  senderId   String?
+  senderRole String   // 'customer' | 'admin' | 'system'
+  body       String
+  createdAt  DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id])
 }
 
 // ───── Analytics Event ─────
