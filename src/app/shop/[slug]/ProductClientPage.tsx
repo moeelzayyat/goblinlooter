@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import styles from "./page.module.css";
 
-type CheckoutProvider = "stripe" | "btcpay";
+type CheckoutProvider = "btcpay";
 
 const DEFAULT_DISCLAIMER =
   "Use this product only on systems and accounts where you understand and accept the applicable game, platform, and service terms. Confirm compatibility before purchase.";
@@ -166,10 +166,10 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
   const availabilityLabel = getAvailabilityLabel(product);
   const availabilityToneClass = getAvailabilityToneClass(product);
 
-  async function handleBuyNow(paymentProvider: CheckoutProvider) {
+  async function handleBuyNow() {
     if (checkingOut) return;
     setCheckoutError(null);
-    setCheckingOut(paymentProvider);
+    setCheckingOut("btcpay");
 
     try {
       const response = await fetch("/api/checkout", {
@@ -177,7 +177,7 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productSlug: product.slug,
-          paymentProvider,
+          paymentProvider: "btcpay",
           purchaseOptionId: selectedOption?.id || null,
         }),
       });
@@ -398,22 +398,11 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
               <Button
                 size="lg"
                 className={styles.checkoutButton}
-                onClick={() => handleBuyNow("stripe")}
+                onClick={handleBuyNow}
                 disabled={Boolean(checkingOut)}
               >
                 <ShoppingCart size={18} />
-                {checkingOut === "stripe"
-                  ? "Processing..."
-                  : "Card / Cash App Checkout"}
-              </Button>
-              <Button
-                size="lg"
-                variant="secondary"
-                className={styles.checkoutButton}
-                onClick={() => handleBuyNow("btcpay")}
-                disabled={Boolean(checkingOut)}
-              >
-                {checkingOut === "btcpay" ? "Processing..." : "Alternative Checkout"}
+                {checkingOut === "btcpay" ? "Processing..." : "Pay with Crypto"}
               </Button>
             </div>
 

@@ -3,9 +3,8 @@ import { auth } from "@/lib/auth";
 import { createInvoice } from "@/lib/btcpay";
 import { ensureDatabaseProduct, getCatalogProductBySlug } from "@/lib/products";
 import { prisma } from "@/lib/prisma";
-import { createStripeCheckoutSession } from "@/lib/stripe";
 
-type CheckoutProvider = "stripe" | "btcpay";
+type CheckoutProvider = "btcpay";
 
 function resolvePurchaseSelection(
   product: NonNullable<Awaited<ReturnType<typeof getCatalogProductBySlug>>>,
@@ -57,25 +56,11 @@ function getRequestOrigin(req: NextRequest) {
   return req.nextUrl.origin;
 }
 
-function getProvider(value: unknown): CheckoutProvider {
-  return value === "btcpay" ? "btcpay" : "stripe";
-}
-
-function getSuccessUrl(origin: string, orderId: string, provider: CheckoutProvider) {
+function getSuccessUrl(origin: string, orderId: string) {
   const successUrl = new URL("/checkout/success", origin);
   successUrl.searchParams.set("orderId", orderId);
 
-  if (provider === "stripe") {
-    return `${successUrl.toString()}&session_id={CHECKOUT_SESSION_ID}`;
-  }
-
   return successUrl.toString();
-}
-
-function getCancelUrl(origin: string, productSlug: string) {
-  const cancelUrl = new URL(`/shop/${productSlug}`, origin);
-  cancelUrl.searchParams.set("checkout", "cancelled");
-  return cancelUrl.toString();
 }
 
 export async function POST(req: NextRequest) {
@@ -83,7 +68,7 @@ export async function POST(req: NextRequest) {
     const session = await auth();
     const body = await req.json();
     const { productSlug, buyerEmail, purchaseOptionId } = body;
-    const paymentProvider = getProvider(body.paymentProvider);
+    const paymentProvider: CheckoutProvider = "btcpay";
 
     if (!productSlug) {
       return NextResponse.json(
@@ -140,7 +125,7 @@ export async function POST(req: NextRequest) {
         customerId: session.user.id,
         status: "pending",
         totalAmount: purchaseSelection.amount,
-        paymentMethod: paymentProvider === "stripe" ? "STRIPE" : "BTCPAY",
+        paymentMethod: "BTCPAY",
         items: {
           create: {
             productId: dbProduct.id,
@@ -163,72 +148,37 @@ export async function POST(req: NextRequest) {
             "unknown",
           userAgent: req.headers.get("user-agent") || "unknown",
           country: req.headers.get("cf-ipcountry") || null,
-          paymentMethod: paymentProvider === "stripe" ? "STRIPE" : "BTCPAY",
+          paymentMethod: "BTCPAY",
         },
       })
       .catch(() => {
         // Non-critical metadata; checkout can continue.
       });
 
-    if (paymentProvider === "btcpay") {
-      const invoice = await createInvoice({
-        amount: purchaseSelection.amount,
-        currency: "USD",
-        orderId: dbOrder.id,
-        itemDescription: purchaseSelection.itemTitle,
-        buyerEmail: customerEmail,
-        redirectURL: getSuccessUrl(origin, dbOrder.id, paymentProvider),
-      });
-
-      await prisma.order.update({
-        where: { id: dbOrder.id },
-        data: { btcpayInvoiceId: invoice.id },
-      });
-
-      return NextResponse.json({
-        invoiceId: invoice.id,
-        checkoutUrl: invoice.checkoutLink,
-        orderId: dbOrder.id,
-        provider: paymentProvider,
-      });
-    }
-
-    const checkoutSession = await createStripeCheckoutSession({
+    const invoice = await createInvoice({
       amount: purchaseSelection.amount,
       buyerEmail: customerEmail,
-      cancelUrl: getCancelUrl(origin, product.slug),
+      currency: "USD",
       orderId: dbOrder.id,
-      productSlug: product.slug,
-      productTitle: purchaseSelection.itemTitle,
-      successUrl: getSuccessUrl(origin, dbOrder.id, paymentProvider),
+      itemDescription: purchaseSelection.itemTitle,
+      redirectURL: getSuccessUrl(origin, dbOrder.id),
     });
-
-    if (!checkoutSession.url) {
-      throw new Error("Stripe did not return a checkout URL.");
-    }
 
     await prisma.order.update({
       where: { id: dbOrder.id },
-      data: { stripeCheckoutSessionId: checkoutSession.id },
+      data: { btcpayInvoiceId: invoice.id },
     });
 
     return NextResponse.json({
-      checkoutUrl: checkoutSession.url,
+      invoiceId: invoice.id,
+      checkoutUrl: invoice.checkoutLink,
       orderId: dbOrder.id,
       provider: paymentProvider,
-      sessionId: checkoutSession.id,
     });
   } catch (error) {
     console.error("Checkout error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
     const normalizedMessage = message.toLowerCase();
-    const isStripeConfigError = normalizedMessage.includes(
-      "stripe is not configured"
-    );
-    const isStripeError =
-      normalizedMessage.includes("stripe") ||
-      normalizedMessage.includes("cashapp") ||
-      normalizedMessage.includes("card");
     const isTimeout = normalizedMessage.includes("timed out");
     const isFullNodeUnavailable = normalizedMessage.includes(
       "full node not available"
@@ -246,31 +196,19 @@ export async function POST(req: NextRequest) {
     let code: string;
     let retryable = false;
 
-    if (isStripeConfigError) {
-      userError =
-        "Card and Cash App checkout is temporarily unavailable. Please contact support or try another payment option.";
-      status = 503;
-      code = "stripe_not_configured";
-      retryable = false;
-    } else if (isStripeError) {
-      userError =
-        "Card and Cash App checkout is temporarily unavailable. Please try again later.";
-      status = 503;
-      code = "stripe_checkout_unavailable";
-      retryable = true;
-    } else if (
+    if (
       isFullNodeUnavailable ||
       isPaymentMethodUnavailable ||
       isRateUnavailable
     ) {
       userError =
-        "Payments are temporarily unavailable because our payment processor is offline or not fully synced. Please try again later.";
+        "Crypto checkout is temporarily unavailable because the payment processor is offline or not fully synced. Please try again later.";
       status = 503;
       code = "payments_temporarily_unavailable";
       retryable = true;
     } else if (isTimeout || isNodeSync) {
       userError =
-        "Payment system is currently syncing with the payment network. This is temporary - please try again in a little while.";
+        "Crypto checkout is currently syncing with the payment network. This is temporary - please try again in a little while.";
       status = 503;
       code = "payments_temporarily_unavailable";
       retryable = true;

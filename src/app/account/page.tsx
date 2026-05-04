@@ -126,8 +126,8 @@ export default function AccountPage() {
             }}
           >
             View your purchase history, track deliveries, and access your product keys.
-            Payments are processed through secure checkout providers; no card details
-            are stored by GoblinLooter.
+            Payments are processed through secure checkout providers; private
+            wallet details are never stored by GoblinLooter.
           </p>
           <div style={{ display: "flex", gap: "var(--space-sm)", flexWrap: "wrap" }}>
             <Link href="/orders">
