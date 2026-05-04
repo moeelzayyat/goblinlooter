@@ -264,7 +264,7 @@ export async function POST(req: NextRequest) {
       isRateUnavailable
     ) {
       userError =
-        "Crypto payments are temporarily unavailable because our BTCPay node is offline or not fully synced. Please try again later.";
+        "Payments are temporarily unavailable because our payment processor is offline or not fully synced. Please try again later.";
       status = 503;
       code = "payments_temporarily_unavailable";
       retryable = true;

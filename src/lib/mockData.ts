@@ -5,12 +5,12 @@ import type { Product } from "@/types";
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: "p1",
-    title: "ArcWay Services",
+    title: "ArcWay Support Services",
     slug: "arcway-refresh-ids",
     shortDescription:
-      "ArcWay gaming tools with guided setup, clean overlays, and fast digital delivery.",
+      "Digital setup resources, account access support, and fast delivery for PC players.",
     fullDescription:
-      "ArcWay Services includes gaming utility access, setup resources, and priority assistance for Arc Raiders players. Built for straightforward configuration, clear guidance, and smooth support from purchase through activation.",
+      "ArcWay Support Services includes digital access, setup resources, and priority assistance for PC players. Built for straightforward configuration, clear guidance, and smooth support from purchase through activation.",
     videoUrl: null,
     disclaimer:
       "Use this product only on systems and accounts where you understand and accept the applicable game, platform, and service terms. Confirm compatibility before purchase.",
@@ -19,7 +19,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: "tool-access",
     platform: ["Windows 10/11"],
     compatibilityNotes:
-      "Requires Arc Raiders (latest patch). Windows 10 or 11 only. DirectX 12.",
+      "Requires a supported Windows PC. Windows 10 or 11 only. DirectX 12.",
     regionRestrictions: null,
     deliveryMethod: "key",
     deliveryTimeEstimate: "Instant delivery",

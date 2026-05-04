@@ -41,7 +41,7 @@ interface ProductClientPageProps {
 }
 
 function formatCategoryLabel(category: string) {
-  return category.replace("-", " ").replace(/\b\w/g, (value) => value.toUpperCase());
+  return category === "configs" ? "Configuration" : "Digital Service";
 }
 
 function formatDeliveryMethod(method: Product["deliveryMethod"]) {
@@ -219,12 +219,12 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
     {
       icon: Gamepad2,
       title: "Player-focused setup",
-      copy: "Configured for a smooth gaming workflow with clear setup guidance.",
+      copy: "Configured for a smooth PC workflow with clear setup guidance.",
     },
     {
       icon: ShieldCheck,
       title: "Secure checkout",
-      copy: "Card, Cash App, and crypto checkout stay connected to your order.",
+      copy: "Checkout and delivery stay connected to your order.",
     },
     {
       icon: Download,
@@ -260,9 +260,9 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
         <section className={styles.storeHero}>
           <div className={styles.storeHeroCopy}>
             <span className={styles.heroEyebrow}>GoblinLooter Store</span>
-            <h1>Premium Gaming Tools. Fast Access.</h1>
+            <h1>Digital Setup Resources. Fast Access.</h1>
             <p>
-              Stable product access, clear delivery, secure checkout, and real
+              Stable digital access, clear delivery, secure checkout, and real
               support from purchase through activation.
             </p>
             <div className={styles.heroActions}>
@@ -413,7 +413,7 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
                 onClick={() => handleBuyNow("btcpay")}
                 disabled={Boolean(checkingOut)}
               >
-                {checkingOut === "btcpay" ? "Processing..." : "Pay with Crypto"}
+                {checkingOut === "btcpay" ? "Processing..." : "Alternative Checkout"}
               </Button>
             </div>
 

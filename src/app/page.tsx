@@ -47,12 +47,6 @@ function getProductPriceLabel(product: Product) {
   return `${prefix}$${lowestPrice.toFixed(2)}`;
 }
 
-function formatCategory(category: string) {
-  return category
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (value) => value.toUpperCase());
-}
-
 function getAvailabilityLabel(product: Product) {
   return product.availabilityLabel?.trim() || "Available";
 }
@@ -111,7 +105,7 @@ export default async function HomePage() {
               <Link href="/shop">
                 <Button size="lg">
                   <ShoppingCart size={18} />
-                  Shop Gaming Tools
+                  Shop Digital Resources
                 </Button>
               </Link>
               <a
@@ -145,7 +139,7 @@ export default async function HomePage() {
             <Link href={primaryHref} className={styles.heroImageLink}>
               <Image
                 src={heroImage}
-                alt={primaryProduct?.title || "GoblinLooter gaming tools"}
+                alt={primaryProduct?.title || "GoblinLooter digital resources"}
                 width={1984}
                 height={793}
                 className={styles.heroImage}
@@ -154,7 +148,7 @@ export default async function HomePage() {
             </Link>
             <div className={styles.productPreviewFooter}>
               <div>
-                <span>{primaryProduct ? formatCategory(primaryProduct.category) : "Catalog"}</span>
+                <span>{primaryProduct ? "Digital Service" : "Catalog"}</span>
                 <strong>{primaryProduct?.title || "Live products updating"}</strong>
               </div>
               <Link href={primaryHref} className={styles.previewLink}>
@@ -176,7 +170,7 @@ export default async function HomePage() {
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <span className={styles.eyebrow}>Catalog</span>
-            <h2>Featured Gaming Tools</h2>
+            <h2>Featured Digital Resources</h2>
             <p>
               Pick a product, choose the duration or access option, and receive
               your key, download, and setup guide after checkout.
@@ -201,7 +195,7 @@ export default async function HomePage() {
                     />
                   </div>
                   <div className={styles.productMeta}>
-                    <span>{formatCategory(item.category)}</span>
+                    <span>Digital Service</span>
                     <b className={getAvailabilityToneClass(item)}>
                       {getAvailabilityLabel(item)}
                     </b>

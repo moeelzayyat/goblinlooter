@@ -39,7 +39,7 @@ export function ProductCard({ product }: ProductCardProps) {
       )}
 
       <div className={styles.body}>
-        <span className={styles.category}>{product.category.replace("-", " ")}</span>
+        <span className={styles.category}>Digital Service</span>
         <h3 className={styles.title}>{product.title}</h3>
         <p className={styles.description}>{product.shortDescription}</p>
 

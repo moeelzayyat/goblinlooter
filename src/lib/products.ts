@@ -21,12 +21,23 @@ type ProductWithKeys = DbProduct & {
 };
 
 const ARCWAY_SERVICES_COPY = {
-  title: "ArcWay Services",
+  title: "ArcWay Support Services",
   shortDescription:
-    "ArcWay gaming tools with guided setup, clean overlays, and fast digital delivery.",
+    "Digital setup resources, account access support, and fast delivery for PC players.",
   fullDescription:
-    "ArcWay Services includes gaming utility access, setup resources, and priority assistance for Arc Raiders players. Built for straightforward configuration, clear guidance, and smooth support from purchase through activation.",
+    "ArcWay Support Services includes digital access, setup resources, and priority assistance for PC players. Built for straightforward configuration, clear guidance, and smooth support from purchase through activation.",
 };
+
+const PUBLIC_BLOCKED_PRODUCT_TERMS =
+  /\b(cheat|cheats|hack|hacks|aimbot|triggerbot|wallhack|esp|radar|undetected|hwid|spoofer|spoofing|bypass|exploit|unban|unbanned|flagging|unflagged|inject|injector|loader|anti-cheat|anticheat|vanguard|faceit)\b/i;
+
+export function getPublicProductTitle(title: string | null | undefined) {
+  if (!title) return "Digital Access";
+
+  return PUBLIC_BLOCKED_PRODUCT_TERMS.test(title)
+    ? "Digital Access Package"
+    : title.replace(/\bArc Raiders\b/gi, "PC Games");
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -161,6 +172,28 @@ function normalizePublicProductCopy(product: Product): Product {
   };
 }
 
+function isPubliclyCompliantProduct(product: Product) {
+  const searchableCopy = [
+    product.title,
+    product.shortDescription,
+    product.fullDescription,
+    product.compatibilityNotes,
+    product.refundTerms,
+    product.regionRestrictions || "",
+    product.disclaimer || "",
+    ...(product.featureGroups || []).flatMap((group) => [
+      group.title,
+      group.description || "",
+      ...group.items,
+    ]),
+    ...(product.setupGuide?.steps || []),
+    ...(product.setupGuide?.fixes || []).flatMap((fix) => [fix.error, fix.fix]),
+    product.setupGuide?.notes || "",
+  ].join(" ");
+
+  return !PUBLIC_BLOCKED_PRODUCT_TERMS.test(searchableCopy);
+}
+
 function toPublicProduct(product: ProductWithKeys): Product {
   const availableKeys =
     product.inventoryKeys?.filter((key) => key.status === "available").length ??
@@ -225,7 +258,7 @@ export function buildCategoryOptions(products: Product[]) {
 
   return [...counts.entries()].map(([id, count]) => ({
     id: id as Product["category"],
-    name: id.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+    name: id === "configs" ? "Configuration" : "Digital Services",
     count,
   }));
 }
@@ -253,7 +286,7 @@ export async function getPublishedProducts(): Promise<Product[]> {
     });
 
     if (products.length > 0) {
-      return products.map(toPublicProduct);
+      return products.map(toPublicProduct).filter(isPubliclyCompliantProduct);
     }
 
     const totalProducts = await prisma.product.count();
@@ -266,7 +299,8 @@ export async function getPublishedProducts(): Promise<Product[]> {
 
   return MOCK_PRODUCTS
     .filter((product) => product.status === "published")
-    .map(normalizeFallbackProduct);
+    .map(normalizeFallbackProduct)
+    .filter(isPubliclyCompliantProduct);
 }
 
 export async function getCatalogProductBySlug(slug: string): Promise<Product | null> {
@@ -291,7 +325,10 @@ export async function getCatalogProductBySlug(slug: string): Promise<Product | n
     });
 
     if (product) {
-      return product.status === "published" ? toPublicProduct(product) : null;
+      if (product.status !== "published") return null;
+
+      const publicProduct = toPublicProduct(product);
+      return isPubliclyCompliantProduct(publicProduct) ? publicProduct : null;
     }
 
     const totalProducts = await prisma.product.count();
@@ -305,7 +342,10 @@ export async function getCatalogProductBySlug(slug: string): Promise<Product | n
   const fallback = MOCK_PRODUCTS.find(
     (product) => product.slug === slug && product.status === "published"
   );
-  return fallback ? normalizeFallbackProduct(fallback) : null;
+  if (!fallback) return null;
+
+  const publicProduct = normalizeFallbackProduct(fallback);
+  return isPubliclyCompliantProduct(publicProduct) ? publicProduct : null;
 }
 
 export async function getAdminProducts(): Promise<Product[]> {
