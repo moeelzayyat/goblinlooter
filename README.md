@@ -82,6 +82,7 @@ text channel. Configure these environment variables:
 - `DISCORD_GUILD_ID`
 - `DISCORD_SUPPORT_CHANNEL_ID`
 - `DISCORD_PUBLIC_KEY`
+- `DISCORD_SUPPORT_ROLE_ID` (optional, restricts who can run `/reply`)
 - `DISCORD_TICKET_CATEGORY_ID` (optional)
 
 Set the Discord app Interactions Endpoint URL to:

@@ -13,6 +13,7 @@ interface DiscordInteraction {
   };
   channel_id?: string;
   member?: {
+    roles?: string[];
     user?: {
       id?: string;
       username?: string;
@@ -39,6 +40,7 @@ function getDiscordConfig() {
     guildId: process.env.DISCORD_GUILD_ID,
     supportChannelId: process.env.DISCORD_SUPPORT_CHANNEL_ID,
     ticketCategoryId: process.env.DISCORD_TICKET_CATEGORY_ID,
+    supportRoleId: process.env.DISCORD_SUPPORT_ROLE_ID,
     publicKey: process.env.DISCORD_PUBLIC_KEY,
   };
 }
@@ -231,6 +233,14 @@ export async function handleDiscordInteraction(
   const channelId = interaction.channel_id;
   if (!channelId) {
     return discordCommandResponse("Run this command inside a ticket channel.");
+  }
+
+  const { supportRoleId } = getDiscordConfig();
+  if (
+    supportRoleId &&
+    !interaction.member?.roles?.includes(supportRoleId)
+  ) {
+    return discordCommandResponse("You do not have permission to reply to website chats.");
   }
 
   const message = getReplyMessage(interaction);
