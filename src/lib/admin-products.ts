@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import type {
   DeliveryMethod,
   ProductCategory,
+  ProductAvailabilityTone,
   ProductDownloadFile,
   ProductFeatureGroup,
   ProductSetupFix,
@@ -60,6 +61,8 @@ export interface AdminProductRecord {
   deliveryTimeEstimate: string;
   thankYouMessage: string | null;
   setupGuide: ProductSetupGuide | null;
+  availabilityLabel: string | null;
+  availabilityTone: ProductAvailabilityTone | null;
   refundEligibility: RefundEligibility;
   refundTerms: string;
   images: string[];
@@ -90,6 +93,13 @@ const VALID_REFUND_ELIGIBILITY: RefundEligibility[] = [
   "non-refundable",
 ];
 const VALID_STATUSES: ProductStatus[] = ["draft", "published", "disabled"];
+const VALID_AVAILABILITY_TONES: ProductAvailabilityTone[] = [
+  "green",
+  "orange",
+  "red",
+  "blue",
+  "gray",
+];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -435,6 +445,8 @@ function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
     deliveryTimeEstimate: product.deliveryTimeEstimate,
     thankYouMessage: product.thankYouMessage,
     setupGuide: serializeSetupGuide(product.setupGuide),
+    availabilityLabel: product.availabilityLabel,
+    availabilityTone: product.availabilityTone as ProductAvailabilityTone | null,
     refundEligibility: product.refundEligibility as RefundEligibility,
     refundTerms: product.refundTerms,
     images: product.images,
@@ -492,6 +504,14 @@ export function normalizeProductInput(input: Record<string, unknown>) {
       ? input.thankYouMessage.trim()
       : null;
   const setupGuide = parseSetupGuide(input);
+  const availabilityLabel =
+    typeof input.availabilityLabel === "string" && input.availabilityLabel.trim()
+      ? input.availabilityLabel.trim().slice(0, 32)
+      : null;
+  const availabilityTone =
+    typeof input.availabilityTone === "string" && input.availabilityTone.trim()
+      ? (input.availabilityTone.trim() as ProductAvailabilityTone)
+      : null;
   const refundTerms =
     typeof input.refundTerms === "string" ? input.refundTerms.trim() : "";
   const regionRestrictions =
@@ -540,6 +560,12 @@ export function normalizeProductInput(input: Record<string, unknown>) {
   if (!VALID_STATUSES.includes(status)) {
     return { error: "Status is invalid." };
   }
+  if (
+    availabilityTone !== null &&
+    !VALID_AVAILABILITY_TONES.includes(availabilityTone)
+  ) {
+    return { error: "Availability badge color is invalid." };
+  }
   if (platform.length === 0) {
     return { error: "At least one platform is required." };
   }
@@ -581,6 +607,8 @@ export function normalizeProductInput(input: Record<string, unknown>) {
       setupGuide: setupGuide.guide
         ? toSetupGuideJson(setupGuide.guide)
         : Prisma.JsonNull,
+      availabilityLabel,
+      availabilityTone: availabilityLabel ? availabilityTone || "green" : null,
       refundEligibility,
       refundTerms,
       images,

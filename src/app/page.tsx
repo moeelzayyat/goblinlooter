@@ -53,6 +53,26 @@ function formatCategory(category: string) {
     .replace(/\b\w/g, (value) => value.toUpperCase());
 }
 
+function getAvailabilityLabel(product: Product) {
+  return product.availabilityLabel?.trim() || "Available";
+}
+
+function getAvailabilityToneClass(product: Product) {
+  switch (product.availabilityTone) {
+    case "orange":
+      return styles.badgeOrange;
+    case "red":
+      return styles.badgeRed;
+    case "blue":
+      return styles.badgeBlue;
+    case "gray":
+      return styles.badgeGray;
+    case "green":
+    default:
+      return styles.badgeGreen;
+  }
+}
+
 export default async function HomePage() {
   const settings = (await getSiteSettings()).home;
   const products = await getPublishedProducts();
@@ -182,9 +202,9 @@ export default async function HomePage() {
                   </div>
                   <div className={styles.productMeta}>
                     <span>{formatCategory(item.category)}</span>
-                    {item.stockCount !== undefined && (
-                      <b>{item.stockCount > 0 ? `${item.stockCount} left` : "Out"}</b>
-                    )}
+                    <b className={getAvailabilityToneClass(item)}>
+                      {getAvailabilityLabel(item)}
+                    </b>
                   </div>
                   <h3>{item.title}</h3>
                   <p>{item.shortDescription}</p>

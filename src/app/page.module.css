@@ -317,8 +317,37 @@
 }
 
 .productMeta b {
+  border: 1px solid transparent;
+}
+
+.badgeGreen {
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border-color: rgba(62, 207, 142, 0.28) !important;
+}
+
+.badgeOrange {
   color: var(--warning);
   background: var(--warning-subtle);
+  border-color: rgba(245, 166, 35, 0.34) !important;
+}
+
+.badgeRed {
+  color: var(--danger);
+  background: var(--danger-subtle);
+  border-color: rgba(239, 68, 68, 0.34) !important;
+}
+
+.badgeBlue {
+  color: var(--info);
+  background: var(--info-subtle);
+  border-color: rgba(59, 130, 246, 0.34) !important;
+}
+
+.badgeGray {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border-color: var(--border-default) !important;
 }
 
 .productCard h3 {

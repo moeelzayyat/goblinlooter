@@ -12,6 +12,17 @@ export function ProductCard({ product }: ProductCardProps) {
     product.purchaseOptions && product.purchaseOptions.length > 0
       ? Math.min(...product.purchaseOptions.map((option) => option.price))
       : product.price;
+  const availabilityLabel = product.availabilityLabel?.trim() || "Available";
+  const availabilityToneClass =
+    product.availabilityTone === "orange"
+      ? styles.badgeOrange
+      : product.availabilityTone === "red"
+        ? styles.badgeRed
+        : product.availabilityTone === "blue"
+          ? styles.badgeBlue
+          : product.availabilityTone === "gray"
+            ? styles.badgeGray
+            : styles.badgeGreen;
 
   return (
     <Link href={`/shop/${product.slug}`} className={styles.card}>
@@ -46,9 +57,9 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       <div className={styles.footer}>
-        {product.stockCount !== undefined && product.stockCount < 10 && (
-          <span className={styles.lowStock}>Low stock</span>
-        )}
+        <span className={`${styles.statusBadge} ${availabilityToneClass}`}>
+          {availabilityLabel}
+        </span>
         <span className={styles.cta}>View →</span>
       </div>
     </Link>

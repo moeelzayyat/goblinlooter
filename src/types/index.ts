@@ -22,6 +22,12 @@ export type DeliveryMethod = "key" | "download" | "manual";
 export type RefundEligibility = "eligible" | "conditional" | "non-refundable";
 
 export type ProductStatus = "draft" | "published" | "disabled";
+export type ProductAvailabilityTone =
+  | "green"
+  | "orange"
+  | "red"
+  | "blue"
+  | "gray";
 
 export interface PurchaseOption {
   id: string;
@@ -89,6 +95,8 @@ export interface Product {
   downloadUrl?: string | null;
   deliveryTimeEstimate: string;
   setupGuide?: ProductSetupGuide | null;
+  availabilityLabel?: string | null;
+  availabilityTone?: ProductAvailabilityTone | null;
   refundEligibility: RefundEligibility;
   refundTerms: string;
   images: string[];

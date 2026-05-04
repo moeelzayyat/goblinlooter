@@ -96,10 +96,42 @@
   padding: 0 var(--space-md) var(--space-md);
 }
 
-.lowStock {
+.statusBadge {
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
   font-size: var(--text-xs);
-  font-weight: 500;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.badgeGreen {
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border-color: rgba(62, 207, 142, 0.28);
+}
+
+.badgeOrange {
+  color: var(--warning);
+  background: var(--warning-subtle);
+  border-color: rgba(245, 166, 35, 0.34);
+}
+
+.badgeRed {
   color: var(--danger);
+  background: var(--danger-subtle);
+  border-color: rgba(239, 68, 68, 0.34);
+}
+
+.badgeBlue {
+  color: var(--info);
+  background: var(--info-subtle);
+  border-color: rgba(59, 130, 246, 0.34);
+}
+
+.badgeGray {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border-color: var(--border-default);
 }
 
 .cta {

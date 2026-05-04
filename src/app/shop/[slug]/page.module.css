@@ -300,10 +300,34 @@
   background: var(--bg-elevated);
 }
 
-.lowStockBadge {
+.stockBadgeGreen {
+  color: var(--accent);
+  border-color: rgba(62, 207, 142, 0.42);
+  background: var(--accent-subtle);
+}
+
+.stockBadgeOrange {
   color: var(--warning);
   border-color: rgba(245, 166, 35, 0.42);
   background: var(--warning-subtle);
+}
+
+.stockBadgeRed {
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.42);
+  background: var(--danger-subtle);
+}
+
+.stockBadgeBlue {
+  color: var(--info);
+  border-color: rgba(59, 130, 246, 0.42);
+  background: var(--info-subtle);
+}
+
+.stockBadgeGray {
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+  background: var(--bg-elevated);
 }
 
 .productHeader h2 {

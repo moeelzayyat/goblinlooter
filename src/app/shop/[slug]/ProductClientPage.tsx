@@ -48,6 +48,26 @@ function formatDeliveryMethod(method: Product["deliveryMethod"]) {
   return method.replace("-", " ").replace(/\b\w/g, (value) => value.toUpperCase());
 }
 
+function getAvailabilityLabel(product: Product) {
+  return product.availabilityLabel?.trim() || "Available";
+}
+
+function getAvailabilityToneClass(product: Product) {
+  switch (product.availabilityTone) {
+    case "orange":
+      return styles.stockBadgeOrange;
+    case "red":
+      return styles.stockBadgeRed;
+    case "blue":
+      return styles.stockBadgeBlue;
+    case "gray":
+      return styles.stockBadgeGray;
+    case "green":
+    default:
+      return styles.stockBadgeGreen;
+  }
+}
+
 function splitDescription(value: string) {
   const paragraphs = value
     .split(/\n{2,}/)
@@ -143,11 +163,8 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
       : null);
   const featureGroups = product.featureGroups || [];
   const productDisclaimer = product.disclaimer || DEFAULT_DISCLAIMER;
-  const availabilityLabel =
-    product.stockCount !== undefined && product.stockCount < 10
-      ? `Only ${product.stockCount} left`
-      : "Available";
-  const isLowStock = product.stockCount !== undefined && product.stockCount < 10;
+  const availabilityLabel = getAvailabilityLabel(product);
+  const availabilityToneClass = getAvailabilityToneClass(product);
 
   async function handleBuyNow(paymentProvider: CheckoutProvider) {
     if (checkingOut) return;
@@ -312,9 +329,7 @@ export function ProductClientPage({ product, related }: ProductClientPageProps) 
               <div className={styles.headerBadges}>
                 <span className={styles.categoryBadge}>{categoryLabel}</span>
                 <span
-                  className={`${styles.stockBadge} ${
-                    isLowStock ? styles.lowStockBadge : ""
-                  }`}
+                  className={`${styles.stockBadge} ${availabilityToneClass}`}
                 >
                   {availabilityLabel}
                 </span>

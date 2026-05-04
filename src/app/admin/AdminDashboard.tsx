@@ -92,6 +92,14 @@ const PRODUCT_STATUS_OPTIONS = [
   { value: "disabled", label: "Disabled" },
 ];
 
+const AVAILABILITY_TONE_OPTIONS = [
+  { value: "green", label: "Green" },
+  { value: "orange", label: "Orange" },
+  { value: "red", label: "Red" },
+  { value: "blue", label: "Blue" },
+  { value: "gray", label: "Gray" },
+];
+
 const ORDER_STATUS_OPTIONS = [
   { value: "pending", label: "Pending" },
   { value: "paid", label: "Paid" },
@@ -192,6 +200,8 @@ function createEmptyProductForm() {
     setupGuideSteps: "",
     setupGuideFixes: "",
     setupGuideNotes: "",
+    availabilityLabel: "",
+    availabilityTone: "green",
     refundEligibility: "conditional",
     refundTerms: "Refunds are available on unused keys within 72 hours.",
     images: "/arcway-dupe.png",
@@ -239,6 +249,8 @@ function formFromProduct(product: AdminProductRecord): ProductFormState {
         .map((fix) => `${fix.error} => ${fix.fix}`)
         .join("\n") || "",
     setupGuideNotes: product.setupGuide?.notes || "",
+    availabilityLabel: product.availabilityLabel || "",
+    availabilityTone: product.availabilityTone || "green",
     refundEligibility: product.refundEligibility,
     refundTerms: product.refundTerms,
     images: product.images.join("\n"),
@@ -1617,6 +1629,35 @@ export function AdminDashboard({
                           updateProductField("regionRestrictions", event.target.value)
                         }
                       />
+                    </label>
+                    <label className={styles.field}>
+                      <span>Storefront Badge Text</span>
+                      <input
+                        maxLength={32}
+                        value={productForm.availabilityLabel}
+                        onChange={(event) =>
+                          updateProductField("availabilityLabel", event.target.value)
+                        }
+                        placeholder="Available, Undetected, Updating..."
+                      />
+                      <small className={styles.fieldHint}>
+                        Public product cards use this instead of showing key counts.
+                      </small>
+                    </label>
+                    <label className={styles.field}>
+                      <span>Storefront Badge Color</span>
+                      <select
+                        value={productForm.availabilityTone}
+                        onChange={(event) =>
+                          updateProductField("availabilityTone", event.target.value)
+                        }
+                      >
+                        {AVAILABILITY_TONE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </label>
                   </div>
 

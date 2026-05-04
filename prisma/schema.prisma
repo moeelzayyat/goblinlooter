@@ -48,6 +48,8 @@ model Product {
   deliveryTimeEstimate String
   thankYouMessage      String?
   setupGuide           Json?
+  availabilityLabel    String?
+  availabilityTone     String?
   refundEligibility    String   // 'eligible' | 'conditional' | 'non-refundable'
   refundTerms          String
   images               String[]
