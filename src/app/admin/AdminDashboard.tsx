@@ -100,7 +100,10 @@ const AVAILABILITY_TONE_OPTIONS = [
   { value: "gray", label: "Gray" },
 ];
 
-const ORDER_STATUS_OPTIONS = [
+const ORDER_STATUS_OPTIONS: {
+  value: AdminOrderStatus;
+  label: string;
+}[] = [
   { value: "pending", label: "Pending" },
   { value: "paid", label: "Paid" },
   { value: "delivered", label: "Delivered" },
@@ -108,6 +111,14 @@ const ORDER_STATUS_OPTIONS = [
   { value: "cancelled", label: "Cancelled" },
   { value: "refunded", label: "Refunded" },
   { value: "chargeback", label: "Chargeback" },
+];
+
+const ORDER_FILTER_OPTIONS: {
+  value: AdminOrderStatus | "all";
+  label: string;
+}[] = [
+  { value: "all", label: "All" },
+  ...ORDER_STATUS_OPTIONS,
 ];
 
 const USER_ROLE_OPTIONS = [
@@ -315,6 +326,7 @@ export function AdminDashboard({
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(
     initialData.orders[0]?.id || null
   );
+  const [orderFilter, setOrderFilter] = useState<AdminOrderStatus | "all">("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
     initialData.customers[0]?.id || null
   );
@@ -394,6 +406,31 @@ export function AdminDashboard({
     () => computeOverview(products, orders, customers, tickets),
     [products, orders, customers, tickets]
   );
+  const orderFilterCounts = useMemo(() => {
+    const counts: Record<AdminOrderStatus | "all", number> = {
+      all: orders.length,
+      pending: 0,
+      paid: 0,
+      delivered: 0,
+      review: 0,
+      cancelled: 0,
+      refunded: 0,
+      chargeback: 0,
+    };
+
+    for (const order of orders) {
+      counts[order.status] += 1;
+    }
+
+    return counts;
+  }, [orders]);
+  const filteredOrders = useMemo(
+    () =>
+      orderFilter === "all"
+        ? orders
+        : orders.filter((order) => order.status === orderFilter),
+    [orderFilter, orders]
+  );
   const removableKeyCount = selectedProduct
     ? selectedProduct.inventoryKeys.filter(
         (key) => key.status !== "assigned" && !key.orderId
@@ -431,6 +468,16 @@ export function AdminDashboard({
       setOrderStatus(selectedOrder.status);
     }
   }, [selectedOrder]);
+
+  useEffect(() => {
+    if (
+      activeSection === "orders" &&
+      filteredOrders.length > 0 &&
+      !filteredOrders.some((order) => order.id === selectedOrderId)
+    ) {
+      setSelectedOrderId(filteredOrders[0].id);
+    }
+  }, [activeSection, filteredOrders, selectedOrderId]);
 
   useEffect(() => {
     if (!selectedCustomer) return;
@@ -2427,8 +2474,26 @@ export function AdminDashboard({
           <section className={styles.sectionGrid}>
             <aside className={styles.sidebar}>
               <div className={styles.sidebarHeader}>Orders</div>
+              <div className={styles.filterTabs} aria-label="Filter orders">
+                {ORDER_FILTER_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`${styles.filterTab} ${
+                      orderFilter === option.value ? styles.filterTabActive : ""
+                    }`}
+                    onClick={() => {
+                      setOrderFilter(option.value);
+                      clearBanner();
+                    }}
+                  >
+                    <span>{option.label}</span>
+                    <b>{orderFilterCounts[option.value]}</b>
+                  </button>
+                ))}
+              </div>
               <div className={styles.productList}>
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <button
                     key={order.id}
                     type="button"
@@ -2454,6 +2519,11 @@ export function AdminDashboard({
                     </div>
                   </button>
                 ))}
+                {filteredOrders.length === 0 && (
+                  <div className={styles.emptyState}>
+                    No {orderFilter === "all" ? "" : orderFilter} orders found.
+                  </div>
+                )}
               </div>
             </aside>
 
