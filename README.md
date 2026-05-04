@@ -73,6 +73,27 @@ Uploaded EXE, MSI, ZIP, 7Z, and RAR files are stored outside the public asset
 folder and served through an authenticated order download endpoint. Customers
 only receive the protected download link after the order is delivered.
 
+## Discord Live Chat Bridge
+
+The customer live chat can mirror each website chat ticket into its own Discord
+text channel. Configure these environment variables:
+
+- `DISCORD_BOT_TOKEN`
+- `DISCORD_GUILD_ID`
+- `DISCORD_SUPPORT_CHANNEL_ID`
+- `DISCORD_PUBLIC_KEY`
+- `DISCORD_TICKET_CATEGORY_ID` (optional)
+
+Set the Discord app Interactions Endpoint URL to:
+
+```txt
+https://goblinlooter.com/api/webhooks/discord
+```
+
+Register a guild slash command named `reply` with one required string option
+named `message`. Supporters run `/reply message:<text>` inside the generated
+ticket channel to send a reply back into the customer's website chat.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 ## Learn More

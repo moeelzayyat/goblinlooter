@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { mirrorCustomerChatToDiscord } from "@/lib/discord-support";
 import { prisma } from "@/lib/prisma";
+
+export const runtime = "nodejs";
 
 function serializeTicket(
   ticket: Awaited<ReturnType<typeof getActiveChatTicket>>
@@ -109,5 +112,9 @@ export async function POST(req: NextRequest) {
   }
 
   ticket = await getActiveChatTicket(session.user.id);
+  if (ticket) {
+    await mirrorCustomerChatToDiscord(ticket.id, message);
+  }
+
   return NextResponse.json({ ticket: serializeTicket(ticket) });
 }

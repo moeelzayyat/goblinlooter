@@ -2,7 +2,10 @@ import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminApiSession } from "@/lib/admin";
 import { getAdminSupportTicketById } from "@/lib/admin-dashboard";
+import { mirrorAdminChatToDiscord } from "@/lib/discord-support";
 import { prisma } from "@/lib/prisma";
+
+export const runtime = "nodejs";
 
 function forbidden() {
   return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -61,6 +64,7 @@ export async function POST(
     ]);
 
     const ticket = await getAdminSupportTicketById(id);
+    await mirrorAdminChatToDiscord(id, message);
 
     revalidatePath("/admin");
 
