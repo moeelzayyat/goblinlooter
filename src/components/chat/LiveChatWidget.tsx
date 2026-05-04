@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -29,6 +29,8 @@ export function LiveChatWidget() {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messageCount = ticket?.messages.length || 0;
 
   const loadChat = useCallback(async () => {
     if (!session?.user) return;
@@ -67,6 +69,15 @@ export function LiveChatWidget() {
 
     return () => window.clearInterval(interval);
   }, [loadChat, open, session?.user]);
+
+  useEffect(() => {
+    if (!open || !session?.user) return;
+
+    messagesEndRef.current?.scrollIntoView({
+      block: "end",
+      behavior: "smooth",
+    });
+  }, [messageCount, open, session?.user]);
 
   if (pathname.startsWith("/admin")) {
     return null;
@@ -147,6 +158,7 @@ export function LiveChatWidget() {
                     Send a message and the support team can reply from the admin panel.
                   </div>
                 )}
+                <div ref={messagesEndRef} aria-hidden="true" />
               </div>
 
               {error ? <div className={styles.error}>{error}</div> : null}
