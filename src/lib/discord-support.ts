@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 const DISCORD_API_BASE = "https://discord.com/api/v10";
 const DISCORD_EPHEMERAL_FLAG = 1 << 6;
 const DISCORD_TEXT_CHANNEL_TYPE = 0;
+const DISCORD_VIEW_CHANNEL = "1024";
+const DISCORD_SEND_MESSAGES = "2048";
+const DISCORD_READ_MESSAGE_HISTORY = "65536";
+const DISCORD_USE_APPLICATION_COMMANDS = "2147483648";
 
 interface DiscordInteraction {
   type: number;
@@ -41,6 +45,8 @@ function getDiscordConfig() {
     supportChannelId: process.env.DISCORD_SUPPORT_CHANNEL_ID,
     ticketCategoryId: process.env.DISCORD_TICKET_CATEGORY_ID,
     supportRoleId: process.env.DISCORD_SUPPORT_ROLE_ID,
+    ownerUserId: process.env.DISCORD_OWNER_USER_ID,
+    botUserId: process.env.DISCORD_BOT_USER_ID,
     publicKey: process.env.DISCORD_PUBLIC_KEY,
   };
 }
@@ -75,6 +81,61 @@ function getDiscordUser(interaction: DiscordInteraction) {
 function getReplyMessage(interaction: DiscordInteraction) {
   const option = interaction.data?.options?.find((item) => item.name === "message");
   return typeof option?.value === "string" ? option.value.trim() : "";
+}
+
+function addPermissionValues(...values: string[]) {
+  return values
+    .reduce((sum, value) => sum + Number(value), 0)
+    .toString();
+}
+
+function getTicketChannelPermissionOverwrites() {
+  const { guildId, supportRoleId, ownerUserId, botUserId } = getDiscordConfig();
+  const allow = addPermissionValues(
+    DISCORD_VIEW_CHANNEL,
+    DISCORD_SEND_MESSAGES,
+    DISCORD_READ_MESSAGE_HISTORY,
+    DISCORD_USE_APPLICATION_COMMANDS
+  );
+  const overwrites = [];
+
+  if (guildId) {
+    overwrites.push({
+      id: guildId,
+      type: 0,
+      deny: DISCORD_VIEW_CHANNEL,
+      allow: "0",
+    });
+  }
+
+  if (supportRoleId) {
+    overwrites.push({
+      id: supportRoleId,
+      type: 0,
+      allow,
+      deny: "0",
+    });
+  }
+
+  if (ownerUserId) {
+    overwrites.push({
+      id: ownerUserId,
+      type: 1,
+      allow,
+      deny: "0",
+    });
+  }
+
+  if (botUserId) {
+    overwrites.push({
+      id: botUserId,
+      type: 1,
+      allow,
+      deny: "0",
+    });
+  }
+
+  return overwrites;
 }
 
 async function discordFetch<T>(path: string, init: RequestInit) {
@@ -138,6 +199,7 @@ async function createTicketChannel(ticket: NonNullable<TicketWithCustomer>) {
       type: DISCORD_TEXT_CHANNEL_TYPE,
       topic: topic.slice(0, 1024),
       parent_id: ticketCategoryId || undefined,
+      permission_overwrites: getTicketChannelPermissionOverwrites(),
     }),
   });
 
@@ -235,11 +297,13 @@ export async function handleDiscordInteraction(
     return discordCommandResponse("Run this command inside a ticket channel.");
   }
 
-  const { supportRoleId } = getDiscordConfig();
-  if (
-    supportRoleId &&
-    !interaction.member?.roles?.includes(supportRoleId)
-  ) {
+  const { ownerUserId, supportRoleId } = getDiscordConfig();
+  const discordUser = getDiscordUser(interaction);
+  const isOwner = ownerUserId && discordUser.id === ownerUserId;
+  const hasSupportRole =
+    supportRoleId && interaction.member?.roles?.includes(supportRoleId);
+
+  if (!isOwner && supportRoleId && !hasSupportRole) {
     return discordCommandResponse("You do not have permission to reply to website chats.");
   }
 
@@ -265,7 +329,6 @@ export async function handleDiscordInteraction(
     return discordCommandResponse("No open website chat is linked to this channel.");
   }
 
-  const discordUser = getDiscordUser(interaction);
   const supportName =
     discordUser.global_name || discordUser.username || "Discord support";
 

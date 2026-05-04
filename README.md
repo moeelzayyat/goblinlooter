@@ -83,6 +83,8 @@ text channel. Configure these environment variables:
 - `DISCORD_SUPPORT_CHANNEL_ID`
 - `DISCORD_PUBLIC_KEY`
 - `DISCORD_SUPPORT_ROLE_ID` (optional, restricts who can run `/reply`)
+- `DISCORD_OWNER_USER_ID` (optional, always allowed to run `/reply`)
+- `DISCORD_BOT_USER_ID` (optional, keeps the bot visible in private ticket channels)
 - `DISCORD_TICKET_CATEGORY_ID` (optional)
 
 Set the Discord app Interactions Endpoint URL to:
