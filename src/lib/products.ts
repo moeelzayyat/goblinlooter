@@ -1,7 +1,12 @@
 import { Prisma, type Product as DbProduct, type InventoryKey } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { MOCK_PRODUCTS } from "@/lib/mockData";
-import type { Product, ProductFeatureGroup, PurchaseOption } from "@/types";
+import type {
+  Product,
+  ProductFeatureGroup,
+  ProductSetupGuide,
+  PurchaseOption,
+} from "@/types";
 
 type ProductWithKeys = DbProduct & {
   inventoryKeys?: Pick<InventoryKey, "status">[];
@@ -86,6 +91,38 @@ function normalizeFeatureGroups(value: unknown): ProductFeatureGroup[] {
   return groups;
 }
 
+function normalizeSetupGuide(value: unknown): ProductSetupGuide | null {
+  if (!isRecord(value)) return null;
+
+  const videoUrl =
+    typeof value.videoUrl === "string" && value.videoUrl.trim()
+      ? value.videoUrl.trim()
+      : null;
+  const steps = Array.isArray(value.steps)
+    ? value.steps
+        .map((step) => (typeof step === "string" ? step.trim() : ""))
+        .filter(Boolean)
+    : [];
+  const fixes = Array.isArray(value.fixes)
+    ? value.fixes
+        .map((entry) => {
+          if (!isRecord(entry)) return null;
+          const error = typeof entry.error === "string" ? entry.error.trim() : "";
+          const fix = typeof entry.fix === "string" ? entry.fix.trim() : "";
+          return error && fix ? { error, fix } : null;
+        })
+        .filter((entry): entry is { error: string; fix: string } => Boolean(entry))
+    : [];
+  const notes =
+    typeof value.notes === "string" && value.notes.trim()
+      ? value.notes.trim()
+      : null;
+
+  if (!videoUrl && steps.length === 0 && fixes.length === 0 && !notes) return null;
+
+  return { videoUrl, steps, fixes, notes };
+}
+
 function toPurchaseOptionsJson(
   options: PurchaseOption[] | undefined
 ): Prisma.InputJsonValue | undefined {
@@ -158,6 +195,7 @@ function toPublicProduct(product: ProductWithKeys): Product {
     deliveryMethod: product.deliveryMethod as Product["deliveryMethod"],
     downloadUrl: product.downloadUrl,
     deliveryTimeEstimate: product.deliveryTimeEstimate,
+    setupGuide: normalizeSetupGuide(product.setupGuide),
     refundEligibility: product.refundEligibility as Product["refundEligibility"],
     refundTerms: product.refundTerms,
     images: product.images,

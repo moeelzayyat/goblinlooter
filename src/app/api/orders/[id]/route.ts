@@ -29,6 +29,7 @@ export async function GET(
                 deliveryMethod: true,
                 downloadUrl: true,
                 thankYouMessage: true,
+                setupGuide: true,
                 productFile: {
                   select: {
                     id: true,
@@ -83,6 +84,10 @@ export async function GET(
             ? item.product?.productFile
               ? `/api/orders/${order.id}/downloads/${item.id}`
               : item.product?.downloadUrl || null
+            : null,
+        setupGuideUrl:
+          order.status === "delivered" && item.product?.setupGuide
+            ? `/guides/${item.product.slug}`
             : null,
         thankYouMessage:
           order.status === "delivered"

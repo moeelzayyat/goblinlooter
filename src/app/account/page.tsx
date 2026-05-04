@@ -129,14 +129,24 @@ export default function AccountPage() {
             Payments are processed through secure checkout providers; no card details
             are stored by GoblinLooter.
           </p>
-          <Link href="/orders">
-            <Button
-              variant="secondary"
-              size="sm"
-            >
-              View My Orders →
-            </Button>
-          </Link>
+          <div style={{ display: "flex", gap: "var(--space-sm)", flexWrap: "wrap" }}>
+            <Link href="/orders">
+              <Button
+                variant="secondary"
+                size="sm"
+              >
+                View My Orders →
+              </Button>
+            </Link>
+            <Link href="/guides">
+              <Button
+                variant="secondary"
+                size="sm"
+              >
+                Setup Guides →
+              </Button>
+            </Link>
+          </div>
         </section>
 
         {/* Notifications */}

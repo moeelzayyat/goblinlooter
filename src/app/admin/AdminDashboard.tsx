@@ -188,6 +188,10 @@ function createEmptyProductForm() {
     downloadUrl: "",
     deliveryTimeEstimate: "Instant delivery",
     thankYouMessage: "",
+    setupGuideVideoUrl: "",
+    setupGuideSteps: "",
+    setupGuideFixes: "",
+    setupGuideNotes: "",
     refundEligibility: "conditional",
     refundTerms: "Refunds are available on unused keys within 72 hours.",
     images: "/arcway-dupe.png",
@@ -228,6 +232,13 @@ function formFromProduct(product: AdminProductRecord): ProductFormState {
     downloadUrl: product.downloadUrl || "",
     deliveryTimeEstimate: product.deliveryTimeEstimate,
     thankYouMessage: product.thankYouMessage || "",
+    setupGuideVideoUrl: product.setupGuide?.videoUrl || "",
+    setupGuideSteps: product.setupGuide?.steps.join("\n") || "",
+    setupGuideFixes:
+      product.setupGuide?.fixes
+        .map((fix) => `${fix.error} => ${fix.fix}`)
+        .join("\n") || "",
+    setupGuideNotes: product.setupGuide?.notes || "",
     refundEligibility: product.refundEligibility,
     refundTerms: product.refundTerms,
     images: product.images.join("\n"),
@@ -2025,6 +2036,61 @@ export function AdminDashboard({
                       placeholder="Shown on the successful payment page after delivery"
                     />
                   </label>
+
+                  <div className={styles.featureEditor}>
+                    <div className={styles.featureEditorHeader}>
+                      <div>
+                        <h3>Customer Setup Guide</h3>
+                        <p>
+                          Shown only to customers with a delivered order for this
+                          product.
+                        </p>
+                      </div>
+                    </div>
+                    <label className={styles.field}>
+                      <span>Guide Video URL</span>
+                      <input
+                        value={productForm.setupGuideVideoUrl}
+                        onChange={(event) =>
+                          updateProductField("setupGuideVideoUrl", event.target.value)
+                        }
+                        placeholder="YouTube, Vimeo, or direct MP4/WebM URL"
+                      />
+                    </label>
+                    <label className={styles.field}>
+                      <span>Installation Steps</span>
+                      <textarea
+                        rows={6}
+                        value={productForm.setupGuideSteps}
+                        onChange={(event) =>
+                          updateProductField("setupGuideSteps", event.target.value)
+                        }
+                        placeholder="One setup step per line"
+                      />
+                    </label>
+                    <label className={styles.field}>
+                      <span>Errors & Fixes</span>
+                      <textarea
+                        rows={6}
+                        value={productForm.setupGuideFixes}
+                        onChange={(event) =>
+                          updateProductField("setupGuideFixes", event.target.value)
+                        }
+                        placeholder={"One per line: Error text => Fix text"}
+                      />
+                    </label>
+                    <label className={styles.field}>
+                      <span>Guide Notes</span>
+                      <textarea
+                        rows={3}
+                        value={productForm.setupGuideNotes}
+                        onChange={(event) =>
+                          updateProductField("setupGuideNotes", event.target.value)
+                        }
+                        placeholder="Optional closing notes or support reminders"
+                      />
+                    </label>
+                  </div>
 
                   <div className={styles.formGrid}>
                     <label className={styles.field}>

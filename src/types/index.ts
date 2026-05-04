@@ -57,6 +57,18 @@ export interface ProductFeatureGroup {
   items: string[];
 }
 
+export interface ProductSetupFix {
+  error: string;
+  fix: string;
+}
+
+export interface ProductSetupGuide {
+  videoUrl?: string | null;
+  steps: string[];
+  fixes: ProductSetupFix[];
+  notes?: string | null;
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -76,6 +88,7 @@ export interface Product {
   deliveryMethod: DeliveryMethod;
   downloadUrl?: string | null;
   deliveryTimeEstimate: string;
+  setupGuide?: ProductSetupGuide | null;
   refundEligibility: RefundEligibility;
   refundTerms: string;
   images: string[];

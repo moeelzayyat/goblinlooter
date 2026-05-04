@@ -17,6 +17,7 @@ import {
   Check,
   Eye,
   EyeOff,
+  BookOpen,
 } from "lucide-react";
 import styles from "./page.module.css";
 
@@ -39,6 +40,7 @@ interface OrderDetail {
     productSlug: string | null;
     deliveryMethod: string | null;
     downloadUrl: string | null;
+    setupGuideUrl: string | null;
     quantity: number;
     unitPrice: number;
     purchaseOptionId: string | null;
@@ -155,6 +157,10 @@ export default function OrderDetailPage() {
   const downloads =
     order?.status === "delivered"
       ? order.items.filter((item) => item.downloadUrl)
+      : [];
+  const setupGuides =
+    order?.status === "delivered"
+      ? order.items.filter((item) => item.setupGuideUrl)
       : [];
 
   return (
@@ -295,6 +301,31 @@ export default function OrderDetailPage() {
                       >
                         Download
                       </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {setupGuides.length > 0 && (
+              <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Setup Guides</h3>
+                <div className={styles.downloadList}>
+                  {setupGuides.map((item) => (
+                    <div key={item.id} className={styles.downloadCard}>
+                      <div>
+                        <div className={styles.downloadTitle}>{item.productTitle}</div>
+                        <div className={styles.downloadMeta}>
+                          Video setup, installation steps, and troubleshooting.
+                        </div>
+                      </div>
+                      <Link
+                        href={item.setupGuideUrl || "#"}
+                        className={styles.downloadButton}
+                      >
+                        <BookOpen size={14} />
+                        Guide
+                      </Link>
                     </div>
                   ))}
                 </div>

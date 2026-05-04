@@ -5,11 +5,14 @@ import type {
   ProductCategory,
   ProductDownloadFile,
   ProductFeatureGroup,
+  ProductSetupGuide,
   ProductVideoFile,
   PurchaseOption,
   ProductStatus,
   RefundEligibility,
 } from "@/types";
+
+export type { ProductSetupGuide };
 
 type AdminProductWithKeys = DbProduct & {
   inventoryKeys?: Pick<
@@ -55,6 +58,7 @@ export interface AdminProductRecord {
   downloadUrl: string | null;
   deliveryTimeEstimate: string;
   thankYouMessage: string | null;
+  setupGuide: ProductSetupGuide | null;
   refundEligibility: RefundEligibility;
   refundTerms: string;
   images: string[];
@@ -210,6 +214,94 @@ function toFeatureGroupsJson(groups: ProductFeatureGroup[]): Prisma.InputJsonVal
   }));
 }
 
+function parseSetupFixes(value: unknown) {
+  const lines = parseStringList(value);
+  const fixes = lines
+    .map((line) => {
+      const [error, ...fixParts] = line.split("=>");
+      return {
+        error: error?.trim() || "",
+        fix: fixParts.join("=>").trim(),
+      };
+    })
+    .filter((item) => item.error || item.fix);
+
+  for (const [index, fix] of fixes.entries()) {
+    if (!fix.error || !fix.fix) {
+      return {
+        error: `Setup guide fix ${index + 1} must use "Error => Fix" format.`,
+      };
+    }
+  }
+
+  return { fixes };
+}
+
+function parseSetupGuide(input: Record<string, unknown>) {
+  const videoUrl =
+    typeof input.setupGuideVideoUrl === "string" && input.setupGuideVideoUrl.trim()
+      ? input.setupGuideVideoUrl.trim()
+      : null;
+  const steps = parseStringList(input.setupGuideSteps);
+  const fixes = parseSetupFixes(input.setupGuideFixes);
+  const notes =
+    typeof input.setupGuideNotes === "string" && input.setupGuideNotes.trim()
+      ? input.setupGuideNotes.trim()
+      : null;
+
+  if ("error" in fixes) return { error: fixes.error };
+
+  if (!videoUrl && steps.length === 0 && fixes.fixes.length === 0 && !notes) {
+    return { guide: null };
+  }
+
+  return {
+    guide: {
+      videoUrl,
+      steps,
+      fixes: fixes.fixes,
+      notes,
+    } satisfies ProductSetupGuide,
+  };
+}
+
+function serializeSetupGuide(value: unknown): ProductSetupGuide | null {
+  if (!isRecord(value)) return null;
+
+  const steps = parseStringList(value.steps);
+  const fixes = Array.isArray(value.fixes)
+    ? value.fixes
+        .map((entry) => {
+          if (!isRecord(entry)) return null;
+          const error = typeof entry.error === "string" ? entry.error.trim() : "";
+          const fix = typeof entry.fix === "string" ? entry.fix.trim() : "";
+          return error && fix ? { error, fix } : null;
+        })
+        .filter((entry): entry is { error: string; fix: string } => Boolean(entry))
+    : [];
+  const videoUrl =
+    typeof value.videoUrl === "string" && value.videoUrl.trim()
+      ? value.videoUrl.trim()
+      : null;
+  const notes =
+    typeof value.notes === "string" && value.notes.trim()
+      ? value.notes.trim()
+      : null;
+
+  if (!videoUrl && steps.length === 0 && fixes.length === 0 && !notes) return null;
+
+  return { videoUrl, steps, fixes, notes };
+}
+
+function toSetupGuideJson(guide: ProductSetupGuide): Prisma.InputJsonValue {
+  return {
+    videoUrl: guide.videoUrl || null,
+    steps: guide.steps,
+    fixes: guide.fixes.map((fix) => ({ error: fix.error, fix: fix.fix })),
+    notes: guide.notes || null,
+  };
+}
+
 function serializePurchaseOptions(value: unknown): PurchaseOption[] {
   const parsed = parsePurchaseOptions(value);
   if ("error" in parsed) return [];
@@ -298,6 +390,7 @@ function serializeProduct(product: AdminProductWithKeys): AdminProductRecord {
     downloadUrl: product.downloadUrl,
     deliveryTimeEstimate: product.deliveryTimeEstimate,
     thankYouMessage: product.thankYouMessage,
+    setupGuide: serializeSetupGuide(product.setupGuide),
     refundEligibility: product.refundEligibility as RefundEligibility,
     refundTerms: product.refundTerms,
     images: product.images,
@@ -354,6 +447,7 @@ export function normalizeProductInput(input: Record<string, unknown>) {
     typeof input.thankYouMessage === "string" && input.thankYouMessage.trim()
       ? input.thankYouMessage.trim()
       : null;
+  const setupGuide = parseSetupGuide(input);
   const refundTerms =
     typeof input.refundTerms === "string" ? input.refundTerms.trim() : "";
   const regionRestrictions =
@@ -386,6 +480,9 @@ export function normalizeProductInput(input: Record<string, unknown>) {
   }
   if ("error" in featureGroups) {
     return { error: featureGroups.error };
+  }
+  if ("error" in setupGuide) {
+    return { error: setupGuide.error };
   }
   if (!VALID_CATEGORIES.includes(category)) {
     return { error: "Category is invalid." };
@@ -437,6 +534,9 @@ export function normalizeProductInput(input: Record<string, unknown>) {
       downloadUrl,
       deliveryTimeEstimate,
       thankYouMessage,
+      setupGuide: setupGuide.guide
+        ? toSetupGuideJson(setupGuide.guide)
+        : Prisma.JsonNull,
       refundEligibility,
       refundTerms,
       images,

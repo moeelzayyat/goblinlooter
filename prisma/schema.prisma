@@ -47,6 +47,7 @@ model Product {
   downloadUrl          String?
   deliveryTimeEstimate String
   thankYouMessage      String?
+  setupGuide           Json?
   refundEligibility    String   // 'eligible' | 'conditional' | 'non-refundable'
   refundTerms          String
   images               String[]
