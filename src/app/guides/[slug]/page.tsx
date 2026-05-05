@@ -30,6 +30,11 @@ export default async function ProductGuidePage({
       title: true,
       shortDescription: true,
       setupGuide: true,
+      productVideo: {
+        select: {
+          id: true,
+        },
+      },
       orderItems: {
         where: {
           order: {
@@ -52,7 +57,14 @@ export default async function ProductGuidePage({
     notFound();
   }
 
-  const embedUrl = getEmbeddableVideoUrl(guide.videoUrl);
+  const uploadedVideoUrl = product.productVideo
+    ? `/api/products/${product.id}/video`
+    : null;
+  const embedUrl = guide.videoUrl
+    ? getEmbeddableVideoUrl(guide.videoUrl)
+    : uploadedVideoUrl;
+  const isDirectVideo = Boolean(uploadedVideoUrl && embedUrl === uploadedVideoUrl) ||
+    isDirectVideoUrl(embedUrl);
 
   return (
     <div className={styles.page}>
@@ -69,7 +81,7 @@ export default async function ProductGuidePage({
             <section className={styles.section}>
               <h2>Setup Video Guide</h2>
               <div className={styles.videoFrame}>
-                {isDirectVideoUrl(embedUrl) ? (
+                {isDirectVideo ? (
                   <video src={embedUrl} controls preload="metadata" />
                 ) : (
                   <iframe
