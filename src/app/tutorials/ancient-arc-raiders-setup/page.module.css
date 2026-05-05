@@ -1,0 +1,143 @@
+.page {
+  min-height: 100vh;
+  width: min(1360px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 38px 0 72px;
+}
+
+.header {
+  padding: 0 10px 24px;
+  border-bottom: 1px solid rgba(231, 238, 255, 0.72);
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #8dbdff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  margin-bottom: 22px;
+}
+
+.brandMark {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #143bff;
+  color: #ffffff;
+  font-family: var(--font-mono), monospace;
+}
+
+.header h1 {
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  color: #ffffff;
+  margin-bottom: 16px;
+}
+
+.header p {
+  max-width: 940px;
+  color: #bdd4ff;
+  line-height: 1.7;
+}
+
+.guideShell {
+  display: grid;
+  gap: 26px;
+  padding-top: 26px;
+}
+
+.section {
+  border-bottom: 1px solid rgba(231, 238, 255, 0.72);
+  padding: 0 10px 26px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.sectionHeader span {
+  color: #4ea1ff;
+  font-family: var(--font-mono), monospace;
+  font-weight: 800;
+}
+
+.sectionHeader h2 {
+  color: #4ea1ff;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+}
+
+.videoFrame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(231, 238, 255, 0.3);
+  background: #05070b;
+  overflow: hidden;
+}
+
+.videoFrame iframe,
+.videoFrame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.steps {
+  padding-left: 28px;
+  color: #ffffff;
+  line-height: 1.85;
+}
+
+.steps li + li {
+  margin-top: 4px;
+}
+
+.fixList {
+  display: grid;
+}
+
+.fix {
+  border-top: 1px solid rgba(231, 238, 255, 0.72);
+  padding: 20px 0;
+}
+
+.fix:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.fix h3 {
+  color: #ff4f5f;
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.fix p {
+  color: #35ff79;
+  line-height: 1.65;
+}
+
+.notes {
+  color: #bdd4ff;
+  line-height: 1.75;
+}
+
+@media (max-width: 720px) {
+  .page {
+    width: min(100% - 22px, 1360px);
+    padding-top: 24px;
+  }
+
+  .header,
+  .section {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
