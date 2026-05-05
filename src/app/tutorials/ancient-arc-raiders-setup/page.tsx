@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import {
-  getEmbeddableVideoUrl,
-  isDirectVideoUrl,
-  normalizeSetupGuide,
-} from "@/lib/setup-guides";
+import { isDirectVideoUrl, normalizeSetupGuide } from "@/lib/setup-guides";
 import styles from "./page.module.css";
 
 const PRODUCT_SLUG =
   "ancient-arc-raiders-undetected-aimbot-esp-radar-visual-enhancements";
+const TUTORIAL_VIDEO_URL = "https://streamable.com/e/vxw4i8";
 
 export const dynamic = "force-dynamic";
 
@@ -49,15 +46,8 @@ export default async function AncientArcRaidersTutorialPage() {
     notFound();
   }
 
-  const uploadedVideoUrl = product.productVideo
-    ? `/api/products/${product.id}/video`
-    : null;
-  const videoUrl = guide.videoUrl
-    ? getEmbeddableVideoUrl(guide.videoUrl)
-    : uploadedVideoUrl;
-  const isVideoFile =
-    Boolean(uploadedVideoUrl && videoUrl === uploadedVideoUrl) ||
-    isDirectVideoUrl(videoUrl);
+  const videoUrl = TUTORIAL_VIDEO_URL;
+  const isVideoFile = isDirectVideoUrl(videoUrl);
 
   return (
     <main className={styles.page}>
